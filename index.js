@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100082811408144", "100085884529708", "100038509998559", "100085671340090", "100087646701594", "100005122337500", "100031011381551", "100001808342073"];
+const OWNER_UIDS = ["100082811408144", "", "", "", "", "100005122337500", "", "100012859802560"];
 let rkbInterval = null;
 let stopRequested = false;
 const lockedGroupNames = {};
@@ -70,11 +70,11 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (!body) return;
       const lowerBody = body.toLowerCase();
 
-      const badNames = ["hannu", "syco", "anox", "avii", "satya", "anox", "avi"];
+      const badNames = ["A V I", "9VI", "4VI", "4V|", "9V|", "anox", "avi"];
       const triggers = ["rkb", "bhen", "maa", "Rndi", "chut", "randi", "madhrchodh", "mc", "bc", "didi", "ma"];
       if (badNames.some(n => lowerBody.includes(n)) && triggers.some(w => lowerBody.includes(w))) {
         return api.sendMessage(
-          "teri ma Rndi hai tu msg mt kr sb chodege teri ma  ko byy🙂 ss Lekr story Lga by",
+          "Teri Bua kii chut me chatni laga kar chat jaunga aur extra namak upar se dalunga baap ka nam mat le",
           threadID,
           messageID
         );
@@ -114,16 +114,16 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           await api.setTitle(input, threadID);
           api.sendMessage(`📝 Group name changed to: ${input}`, threadID);
         } catch {
-          api.sendMessage(" klpoo🤣 rkb", threadID);
+          api.sendMessage(" kya hua rkb chud gyen kya sab ", threadID);
         }
       }
 
       else if (cmd === "/lockgroupname") {
-        if (!input) return api.sendMessage("name de 🤣 gc ke Liye", threadID);
+        if (!input) return api.sendMessage("areh admin ji name doge tab na kya name dalu kiski ma chodna he apko batao🙂💔", threadID);
         try {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
-          api.sendMessage(`🔒 Group name  "${input}"`, threadID);
+          api.sendMessage(`[[ AVII KA LODE SE DABA HAI GRP NAME ]]  "${input}"`, threadID);
         } catch {
           api.sendMessage("❌ Locking failed.", threadID);
         }
@@ -131,11 +131,11 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 
       else if (cmd === "/unlockgroupname") {
         delete lockedGroupNames[threadID];
-        api.sendMessage("🔓 Group name unlocked.", threadID);
+        api.sendMessage("🔓 Avii Raj Ka kabja hat gya Groups se name badal lo rkb.", threadID);
       }
 
       else if (cmd === "/uid") {
-        api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+        api.sendMessage(`🆔 ye lo boss aur chod dale is gc me jitne hater hain🙂💔🖕 Group ID: ${threadID}`, threadID);
       }
 
       else if (cmd === "/exit") {
@@ -165,7 +165,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           index++;
         }, 40000);
 
-        api.sendMessage(`sex hogya bche 🤣rkb ${name}`, threadID);
+        api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       }
 
       else if (cmd === "/stop") {
@@ -173,7 +173,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         if (rkbInterval) {
           clearInterval(rkbInterval);
           rkbInterval = null;
-          api.sendMessage("chud gaye bche🤣", threadID);
+          api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
         } else {
           api.sendMessage("konsa gaLi du sale ko🤣 rkb tha", threadID);
         }
@@ -255,20 +255,21 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         const newTarget = args[1];
         if (!targetUIDs.includes(newTarget)) {
           targetUIDs.push(newTarget);
-          api.sendMessage(`chudega aane de sale ko: ${newTarget}`, threadID);
+          api.sendMessage(`dont worry Avi bhai chudega aane de sale ko: ${newTarget}`, threadID);
         } else {
-          api.sendMessage("⚠️ ye chud rha phele se.", threadID);
+          api.sendMessage("⚠️ are avii bhai 🙂💔 ye chud rha phele se.", threadID);
         }
       }
 
       else if (cmd === "/cleartarget") {
         targetUIDs = [];
-        api.sendMessage("🤣ro gya", threadID);
+        api.sendMessage("🙂 kya hua ro gya", threadID);
       }
 
       else if (cmd === "/help") {
         const helpText = `
 📌 Available Commands:
+
 /allname <name> – Change all nicknames
 /groupname <name> – Change group name
 /lockgroupname <name> – Lock group name
