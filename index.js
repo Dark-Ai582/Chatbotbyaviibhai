@@ -87,7 +87,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       };
 
-      // Commands Begin
+      // All commands start here
       if (cmd === "!rkb" || cmd === "!rkb2" || cmd === "!rkb3") {
         const name = input.trim();
         if (!name) return api.sendMessage("⚠️ Naam to de bhai kiski bajani hai bata 😎", threadID);
@@ -100,18 +100,28 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
       }
 
+      else if (cmd === "!useblock") {
+        const uid = args[1];
+        if (!uid) {
+          api.sendMessage("⚠️ UID to de bhai, kise block karu 😅", threadID);
+        } else if (OWNER_UIDS.includes(uid)) {
+          api.sendMessage("😤 Avii bhaiya ko block karne ki soch bhi kaise li be chutye 😭💀", threadID);
+        } else {
+          blockedUIDs.add(uid);
+          api.sendMessage(`Avii bhaiya is madrchod ko sex full block kr diya hun 💀\nab msg krega to nhi sununga iska 😎`, threadID);
+        }
+      }
+
       else if (cmd === "!useunblock") {
-  const uid = args[1];
-  if (uid) {
-    if (blockedUIDs.has(uid)) {
-      blockedUIDs.delete(uid);
-      api.sendMessage(`Avii bhaiya ne daya kar diya 😎 unblock ho gaya: ${uid}`, threadID);
-    } else {
-      api.sendMessage(`Ye to blocked hi nahi tha baby 😘`, threadID);
-    }
-  } else {
-    api.sendMessage("⚠️ UID to de bhai, kise unblock karu 😅", threadID);
-  }
+        const uid = args[1];
+        if (!uid) {
+          api.sendMessage("⚠️ UID to de bhai, kise unblock karu 😅", threadID);
+        } else if (blockedUIDs.has(uid)) {
+          blockedUIDs.delete(uid);
+          api.sendMessage(`Avii bhaiya ne daya kar diya 😎 unblock ho gaya: ${uid}`, threadID);
+        } else {
+          api.sendMessage(`Ye to blocked hi nahi tha baby 😘`, threadID);
+        }
       }
 
       else if (cmd === "!exit") {
@@ -239,7 +249,8 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 !target <uid> – Add target UID
 !cleartarget – Remove all targets
 !useblock <uid> – Block UID from responding
-!help – Help message
+!useunblock <uid> – Unblock UID
+!help – Show help message
         `;
         api.sendMessage(help.trim(), threadID);
       }
