@@ -2,26 +2,21 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100082811408144", "", "", "", "", "100005122337500", "", "100012859802560"];
-let rkbInterval = null;
+const OWNER_UIDS = ["100082811408144", "100005122337500", "100012859802560"];
+let activeSpam = null;
 let stopRequested = false;
 const lockedGroupNames = {};
-
 let mediaLoopInterval = null;
 let lastMedia = null;
-let targetUIDs = []; // ✅ Modified to support multiple targets
+let targetUIDs = [];
+const blockedUIDs = new Set();
 
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 
-process.on("uncaughtException", (err) => {
-  console.error("❗ Uncaught Exception:", err.message);
-});
-
-process.on("unhandledRejection", (reason) => {
-  console.error("❗ Unhandled Rejection:", reason);
-});
+process.on("uncaughtException", (err) => console.error("❗ Uncaught Exception:", err.message));
+process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Rejection:", reason));
 
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
@@ -33,7 +28,8 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
 
-      // ✅ Target reply with message reply
+      if (blockedUIDs.has(senderID)) return;
+
       if (
         targetUIDs.includes(senderID) &&
         fs.existsSync("np.txt") &&
@@ -42,20 +38,13 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
         if (lines.length > 0) {
           const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(
-            {
-              body: randomLine,
-              replyToMessage: messageID
-            },
-            threadID
-          );
+          api.sendMessage({ body: randomLine, replyToMessage: messageID }, threadID);
         }
       }
 
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
         const lockedName = lockedGroupNames[threadID];
-
         if (lockedName && currentName !== lockedName) {
           try {
             await api.setTitle(lockedName, threadID);
@@ -70,63 +59,96 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (!body) return;
       const lowerBody = body.toLowerCase();
 
-      const badNames = ["A V I", "9VI", "4VI", "4V|", "9V|", "anox", "avi"];
-      const triggers = ["rkb", "bhen", "maa", "Rndi", "chut", "randi", "madhrchodh", "mc", "bc", "didi", "ma"];
+      const badNames = ["avi", "anox", "9vi", "4vi", "4v|", "9v|"];
+      const triggers = ["rkb", "bhen", "maa", "rndi", "chut", "randi", "madhrchodh", "mc", "bc", "didi", "ma"];
       if (badNames.some(n => lowerBody.includes(n)) && triggers.some(w => lowerBody.includes(w))) {
-        return api.sendMessage(
-          "Teri Bua kii chut me chatni laga kar chat jaunga aur extra namak upar se dalunga baap ka nam mat le",
-          threadID,
-          messageID
-        );
+        return api.sendMessage("Teri Bua kii chut me chatni laga kar chat jaunga", threadID, messageID);
       }
 
       if (!OWNER_UIDS.includes(senderID)) return;
-
       const args = body.trim().split(" ");
       const cmd = args[0].toLowerCase();
       const input = args.slice(1).join(" ");
 
-      if (cmd === "/allname") {
-        try {
-          const info = await api.getThreadInfo(threadID);
-          const members = info.participantIDs;
-          api.sendMessage(`🛠  ${members.length} ' nicknames...`, threadID);
+      const stopActiveSpam = () => {
+        stopRequested = true;
+        if (activeSpam) clearInterval(activeSpam);
+        activeSpam = null;
+      };
 
-          for (const uid of members) {
-            try {
-              await api.changeNickname(input, threadID, uid);
-              console.log(`✅ Nickname changed for UID: ${uid}`);
-              await new Promise(res => setTimeout(res, 30000));
-            } catch (e) {
-              console.log(`⚠️ Failed for ${uid}:`, e.message);
-            }
+      const startSpam = (filename, name) => {
+        if (!fs.existsSync(filename)) return api.sendMessage("⛔ File not found", threadID);
+        stopActiveSpam();
+        const lines = fs.readFileSync(filename, "utf8").split("\n").filter(Boolean);
+        let index = 0;
+        stopRequested = false;
+
+        activeSpam = setInterval(() => {
+          if (index >= lines.length || stopRequested) {
+            clearInterval(activeSpam);
+            activeSpam = null;
+            return;
           }
+          api.sendMessage(`${name} ${lines[index++]}`, threadID);
+        }, 40000);
+        api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
+      };
 
-          api.sendMessage("ye gribh ka bcha to Rone Lga bkL", threadID);
-        } catch (e) {
-          console.error("❌ Error in /allname:", e);
-          api.sendMessage("badh me kLpauga", threadID);
+      if (cmd === "/rkb" || cmd === "/rkb2" || cmd === "/rkb3") {
+        const name = input.trim();
+        const filename = cmd === "/rkb" ? "np.txt" : cmd === "/rkb2" ? "np2.txt" : "np3.txt";
+        startSpam(filename, name);
+      }
+
+      else if (cmd === "/stop") {
+        stopActiveSpam();
+        api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
+      }
+
+      else if (cmd === "/useblock") {
+        const uid = args[1];
+        if (uid) {
+          blockedUIDs.add(uid);
+          api.sendMessage(`Blocked UID: ${uid}`, threadID);
         }
+      }
+
+      else if (cmd === "/exit") {
+        api.sendMessage("bye bye avii bhai ja raha hun kabhi kam pare to yad kar lena 🙏", threadID, () => {
+          api.removeUserFromGroup(api.getCurrentUserID(), threadID).catch(() => {
+            api.sendMessage("❌ Can't leave group.", threadID);
+          });
+        });
+      }
+
+      else if (cmd === "/allname") {
+        const info = await api.getThreadInfo(threadID);
+        const members = info.participantIDs;
+        api.sendMessage(`🛠 ${members.length} ' nicknames...`, threadID);
+        for (const uid of members) {
+          try {
+            await api.changeNickname(input, threadID, uid);
+            await new Promise(r => setTimeout(r, 30000));
+          } catch (e) {
+            console.log(`⚠️ Nick fail ${uid}:`, e.message);
+          }
+        }
+        api.sendMessage("ye gribh ka bcha to Rone Lga bkL", threadID);
       }
 
       else if (cmd === "/groupname") {
-        try {
-          await api.setTitle(input, threadID);
-          api.sendMessage(`📝 Group name changed to: ${input}`, threadID);
-        } catch {
-          api.sendMessage(" kya hua rkb chud gyen kya sab ", threadID);
-        }
+        await api.setTitle(input, threadID).catch(() =>
+          api.sendMessage(" kya hua rkb chud gyen kya sab ", threadID)
+        );
       }
 
       else if (cmd === "/lockgroupname") {
-        if (!input) return api.sendMessage("areh admin ji name doge tab na kya name dalu kiski ma chodna he apko batao🙂💔", threadID);
-        try {
-          await api.setTitle(input, threadID);
-          lockedGroupNames[threadID] = input;
-          api.sendMessage(`[[ AVII KA LODE SE DABA HAI GRP NAME ]]  "${input}"`, threadID);
-        } catch {
-          api.sendMessage("❌ Locking failed.", threadID);
-        }
+        if (!input) return api.sendMessage("name doge tab na 😅", threadID);
+        await api.setTitle(input, threadID).catch(() =>
+          api.sendMessage("❌ Locking failed.", threadID)
+        );
+        lockedGroupNames[threadID] = input;
+        api.sendMessage(`[[ AVII KA LODE SE DABA HAI GRP NAME ]]  "${input}"`, threadID);
       }
 
       else if (cmd === "/unlockgroupname") {
@@ -135,78 +157,27 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       else if (cmd === "/uid") {
-        api.sendMessage(`🆔 ye lo boss aur chod dale is gc me jitne hater hain🙂💔🖕 Group ID: ${threadID}`, threadID);
-      }
-
-      else if (cmd === "/exit") {
-        try {
-          await api.removeUserFromGroup(api.getCurrentUserID(), threadID);
-        } catch {
-          api.sendMessage("❌ Can't leave group.", threadID);
-        }
-      }
-
-      else if (cmd === "/rkb") {
-        if (!fs.existsSync("np.txt")) return api.sendMessage("konsa gaLi du rkb ko", threadID);
-        const name = input.trim();
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        stopRequested = false;
-
-        if (rkbInterval) clearInterval(rkbInterval);
-        let index = 0;
-
-        rkbInterval = setInterval(() => {
-          if (index >= lines.length || stopRequested) {
-            clearInterval(rkbInterval);
-            rkbInterval = null;
-            return;
-          }
-          api.sendMessage(`${name} ${lines[index]}`, threadID);
-          index++;
-        }, 40000);
-
-        api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
-      }
-
-      else if (cmd === "/stop") {
-        stopRequested = true;
-        if (rkbInterval) {
-          clearInterval(rkbInterval);
-          rkbInterval = null;
-          api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
-        } else {
-          api.sendMessage("konsa gaLi du sale ko🤣 rkb tha", threadID);
-        }
+        api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
       }
 
       else if (cmd === "/photo") {
         api.sendMessage("📸 Send a photo or video within 1 minute...", threadID);
-
         const handleMedia = async (mediaEvent) => {
           if (
             mediaEvent.type === "message" &&
             mediaEvent.threadID === threadID &&
-            mediaEvent.attachments &&
-            mediaEvent.attachments.length > 0
+            mediaEvent.attachments?.length > 0
           ) {
-            lastMedia = {
-              attachments: mediaEvent.attachments,
-              threadID: mediaEvent.threadID
-            };
-
-            api.sendMessage("✅ Photo/video received. Will resend every 30 seconds.", threadID);
-
+            lastMedia = { attachments: mediaEvent.attachments, threadID };
+            api.sendMessage("✅ Media received. Loop started.", threadID);
             if (mediaLoopInterval) clearInterval(mediaLoopInterval);
             mediaLoopInterval = setInterval(() => {
-              if (lastMedia) {
-                api.sendMessage({ attachment: lastMedia.attachments }, lastMedia.threadID);
-              }
+              if (lastMedia)
+                api.sendMessage({ attachment: lastMedia.attachments }, threadID);
             }, 30000);
-
             api.removeListener("message", handleMedia);
           }
         };
-
         api.on("message", handleMedia);
       }
 
@@ -216,49 +187,33 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           mediaLoopInterval = null;
           lastMedia = null;
           api.sendMessage("chud gaye sb.", threadID);
-        } else {
-          api.sendMessage("🤣ro sale chnar", threadID);
-        }
+        } else api.sendMessage("🤣ro sale chnar", threadID);
       }
 
       else if (cmd === "/forward") {
-        try {
-          const info = await api.getThreadInfo(threadID);
-          const members = info.participantIDs;
-
-          const msgInfo = event.messageReply;
-          if (!msgInfo) return api.sendMessage("❌ Kisi message ko reply karo bhai", threadID);
-
-          for (const uid of members) {
-            if (uid !== api.getCurrentUserID()) {
-              try {
-                await api.sendMessage({
-                  body: msgInfo.body || "",
-                  attachment: msgInfo.attachments || []
-                }, uid);
-              } catch (e) {
-                console.log(`⚠️ Can't send to ${uid}:`, e.message);
-              }
-              await new Promise(res => setTimeout(res, 2000));
+        const info = await api.getThreadInfo(threadID);
+        const members = info.participantIDs;
+        const msgInfo = event.messageReply;
+        if (!msgInfo) return api.sendMessage("❌ Kisi message ko reply karo bhai", threadID);
+        for (const uid of members) {
+          if (uid !== api.getCurrentUserID()) {
+            try {
+              await api.sendMessage({ body: msgInfo.body || "", attachment: msgInfo.attachments || [] }, uid);
+            } catch (e) {
+              console.log(`⚠️ Can't send to ${uid}:`, e.message);
             }
+            await new Promise(res => setTimeout(res, 2000));
           }
-
-          api.sendMessage("📨 Forwarding complete.", threadID);
-        } catch (e) {
-          console.error("❌ Error in /forward:", e.message);
-          api.sendMessage("mja na aaya Bhen la Loda kLp gya tha yo hetter", threadID);
         }
+        api.sendMessage("📨 Forwarding complete.", threadID);
       }
 
       else if (cmd === "/target") {
-        if (!args[1]) return api.sendMessage("👤 UID de", threadID);
-        const newTarget = args[1];
-        if (!targetUIDs.includes(newTarget)) {
-          targetUIDs.push(newTarget);
-          api.sendMessage(`dont worry Avi bhai chudega aane de sale ko: ${newTarget}`, threadID);
-        } else {
-          api.sendMessage("⚠️ are avii bhai 🙂💔 ye chud rha phele se.", threadID);
-        }
+        const uid = args[1];
+        if (uid && !targetUIDs.includes(uid)) {
+          targetUIDs.push(uid);
+          api.sendMessage(`dont worry Avi bhai chudega aane de sale ko: ${uid}`, threadID);
+        } else api.sendMessage("⚠️ pehle se chud rha avii bhai🙂", threadID);
       }
 
       else if (cmd === "/cleartarget") {
@@ -267,28 +222,28 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       else if (cmd === "/help") {
-        const helpText = `
+        const help = `
 📌 Available Commands:
-
 /allname <name> – Change all nicknames
 /groupname <name> – Change group name
 /lockgroupname <name> – Lock group name
 /unlockgroupname – Unlock group name
 /uid – Show group ID
-/exit – group se Left Le Luga
-/rkb <name> – HETTER NAME DAL 
-/stop – Stop RKB command
-/photo – Send photo/video after this; it will repeat every 30s
-/stopphoto – Stop repeating photo/video
-/forward – Reply kisi message pe kro, sabko forward ho jaega
-/target <uid> – aane to de chudega dikhte hi
-/cleartarget – Target hata dega
-/help – Show this help message🙂😁
+/exit – Group chodne se pehle msg deke leave
+/rkb, /rkb2, /rkb3 <name> – Spam from respective files
+/stop – Stop any running spam
+/photo – Send and repeat photo/video
+/stopphoto – Stop photo/video
+/forward – Reply msg sabko bhejega
+/target <uid> – Add target UID
+/cleartarget – Remove all targets
+/useblock <uid> – Block UID from responding
+/help – Help message
         `;
-        api.sendMessage(helpText.trim(), threadID);
+        api.sendMessage(help.trim(), threadID);
       }
     } catch (e) {
-      console.error("⚠️ Error in message handler:", e.message);
+      console.error("⚠️ Handler error:", e.message);
     }
   });
 });
