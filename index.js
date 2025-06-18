@@ -100,17 +100,18 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
       }
 
-      else if (cmd === "!useblock") {
-        const uid = args[1];
-        if (uid) {
-          blockedUIDs.add(uid);
-          api.sendMessage(
-            `Avii bhaiya is madrchod ko sex full block kr diya hun 💀\nab msg krega to nhi sununga iska 😎`,
-            threadID
-          );
-        } else {
-          api.sendMessage("⚠️ UID to de bhai, kise block karu 😒", threadID);
-        }
+      else if (cmd === "!useunblock") {
+  const uid = args[1];
+  if (uid) {
+    if (blockedUIDs.has(uid)) {
+      blockedUIDs.delete(uid);
+      api.sendMessage(`Avii bhaiya ne daya kar diya 😎 unblock ho gaya: ${uid}`, threadID);
+    } else {
+      api.sendMessage(`Ye to blocked hi nahi tha baby 😘`, threadID);
+    }
+  } else {
+    api.sendMessage("⚠️ UID to de bhai, kise unblock karu 😅", threadID);
+  }
       }
 
       else if (cmd === "!exit") {
