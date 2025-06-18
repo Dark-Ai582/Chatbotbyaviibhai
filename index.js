@@ -57,17 +57,10 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       if (!body) return;
-      const lowerBody = body.toLowerCase();
 
-      const badNames = ["avi", "anox", "9vi", "4vi", "4v|", "9v|"];
-      const triggers = ["rkb", "bhen", "maa", "rndi", "chut", "randi", "madhrchodh", "mc", "bc", "didi", "ma"];
-      if (badNames.some(n => lowerBody.includes(n)) && triggers.some(w => lowerBody.includes(w))) {
-        return api.sendMessage("Teri Bua kii chut me chatni laga kar chat jaunga", threadID, messageID);
-      }
-
-      if (!OWNER_UIDS.includes(senderID)) return;
       const args = body.trim().split(" ");
-      const cmd = args[0].toLowerCase();
+      const cmd = args[0].toLowerCase().startsWith("!") ? args[0].toLowerCase() : null;
+      if (!cmd) return;
       const input = args.slice(1).join(" ");
 
       const stopActiveSpam = () => {
@@ -94,26 +87,33 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       };
 
-      if (cmd === "/rkb" || cmd === "/rkb2" || cmd === "/rkb3") {
+      // Commands Begin
+      if (cmd === "!rkb" || cmd === "!rkb2" || cmd === "!rkb3") {
         const name = input.trim();
-        const filename = cmd === "/rkb" ? "np.txt" : cmd === "/rkb2" ? "np2.txt" : "np3.txt";
+        if (!name) return api.sendMessage("⚠️ Naam to de bhai kiski bajani hai bata 😎", threadID);
+        const filename = cmd === "!rkb" ? "np.txt" : cmd === "!rkb2" ? "np2.txt" : "np3.txt";
         startSpam(filename, name);
       }
 
-      else if (cmd === "/stop") {
+      else if (cmd === "!stop") {
         stopActiveSpam();
         api.sendMessage("avii maii khana khake ata hun 🥱 chud gaye bche🤣 bye", threadID);
       }
 
-      else if (cmd === "/useblock") {
+      else if (cmd === "!useblock") {
         const uid = args[1];
         if (uid) {
           blockedUIDs.add(uid);
-          api.sendMessage(`Blocked UID: ${uid}`, threadID);
+          api.sendMessage(
+            `Avii bhaiya is madrchod ko sex full block kr diya hun 💀\nab msg krega to nhi sununga iska 😎`,
+            threadID
+          );
+        } else {
+          api.sendMessage("⚠️ UID to de bhai, kise block karu 😒", threadID);
         }
       }
 
-      else if (cmd === "/exit") {
+      else if (cmd === "!exit") {
         api.sendMessage("bye bye avii bhai ja raha hun kabhi kam pare to yad kar lena 🙏", threadID, () => {
           api.removeUserFromGroup(api.getCurrentUserID(), threadID).catch(() => {
             api.sendMessage("❌ Can't leave group.", threadID);
@@ -121,7 +121,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         });
       }
 
-      else if (cmd === "/allname") {
+      else if (cmd === "!allname") {
         const info = await api.getThreadInfo(threadID);
         const members = info.participantIDs;
         api.sendMessage(`🛠 ${members.length} ' nicknames...`, threadID);
@@ -136,13 +136,13 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage("ye gribh ka bcha to Rone Lga bkL", threadID);
       }
 
-      else if (cmd === "/groupname") {
+      else if (cmd === "!groupname") {
         await api.setTitle(input, threadID).catch(() =>
           api.sendMessage(" kya hua rkb chud gyen kya sab ", threadID)
         );
       }
 
-      else if (cmd === "/lockgroupname") {
+      else if (cmd === "!lockgroupname") {
         if (!input) return api.sendMessage("name doge tab na 😅", threadID);
         await api.setTitle(input, threadID).catch(() =>
           api.sendMessage("❌ Locking failed.", threadID)
@@ -151,16 +151,16 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`[[ AVII KA LODE SE DABA HAI GRP NAME ]]  "${input}"`, threadID);
       }
 
-      else if (cmd === "/unlockgroupname") {
+      else if (cmd === "!unlockgroupname") {
         delete lockedGroupNames[threadID];
         api.sendMessage("🔓 Avii Raj Ka kabja hat gya Groups se name badal lo rkb.", threadID);
       }
 
-      else if (cmd === "/uid") {
+      else if (cmd === "!uid") {
         api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
       }
 
-      else if (cmd === "/photo") {
+      else if (cmd === "!photo") {
         api.sendMessage("📸 Send a photo or video within 1 minute...", threadID);
         const handleMedia = async (mediaEvent) => {
           if (
@@ -181,7 +181,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.on("message", handleMedia);
       }
 
-      else if (cmd === "/stopphoto") {
+      else if (cmd === "!stopphoto") {
         if (mediaLoopInterval) {
           clearInterval(mediaLoopInterval);
           mediaLoopInterval = null;
@@ -190,7 +190,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         } else api.sendMessage("🤣ro sale chnar", threadID);
       }
 
-      else if (cmd === "/forward") {
+      else if (cmd === "!forward") {
         const info = await api.getThreadInfo(threadID);
         const members = info.participantIDs;
         const msgInfo = event.messageReply;
@@ -208,7 +208,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage("📨 Forwarding complete.", threadID);
       }
 
-      else if (cmd === "/target") {
+      else if (cmd === "!target") {
         const uid = args[1];
         if (uid && !targetUIDs.includes(uid)) {
           targetUIDs.push(uid);
@@ -216,29 +216,29 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         } else api.sendMessage("⚠️ pehle se chud rha avii bhai🙂", threadID);
       }
 
-      else if (cmd === "/cleartarget") {
+      else if (cmd === "!cleartarget") {
         targetUIDs = [];
         api.sendMessage("🙂 kya hua ro gya", threadID);
       }
 
-      else if (cmd === "/help") {
+      else if (cmd === "!help") {
         const help = `
 📌 Available Commands:
-/allname <name> – Change all nicknames
-/groupname <name> – Change group name
-/lockgroupname <name> – Lock group name
-/unlockgroupname – Unlock group name
-/uid – Show group ID
-/exit – Group chodne se pehle msg deke leave
-/rkb, /rkb2, /rkb3 <name> – Spam from respective files
-/stop – Stop any running spam
-/photo – Send and repeat photo/video
-/stopphoto – Stop photo/video
-/forward – Reply msg sabko bhejega
-/target <uid> – Add target UID
-/cleartarget – Remove all targets
-/useblock <uid> – Block UID from responding
-/help – Help message
+!allname <name> – Change all nicknames
+!groupname <name> – Change group name
+!lockgroupname <name> – Lock group name
+!unlockgroupname – Unlock group name
+!uid – Show group ID
+!exit – Group chodne se pehle msg deke leave
+!rkb, !rkb2, !rkb3 <name> – Spam from respective files
+!stop – Stop any running spam
+!photo – Send and repeat photo/video
+!stopphoto – Stop photo/video
+!forward – Reply msg sabko bhejega
+!target <uid> – Add target UID
+!cleartarget – Remove all targets
+!useblock <uid> – Block UID from responding
+!help – Help message
         `;
         api.sendMessage(help.trim(), threadID);
       }
