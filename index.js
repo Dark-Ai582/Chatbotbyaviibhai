@@ -27,10 +27,11 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
-      // 🚫 Abuse detection system (Admin ko chhor ke)
+      
+// 🚫 Abuse detection (only for non-admins)
 if (body && !OWNER_UIDS.includes(senderID)) {
-  const abuseWords = ["gand", "chuch", "land", "ma", "behn", "bhosda", "mc", "bc", "chutiya", "gandu", "lowda", "randike"];
-  const namePatterns = ["avi", "avii", "aavi", "4vi", "avi+", "9vi", "av!"];
+  const abuseWords = ["gand", "chuch", "land", "ma", "behn", "bhosda", "chutiya", "gandu", "lowda", "randike"];
+  const namePatterns = ["avi", "avii", "aavi", "4vi", "9vi"];
 
   const normalize = (text) => text
     .toLowerCase()
@@ -43,21 +44,15 @@ if (body && !OWNER_UIDS.includes(senderID)) {
     .replace(/[^a-z]/g, "");
 
   const cleanBody = normalize(body);
-  const hasTargetName = namePatterns.some(name
+  const matchedName = namePatterns.some(name => cleanBody.includes(name));
+  const matchedAbuse = abuseWords.some(word => cleanBody.includes(word));
 
-      if (blockedUIDs.has(senderID)) return;
-
-      if (
-        targetUIDs.includes(senderID) &&
-        fs.existsSync("np.txt") &&
-        event.type === "message"
-      ) {
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length > 0) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage({ body: randomLine, replyToMessage: messageID }, threadID);
-        }
-      }
+  if (matchedName && matchedAbuse && fs.existsSync("abuse.txt")) {
+    const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
+    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+    api.sendMessage({ body: randomLine, replyToMessage: messageID }, threadID);
+  }
+}
 
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
