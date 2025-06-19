@@ -30,6 +30,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 
       if (blockedUIDs.has(senderID)) return;
 
+      // Target UID Auto Abuse (from np.txt)
       if (
         targetUIDs.includes(senderID) &&
         fs.existsSync("np.txt") &&
@@ -42,6 +43,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         }
       }
 
+      // Group Name Lock Handler
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
         const lockedName = lockedGroupNames[threadID];
@@ -56,11 +58,15 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         return;
       }
 
+      // Command Handling
       if (!body) return;
-
       const args = body.trim().split(" ");
       const cmd = args[0].toLowerCase().startsWith("!") ? args[0].toLowerCase() : null;
       if (!cmd) return;
+
+      // ✅ Admin-Only Command Gate
+      if (!OWNER_UIDS.includes(senderID)) return;
+
       const input = args.slice(1).join(" ");
 
       const stopActiveSpam = () => {
@@ -87,7 +93,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       };
 
-      // All commands start here
+      // Commands
       if (cmd === "!rkb" || cmd === "!rkb2" || cmd === "!rkb3") {
         const name = input.trim();
         if (!name) return api.sendMessage("⚠️ Naam to de bhai kiski bajani hai bata 😎", threadID);
@@ -254,6 +260,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         `;
         api.sendMessage(help.trim(), threadID);
       }
+
     } catch (e) {
       console.error("⚠️ Handler error:", e.message);
     }
