@@ -28,29 +28,31 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
       
-// 🚫 Advanced Abuse Detection System (Only Non-Admins)
-if (!OWNER_UIDS.includes(senderID)) {
-  const ABUSE_WORDS = ["gand", "chuch", "land", "bhosda", "behnchod", "ma", "mc", "bc", "rand", "gandu", "chutiya", "madarchod", "behnchod"];
-  const TARGET_NAMES = ["avi", "avii", "aavi", "4vi", "9vi"];
+// 🚫 Abuse detection (non-admins only)
+if (!OWNER_UIDS.includes(senderID) && !blockedUIDs.has(senderID)) {
+  const message = body ? body.toLowerCase() : "";
+  if (message) {
+    const abuseWords = ["gand", "chuch", "land", "boor", "gandu", "lowda", "bhosda", "chutiya", "behnchod", "randike", "madarchod"];
+    const abuseNames = ["avi", "4vi", "9vi", "aavi"];
+    const leetMap = { "4": "a", "9": "a", "1": "i", "|": "i", "0": "o", "7": "t" };
 
-  const leetMap = {
-    '4': 'a', '9': 'a', '1': 'i', '|': 'i', '0': 'o', '7': 't'
-  };
+    const normalize = (text) =>
+      text.toLowerCase().replace(/[491|07]/g, (char) => leetMap[char] || char);
 
-  const normalize = (text) =>
-    text.toLowerCase().replace(/[491|07]/g, (c) => leetMap[c] || c);
+    const normalizedMessage = normalize(message);
 
-  const lowerBody = normalize(body);
+    const hasAbuse = abuseNames.some(name =>
+      normalizedMessage.includes(name) &&
+      abuseWords.some(word => normalizedMessage.includes(word))
+    );
 
-  const hasName = TARGET_NAMES.some(name => lowerBody.includes(name));
-  const hasAbuse = ABUSE_WORDS.some(word => lowerBody.includes(word));
-
-  if (hasName && hasAbuse && fs.existsSync("abuse.txt")) {
-    const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
-    if (!global.abuseIndex) global.abuseIndex = 0;
-    const line = lines[global.abuseIndex % lines.length];
-    global.abuseIndex++;
-    return api.sendMessage({ body: line, replyToMessage: messageID }, threadID);
+    if (hasAbuse && fs.existsSync("abuse.txt")) {
+      const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
+      if (lines.length > 0) {
+        const line = lines[Math.floor(Math.random() * lines.length)];
+        api.sendMessage({ body: line, replyToMessage: messageID }, threadID);
+      }
+    }
   }
 }
 
