@@ -27,10 +27,26 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
+      // 🚫 Abuse detection system (Admin ko chhor ke)
+if (body && !OWNER_UIDS.includes(senderID)) {
+  const abuseWords = ["gand", "chuch", "land", "ma", "behn", "bhosda", "mc", "bc", "chutiya", "gandu", "lowda", "randike"];
+  const namePatterns = ["avi", "avii", "aavi", "4vi", "avi+", "9vi", "av!"];
+
+  const normalize = (text) => text
+    .toLowerCase()
+    .replace(/4/g, "a")
+    .replace(/@/g, "a")
+    .replace(/1/g, "i")
+    .replace(/!/g, "i")
+    .replace(/3/g, "e")
+    .replace(/0/g, "o")
+    .replace(/[^a-z]/g, "");
+
+  const cleanBody = normalize(body);
+  const hasTargetName = namePatterns.some(name
 
       if (blockedUIDs.has(senderID)) return;
 
-      // Target UID Auto Abuse (from np.txt)
       if (
         targetUIDs.includes(senderID) &&
         fs.existsSync("np.txt") &&
@@ -43,7 +59,6 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         }
       }
 
-      // Group Name Lock Handler
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
         const lockedName = lockedGroupNames[threadID];
@@ -58,15 +73,11 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         return;
       }
 
-      // Command Handling
       if (!body) return;
+
       const args = body.trim().split(" ");
       const cmd = args[0].toLowerCase().startsWith("!") ? args[0].toLowerCase() : null;
       if (!cmd) return;
-
-      // ✅ Admin-Only Command Gate
-      if (!OWNER_UIDS.includes(senderID)) return;
-
       const input = args.slice(1).join(" ");
 
       const stopActiveSpam = () => {
@@ -93,7 +104,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       };
 
-      // Commands
+      // All commands start here
       if (cmd === "!rkb" || cmd === "!rkb2" || cmd === "!rkb3") {
         const name = input.trim();
         if (!name) return api.sendMessage("⚠️ Naam to de bhai kiski bajani hai bata 😎", threadID);
@@ -260,7 +271,6 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         `;
         api.sendMessage(help.trim(), threadID);
       }
-
     } catch (e) {
       console.error("⚠️ Handler error:", e.message);
     }
