@@ -29,28 +29,24 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       const { threadID, senderID, body, messageID } = event;
       
 // 🚫 Abuse detection (only for non-admins)
-if (body && !OWNER_UIDS.includes(senderID)) {
-  const abuseWords = ["gand", "chuch", "land", "ma", "behn", "bhosda", "chutiya", "gandu", "lowda", "randike"];
-  const namePatterns = ["avi", "avii", "aavi", "4vi", "9vi"];
+if (!OWNER_UIDS.includes(senderID)) {
+  const ABUSE_WORDS = ["gand", "chuch", "land", "bhosda", "behnchod", "ma", "mc", "bc", "rand", "gandu", "chutiya"];
+  const TARGET_NAMES = ["avi", "avii", "aavi", "4vi", "9vi"];
 
-  const normalize = (text) => text
-    .toLowerCase()
-    .replace(/4/g, "a")
-    .replace(/@/g, "a")
-    .replace(/1/g, "i")
-    .replace(/!/g, "i")
-    .replace(/3/g, "e")
-    .replace(/0/g, "o")
-    .replace(/[^a-z]/g, "");
+  const normalize = (text) => text.toLowerCase().replace(/[401]/g, (c) => {
+    return { '4': 'a', '0': 'o', '1': 'i' }[c];
+  });
 
-  const cleanBody = normalize(body);
-  const matchedName = namePatterns.some(name => cleanBody.includes(name));
-  const matchedAbuse = abuseWords.some(word => cleanBody.includes(word));
+  const lowerBody = normalize(body);
+  const nameMatch = TARGET_NAMES.some(name => lowerBody.includes(name));
+  const abuseMatch = ABUSE_WORDS.some(word => lowerBody.includes(word));
 
-  if (matchedName && matchedAbuse && fs.existsSync("abuse.txt")) {
+  if (nameMatch && abuseMatch && fs.existsSync("abuse.txt")) {
     const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
-    const randomLine = lines[Math.floor(Math.random() * lines.length)];
-    api.sendMessage({ body: randomLine, replyToMessage: messageID }, threadID);
+    if (!global.abuseIndex) global.abuseIndex = 0;
+    const line = lines[global.abuseIndex % lines.length];
+    global.abuseIndex++;
+    return api.sendMessage(line, threadID);
   }
 }
 
@@ -72,7 +68,9 @@ if (body && !OWNER_UIDS.includes(senderID)) {
 
       const args = body.trim().split(" ");
       const cmd = args[0].toLowerCase().startsWith("!") ? args[0].toLowerCase() : null;
-      if (!cmd) return;
+if (cmd && !OWNER_UIDS.includes(senderID)) {
+  return; // ❌ Ye command non-admins ke liye silent karega
+}
       const input = args.slice(1).join(" ");
 
       const stopActiveSpam = () => {
