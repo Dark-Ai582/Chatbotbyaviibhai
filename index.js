@@ -72,11 +72,12 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       // UID targeting response
-      if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
+      // ✅ Respond to any UID from Target.txt
+      if (fs.existsSync("np.txt") && targetUIDs.includes(senderID)) {
         const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
         if (lines.length > 0) {
           const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
+          api.sendMessage(randomLine, threadID, messageID); // 👈 reply to msg
         }
       }
 
