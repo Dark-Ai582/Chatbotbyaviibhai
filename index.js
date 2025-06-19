@@ -18,6 +18,35 @@ app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 process.on("uncaughtException", (err) => console.error("❗ Uncaught Exception:", err.message));
 process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Rejection:", reason));
 
+let abuseIndex = 0;
+let abuseLines = [];
+
+try {
+  abuseLines = fs.readFileSync("abuse.txt", "utf-8").split("\n").filter(Boolean);
+  console.log(`✅ Loaded ${abuseLines.length} abuse lines`);
+} catch (e) {
+  console.error("❌ 'abuse.txt' missing or empty.");
+}
+
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[4@]/g, "a")
+    .replace(/[!|1]/g, "i")
+    .replace(/0/g, "o")
+    .replace(/3/g, "e")
+    .replace(/7/g, "t")
+    .replace(/9/g, "g")
+    .replace(/\$/g, "s");
+}
+
+function getNextAbuseLine() {
+  if (abuseLines.length === 0) return "⚠️ abuse.txt is empty!";
+  const line = abuseLines[abuseIndex];
+  abuseIndex = (abuseIndex + 1) % abuseLines.length;
+  return line;
+}
+
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
   api.setOptions({ listenEvents: true });
@@ -27,59 +56,32 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
-      
-// Global abuse tracker setup
-let abuseIndex = 0;
-let abuseLines = [];
 
-// Load abuse.txt lines at startup
-try {
-  abuseLines = fs.readFileSync("abuse.txt", "utf-8").split("\n").filter(Boolean);
-} catch (err) {
-  console.error("⚠️ 'abuse.txt' not found or is empty.");
-}
+      // ABUSE DETECTION
+      if (body && !OWNER_UIDS.includes(senderID)) {
+        const normalizedBody = normalize(body);
+        const targetNames = ["avi", "avii", "aavi", "syco", "hannu", "satya", "anox"];
+        const abuseWords = [
+          "bhen", "maa", "madarchod", "mc", "bc", "randi", "rndi", "chut",
+          "gand", "lund", "behnchod", "chutiya", "gandu", "lowda", "bhosda"
+        ];
+        const hasName = targetNames.some(name => normalizedBody.includes(name));
+        const hasAbuse = abuseWords.some(word => normalizedBody.includes(word));
+        if (hasName && hasAbuse) {
+          const abuseReply = getNextAbuseLine();
+          api.sendMessage(abuseReply, threadID, messageID);
+        }
+      }
 
-// Leetspeak-normalize helper function
-function normalize(text) {
-  return text
-    .toLowerCase()
-    .replace(/[4@]/g, "a")
-    .replace(/[|!1]/g, "i")
-    .replace(/0/g, "o")
-    .replace(/3/g, "e")
-    .replace(/7/g, "t")
-    .replace(/9/g, "g")
-    .replace(/\$/g, "s");
-}
+      // REST OF BOT LOGIC (trimmed for space; already part of your shared script)
+      // Keep all your command handling here exactly as in your original
 
-// Fetch next abuse line (looping)
-function getNextAbuseLine() {
-  if (abuseLines.length === 0) return "⚠️ abuse.txt file is empty!";
-  const line = abuseLines[abuseIndex];
-  abuseIndex = (abuseIndex + 1) % abuseLines.length;
-  return line;
-}
+    } catch (e) {
+      console.error("⚠️ Handler error:", e.message);
+    }
+  });
+});
 
-// Main abuse checker function
-function checkAbuse({ body, senderID, messageID, threadID, api }) {
-  if (!body) return;
-
-  const normalizedBody = normalize(body);
-  const badNames = ["avi", "avii", "aavi", "syco", "hannu", "satya", "anox"];
-  const abuseWords = [
-    "bhen", "maa", "madarchod", "mc", "bc", "randi", "rndi", "chut", "gand",
-    "lund", "behnchod", "chutiya", "gandu", "lowda", "bhosda"
-  ];
-
-  const nameDetected = badNames.some(name => normalizedBody.includes(name));
-  const abuseDetected = abuseWords.some(word => normalizedBody.includes(word));
-
-  const isAdmin = OWNER_UIDS.includes(senderID);
-  if (!isAdmin && nameDetected && abuseDetected) {
-    const abuseMsg = getNextAbuseLine();
-    api.sendMessage(abuseMsg, threadID, messageID);
-  }
-}
 
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
