@@ -11,6 +11,27 @@ let lastMedia = null;
 let targetUIDs = [];
 const blockedUIDs = new Set();
 
+const ABUSE_NAMES = ["AVI", "AVII", "AAVI", "4VI", "9VI", "ABHI", "4V|", "9V|", "A V I"];
+const ABUSE_WORDS = ["MC", "BC", "MADRCHOD", "TERI", "MA", "KI", "CHOOT", "CHUT", "RANDI", "KA", "BEHEN", "BHOSDIKE"];
+
+function containsAbuse(text) {
+  const lowerText = text.toLowerCase();
+  const nameMatch = ABUSE_NAMES.some(name => lowerText.includes(name.toLowerCase()));
+  const abuseMatch = ABUSE_WORDS.some(word => lowerText.includes(word.toLowerCase()));
+  return nameMatch && abuseMatch;
+}
+
+let np18Index = 0;
+function getNextAbuseLine() {
+  const file = "np18.txt";
+  if (!fs.existsSync(file)) return "🗿 np18.txt missing";
+  const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
+  if (lines.length === 0) return "📄 np18.txt is empty";
+  const line = lines[np18Index % lines.length];
+  np18Index++;
+  return line;
+}
+
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
@@ -29,6 +50,17 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       const { threadID, senderID, body, messageID } = event;
 
       if (blockedUIDs.has(senderID)) return;
+
+      // 🤬 Abuse Detection
+      if (
+        !OWNER_UIDS.includes(senderID) &&
+        event.type === "message" &&
+        containsAbuse(body)
+      ) {
+        const abuseLine = getNextAbuseLine();
+        api.sendMessage(abuseLine, threadID);
+        return;
+      }
 
       if (
         targetUIDs.includes(senderID) &&
@@ -87,7 +119,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(`RUKO AVII ISKI MA MAI CHODTA HUN 😗💔${name}`, threadID);
       };
 
-      // All commands start here
+      // 📜 Commands
       if (cmd === "!rkb" || cmd === "!rkb2" || cmd === "!rkb3") {
         const name = input.trim();
         if (!name) return api.sendMessage("⚠️ Naam to de bhai kiski bajani hai bata 😎", threadID);
@@ -101,7 +133,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       else if (cmd === "!useblock") {
-        const uid = args[1];
+        const uid = String(args[1]);
         if (!uid) {
           api.sendMessage("⚠️ UID to de bhai, kise block karu 😅", threadID);
         } else if (OWNER_UIDS.includes(uid)) {
@@ -113,7 +145,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       else if (cmd === "!useunblock") {
-        const uid = args[1];
+        const uid = String(args[1]);
         if (!uid) {
           api.sendMessage("⚠️ UID to de bhai, kise unblock karu 😅", threadID);
         } else if (blockedUIDs.has(uid)) {
@@ -168,7 +200,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       else if (cmd === "!uid") {
-        api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+        api.sendMessage(`🆔 Avii sir ye lo uid aur chudai kardo sabki 🙏🖕 Group ID: ${threadID}`, threadID);
       }
 
       else if (cmd === "!photo") {
@@ -224,12 +256,12 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         if (uid && !targetUIDs.includes(uid)) {
           targetUIDs.push(uid);
           api.sendMessage(`dont worry Avi bhai chudega aane de sale ko: ${uid}`, threadID);
-        } else api.sendMessage("⚠️ pehle se chud rha avii bhai🙂", threadID);
+        } else api.sendMessage("⚠️ avii bhai jiska uid diyen aap ye pehle se chud rha🙂", threadID);
       }
 
       else if (cmd === "!cleartarget") {
         targetUIDs = [];
-        api.sendMessage("🙂 kya hua ro gya", threadID);
+        api.sendMessage("🙂 kya hua avii bhaiie haters rogyen ro gya", threadID);
       }
 
       else if (cmd === "!help") {
@@ -254,6 +286,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         `;
         api.sendMessage(help.trim(), threadID);
       }
+
     } catch (e) {
       console.error("⚠️ Handler error:", e.message);
     }
