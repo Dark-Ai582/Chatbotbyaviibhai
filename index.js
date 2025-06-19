@@ -122,26 +122,82 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         });
       }
 
-// Multi-file RKB command
-const rkbCommand = (tag, file) => {
-  if (cmd === `!rkb${tag}`) {
-    if (!fs.existsSync(file)) return api.sendMessage(`❌ File missing: ${file}`, threadID);
-    const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
-    if (!input) return api.sendMessage("👤 Naam de bhai", threadID);
-    let i = 0;
-    stopRequested = false;
-    if (rkbInterval) clearInterval(rkbInterval);
-    rkbInterval = setInterval(() => {
-      if (i >= lines.length || stopRequested) {
-        clearInterval(rkbInterval);
-        rkbInterval = null;
-        return;
-      }
-      api.sendMessage(`${input} ${lines[i++]}`, threadID);
-    }, 40000);
-    api.sendMessage(`chalu ho gaya ${input} ke liye`, threadID);
+if (cmd === "!rkb") {
+  if (!fs.existsSync("np.txt")) return api.sendMessage("konsa gaLi du rkb ko", threadID);
+  const name = input.trim();
+  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  stopRequested = false;
+
+  if (rkbInterval) clearInterval(rkbInterval);
+  let index = 0;
+
+  rkbInterval = setInterval(() => {
+    if (index >= lines.length || stopRequested) {
+      clearInterval(rkbInterval);
+      rkbInterval = null;
+      return;
+    }
+    api.sendMessage(`${name} ${lines[index]}`, threadID);
+    index++;
+  }, 40000);
+
+  api.sendMessage(`iski maa chhodta hun avi bhai rukja ${name}`, threadID);
+}
+
+if (cmd === "!rkb2") {
+  if (!fs.existsSync("np2.txt")) return api.sendMessage("konsa gaLi du rkb2 ko", threadID);
+  const name = input.trim();
+  const lines = fs.readFileSync("np2.txt", "utf8").split("\n").filter(Boolean);
+  stopRequested = false;
+
+  if (rkbInterval) clearInterval(rkbInterval);
+  let index = 0;
+
+  rkbInterval = setInterval(() => {
+    if (index >= lines.length || stopRequested) {
+      clearInterval(rkbInterval);
+      rkbInterval = null;
+      return;
+    }
+    api.sendMessage(`${name} ${lines[index]}`, threadID);
+    index++;
+  }, 40000);
+
+  api.sendMessage(`ruka ja randike bachhe teri ma ki chut ${name}`, threadID);
+}
+
+if (cmd === "!rkb3") {
+  if (!fs.existsSync("np3.txt")) return api.sendMessage("konsa gaLi du rkb3 ko", threadID);
+  const name = input.trim();
+  const lines = fs.readFileSync("np3.txt", "utf8").split("\n").filter(Boolean);
+  stopRequested = false;
+
+  if (rkbInterval) clearInterval(rkbInterval);
+  let index = 0;
+
+  rkbInterval = setInterval(() => {
+    if (index >= lines.length || stopRequested) {
+      clearInterval(rkbInterval);
+      rkbInterval = null;
+      return;
+    }
+    api.sendMessage(`${name} ${lines[index]}`, threadID);
+    index++;
+  }, 40000);
+
+  api.sendMessage(`😗 rukja avii bhaiya kr rha ${name}`, threadID);
+}
+
+if (cmd === "!stop") {
+  stopRequested = true;
+  if (rkbInterval) {
+    clearInterval(rkbInterval);
+    rkbInterval = null;
+    api.sendMessage("chud gaye bche🤣 avii bhai maii ata hun ankit ki ma bula rahi jara sa ", threadID);
+  } else {
+    api.sendMessage("konsa gaLi du i is  sale ko🤣 rkb tha", threadID);
   }
-};
+}
 
 rkbCommand("", "np.txt");
 rkbCommand("2", "np2.txt");
