@@ -38,6 +38,12 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         return;
       }
 
+
+// ✅ Target.txt multiple UID support
+const targetUIDs = fs.existsSync("Target.txt")
+  ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean)
+  : [];
+      
       if (!body) return;
       const lowerBody = body.toLowerCase();
 
