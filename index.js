@@ -122,26 +122,41 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         });
       }
 
-      // Multi-file RKB
-      const rkbCommand = (tag, file) => {
-        if (cmd === `!rkb${tag}`) {
-          if (!fs.existsSync(file)) return api.sendMessage(`❌ File missing: ${file}`, threadID);
-          const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
-          if (!input) return api.sendMessage("areh avii sir naame dona 😒🙂 ji", threadID);
-          let i = 0;
-          stopRequested = false;
-          if (rkbInterval) clearInterval(rkbInterval);
-          rkbInterval = setInterval(() => {
-            if (i >= lines.length || stopRequested) {
-              clearInterval(rkbInterval);
-              rkbInterval = null;
-              return;
-            }
-            api.sendMessage(`${input} ${lines[i++]}`, threadID);
-          }, 40000);
-          api.sendMessage(`chalu ho gaya ${input} ke liye`, threadID);
-        }
-      };
+// Multi-file RKB command
+const rkbCommand = (tag, file) => {
+  if (cmd === `!rkb${tag}`) {
+    if (!fs.existsSync(file)) return api.sendMessage(`❌ File missing: ${file}`, threadID);
+    const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
+    if (!input) return api.sendMessage("👤 Naam de bhai", threadID);
+    let i = 0;
+    stopRequested = false;
+    if (rkbInterval) clearInterval(rkbInterval);
+    rkbInterval = setInterval(() => {
+      if (i >= lines.length || stopRequested) {
+        clearInterval(rkbInterval);
+        rkbInterval = null;
+        return;
+      }
+      api.sendMessage(`${input} ${lines[i++]}`, threadID);
+    }, 40000);
+    api.sendMessage(`chalu ho gaya ${input} ke liye`, threadID);
+  }
+};
+
+rkbCommand("", "np.txt");
+rkbCommand("2", "np2.txt");
+rkbCommand("3", "np3.txt");
+
+if (cmd === "!stop") {
+  stopRequested = true;
+  if (rkbInterval) {
+    clearInterval(rkbInterval);
+    rkbInterval = null;
+    api.sendMessage("Stopped.", threadID);
+  } else {
+    api.sendMessage("Kuch chal hi nahi raha tha bhai", threadID);
+  }
+}
 
       rkbCommand("", "np.txt");
       rkbCommand("2", "np2.txt");
