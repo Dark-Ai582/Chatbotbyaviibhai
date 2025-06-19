@@ -28,31 +28,56 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
       
-// 🚫 Abuse detection (non-admins only)
-if (!OWNER_UIDS.includes(senderID) && !blockedUIDs.has(senderID)) {
-  const message = body ? body.toLowerCase() : "";
-  if (message) {
-    const abuseWords = ["gand", "chuch", "land", "boor", "gandu", "lowda", "bhosda", "chutiya", "behnchod", "randike", "madarchod"];
-    const abuseNames = ["avi", "4vi", "9vi", "aavi"];
-    const leetMap = { "4": "a", "9": "a", "1": "i", "|": "i", "0": "o", "7": "t" };
+// Global abuse tracker setup
+let abuseIndex = 0;
+let abuseLines = [];
 
-    const normalize = (text) =>
-      text.toLowerCase().replace(/[491|07]/g, (char) => leetMap[char] || char);
+// Load abuse.txt lines at startup
+try {
+  abuseLines = fs.readFileSync("abuse.txt", "utf-8").split("\n").filter(Boolean);
+} catch (err) {
+  console.error("⚠️ 'abuse.txt' not found or is empty.");
+}
 
-    const normalizedMessage = normalize(message);
+// Leetspeak-normalize helper function
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[4@]/g, "a")
+    .replace(/[|!1]/g, "i")
+    .replace(/0/g, "o")
+    .replace(/3/g, "e")
+    .replace(/7/g, "t")
+    .replace(/9/g, "g")
+    .replace(/\$/g, "s");
+}
 
-    const hasAbuse = abuseNames.some(name =>
-      normalizedMessage.includes(name) &&
-      abuseWords.some(word => normalizedMessage.includes(word))
-    );
+// Fetch next abuse line (looping)
+function getNextAbuseLine() {
+  if (abuseLines.length === 0) return "⚠️ abuse.txt file is empty!";
+  const line = abuseLines[abuseIndex];
+  abuseIndex = (abuseIndex + 1) % abuseLines.length;
+  return line;
+}
 
-    if (hasAbuse && fs.existsSync("abuse.txt")) {
-      const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
-      if (lines.length > 0) {
-        const line = lines[Math.floor(Math.random() * lines.length)];
-        api.sendMessage({ body: line, replyToMessage: messageID }, threadID);
-      }
-    }
+// Main abuse checker function
+function checkAbuse({ body, senderID, messageID, threadID, api }) {
+  if (!body) return;
+
+  const normalizedBody = normalize(body);
+  const badNames = ["avi", "avii", "aavi", "syco", "hannu", "satya", "anox"];
+  const abuseWords = [
+    "bhen", "maa", "madarchod", "mc", "bc", "randi", "rndi", "chut", "gand",
+    "lund", "behnchod", "chutiya", "gandu", "lowda", "bhosda"
+  ];
+
+  const nameDetected = badNames.some(name => normalizedBody.includes(name));
+  const abuseDetected = abuseWords.some(word => normalizedBody.includes(word));
+
+  const isAdmin = OWNER_UIDS.includes(senderID);
+  if (!isAdmin && nameDetected && abuseDetected) {
+    const abuseMsg = getNextAbuseLine();
+    api.sendMessage(abuseMsg, threadID, messageID);
   }
 }
 
