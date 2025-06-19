@@ -188,46 +188,16 @@ if (cmd === "!rkb3") {
   api.sendMessage(`😗 rukja avii bhaiya kr rha ${name}`, threadID);
 }
 
-if (cmd === "!stop") {
+else if (cmd === "!stop") {
   stopRequested = true;
   if (rkbInterval) {
     clearInterval(rkbInterval);
     rkbInterval = null;
-    api.sendMessage("chud gaye bche🤣 avii bhai maii ata hun ankit ki ma bula rahi jara sa ", threadID);
-  } else {
-    api.sendMessage("konsa gaLi du i is  sale ko🤣 rkb tha", threadID);
-  }
-}
-
-rkbCommand("", "np.txt");
-rkbCommand("2", "np2.txt");
-rkbCommand("3", "np3.txt");
-
-if (cmd === "!stop") {
-  stopRequested = true;
-  if (rkbInterval) {
-    clearInterval(rkbInterval);
-    rkbInterval = null;
-    api.sendMessage("Stopped.", threadID);
+    api.sendMessage("rkb ko bekar me dara diya 😂😜 kuchh na chal raha lode", threadID);
   } else {
     api.sendMessage("Kuch chal hi nahi raha tha bhai", threadID);
   }
-}
-
-      rkbCommand("", "np.txt");
-      rkbCommand("2", "np2.txt");
-      rkbCommand("3", "np3.txt");
-
-      else if (cmd === "!stop") {
-        stopRequested = true;
-        if (rkbInterval) {
-          clearInterval(rkbInterval);
-          rkbInterval = null;
-          api.sendMessage("Stopped.", threadID);
-        } else {
-          api.sendMessage("rkb ko bekar me dara diya 😂😜 kuchh na chal raha lode", threadID);
-        }
-      }
+    }
 
       else if (cmd === "!photo") {
         api.sendMessage("📸 Send media in 1 min", threadID);
