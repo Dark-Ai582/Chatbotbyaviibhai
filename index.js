@@ -51,7 +51,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           .replace(/[7]/g, "t");
 
       const normalized = normalize(lowerBody);
-      const badNames = ["avi", "avii", "Akshay", "Specter", "Akshu", "Threesom", "Abhishek"];
+      const badNames = ["Akshay", "ruhan", "Avi", "Specter", "avii", "Threesom", "Abhishek"];
       const abuseWords = ["randi", "chut", "gand", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "gandu", "boor", "lowda", "maa", "didi"];
 
       if (
