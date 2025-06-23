@@ -19,7 +19,11 @@ process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Reject
 
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
-  api.setOptions({ listenEvents: true });
+  api.setOptions({
+  listenEvents: true,
+  selfListen: true,        // 👈 Apne message bhi sune
+  forceLogin: true         // 👈 Kuch cases me helpful
+});
   console.log("✅ Bot logged in and running...");
 
   api.listenMqtt(async (err, event) => {
