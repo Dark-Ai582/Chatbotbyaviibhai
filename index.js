@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100012858990152", "100069692356853", "100087881326581", "100001808342073", "100005122337500"];
+const OWNER_UIDS = ["61555128412763", "100069692356853", "100087881326581", "100001808342073", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 
@@ -260,6 +260,10 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.sendMessage(help.trim(), threadID);
       }
 
+else if (cmd === "*myid") {
+  api.sendMessage(`🆔 Your UID is: ${senderID}`, threadID);
+}
+      
     } catch (e) {
       console.error("❗ Bot error:", e.message);
     }
