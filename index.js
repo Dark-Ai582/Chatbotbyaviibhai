@@ -79,50 +79,7 @@ if (
 }
 
 
-   // 😄 Emojis list
-const emojiList = [
-  "😀","😃","😄","😁","😆","😅","😂","🤣","😭","😉","😗","😙","😚","😘","🥰","😍","🙃","🙂","🫠","🥲","🥹","😊","☺️",
-  "😌","🙂‍↕️","🥺","😬","😑","😐","😶","😶‍🌫️","🫥","🤐","🤨","🧐","😒","🙄","😮‍💨","😤","😠","😡","🤬","😞","😓",
-  "😟","😥","😢","☹️","🙁","🫤","😕","😰","😨","😧","😦","😮","😯","😲","😳","🤯","😖","😣","😩","😫","😵","😵‍💫",
-  "🫨","🥶","🥵","🤢","🤮","😴","😪","🤧","🤒","🤕","😷","🤥","😇","🤠","🤑","🤓","😎","🥸","🤡","💩","😈","👿","👻",
-  "💀","☠️","🌚","❤️","🧡","💛","💚","🩵","💙","💜","🤎","🖤","🩶","🤍","🩷","💘","💝","💖","💗","💓","💞","💕",
-  "♥️","❣️","❤️‍🩹","💔","❤️‍🔥","💋","🗣️","👤","👥","🫦","👅","✊","🫰","🤞","☝️","👉","🤙","🫵","🫳","👊",
-  "🖕","✍️","👆","🙇","🙋","💁","🙆","🙅"
-];
-
-// 1️⃣ OWNER reply detection – 3 funny msg
-if (event.type === "message_reply" && OWNER_UIDS.includes(senderID)) {
-  const replyAuthor = event.messageReply?.senderID;
-  if (replyAuthor === api.getCurrentUserID()) {
-    const funnyMsgs = [
-      "😂 oye owner reply maar diya ab to hil gyi duniya",
-      "🤣 avii bhai reply de rahe 🐐 boss mode on",
-      "😝 ab tu kya hi bolega admin reply kar gaya"
-    ];
-    funnyMsgs.forEach((msg, i) => {
-      setTimeout(() => api.sendMessage(msg, threadID), i * 1500);
-    });
-  }
-}
-
-api.listenMqtt(async (err, event) => {
-  const { threadID, senderID, body, messageID } = event;
-
-  // 👇 Yeh line paste karo yahin par:
-  if (OWNER_UIDS.includes(senderID) && event.type === "message" && body) {
-    const foundEmoji = emojiList.find(emoji => body.includes(emoji));
-    if (foundEmoji) {
-      try {
-        await api.setMessageReaction(foundEmoji, messageID, true);
-      } catch (err) {
-        console.error("❌ Emoji React Error:", err.message);
-      }
-    }
-  }
-
-  // ...tumhara baaki code
-});
-
+  
   
 if (fs.existsSync("np.txt") && senderID === targetUID) {
   const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
