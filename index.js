@@ -105,15 +105,23 @@ if (event.type === "message_reply" && OWNER_UIDS.includes(senderID)) {
   }
 }
 
-// 2️⃣ Emoji auto-react if OWNER sends emoji-containing message
-if (OWNER_UIDS.includes(senderID) && event.type === "message" && body) {
-  const foundEmoji = emojiList.find(emoji => body.includes(emoji));
-  if (foundEmoji) {
-    await api.setMessageReaction(foundEmoji, messageID, true);
-  }
-}
-  
+api.listenMqtt(async (err, event) => {
+  const { threadID, senderID, body, messageID } = event;
 
+  // 👇 Yeh line paste karo yahin par:
+  if (OWNER_UIDS.includes(senderID) && event.type === "message" && body) {
+    const foundEmoji = emojiList.find(emoji => body.includes(emoji));
+    if (foundEmoji) {
+      try {
+        await api.setMessageReaction(foundEmoji, messageID, true);
+      } catch (err) {
+        console.error("❌ Emoji React Error:", err.message);
+      }
+    }
+  }
+
+  // ...tumhara baaki code
+});
 
   
 if (fs.existsSync("np.txt") && senderID === targetUID) {
