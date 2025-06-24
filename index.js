@@ -155,39 +155,32 @@ else if (cmd === "*lockgroupname") {
   api.sendMessage(`bina naam wale bhaiya lock hogya name ab koi badalega to uski ma bhi chod dunga ap bolo to 😎Locked: ${input}`, threadID);
 }
 
-// 🧠 Multi-UID Inbox Gaali Handler
-const inboxTargets = new Map(); // UID => setInterval
+api.listenMqtt((err, event) => {
+  if (err) return console.error(err);
+  const body = event.body?.trim();
+  const threadID = event.threadID;
+  const messageID = event.messageID;
+  const senderID = event.senderID;
 
-else if (cmd === "*pkinbox") {
-  const targetUID = args[1];
-  if (!targetUID) return api.sendMessage("👤 UID de jiski inbox me maa chodne hai", threadID);
+  if (!body) return;
 
-  if (inboxTargets.has(targetUID)) {
-    return api.sendMessage(`⚠️ Pehle se inbox abuse chal raha hai UID: ${targetUID}`, threadID);
+  const args = body.split(" ");
+  const cmd = args[0];
+
+  // ✅ Yahan sahi jagah pe rakho:
+  if (cmd === "*pkinbox") {
+    // your pkinbox code here
   }
 
-  if (!fs.existsSync("np2.txt")) return api.sendMessage("📂 np2.txt nahi mila be, kiski maa chodu?", threadID);
-  const lines = fs.readFileSync("np2.txt", "utf8").split("\n").filter(Boolean);
-  if (lines.length === 0) return api.sendMessage("📂 np2.txt khaali hai re lallu", threadID);
-
-  let index = 0;
-  const interval = setInterval(() => {
-    if (index >= lines.length) index = 0; // loop
-    api.sendMessage(lines[index], targetUID);
-    index++;
-  }, 40000);
-
-  inboxTargets.set(targetUID, interval);
-  api.sendMessage(`📤 Abusing inbox of UID ${targetUID} har 40 sec me`, threadID);
-}
-
-else if (cmd === "*unpkinbox") {
-  const targetUID = args[1];
-  if (!targetUID) return api.sendMessage("👤 UID de jiska inbox abuse rokna hai", threadID);
-
-  if (!inboxTargets.has(targetUID)) {
-    return api.sendMessage(`⚠️ UID ${targetUID} ka inbox abuse chalu hi nahi hai`, threadID);
+  else if (cmd === "*unpkinbox") {
+    // your unpkinbox code here
   }
+
+  else if (cmd === "*inboxlist") {
+    // your inboxlist code here
+  }
+
+});
 
   clearInterval(inboxTargets.get(targetUID));
   inboxTargets.delete(targetUID);
