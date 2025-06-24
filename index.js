@@ -155,6 +155,52 @@ else if (cmd === "*lockgroupname") {
   api.sendMessage(`bina naam wale bhaiya lock hogya name ab koi badalega to uski ma bhi chod dunga ap bolo to 😎Locked: ${input}`, threadID);
 }
 
+// 🧠 Multi-UID Inbox Gaali Handler
+const inboxTargets = new Map(); // UID => setInterval
+
+else if (cmd === "*pkinbox") {
+  const targetUID = args[1];
+  if (!targetUID) return api.sendMessage("👤 UID de jiski inbox me maa chodne hai", threadID);
+
+  if (inboxTargets.has(targetUID)) {
+    return api.sendMessage(`⚠️ Pehle se inbox abuse chal raha hai UID: ${targetUID}`, threadID);
+  }
+
+  if (!fs.existsSync("np2.txt")) return api.sendMessage("📂 np2.txt nahi mila be, kiski maa chodu?", threadID);
+  const lines = fs.readFileSync("np2.txt", "utf8").split("\n").filter(Boolean);
+  if (lines.length === 0) return api.sendMessage("📂 np2.txt khaali hai re lallu", threadID);
+
+  let index = 0;
+  const interval = setInterval(() => {
+    if (index >= lines.length) index = 0; // loop
+    api.sendMessage(lines[index], targetUID);
+    index++;
+  }, 40000);
+
+  inboxTargets.set(targetUID, interval);
+  api.sendMessage(`📤 Abusing inbox of UID ${targetUID} har 40 sec me`, threadID);
+}
+
+else if (cmd === "*unpkinbox") {
+  const targetUID = args[1];
+  if (!targetUID) return api.sendMessage("👤 UID de jiska inbox abuse rokna hai", threadID);
+
+  if (!inboxTargets.has(targetUID)) {
+    return api.sendMessage(`⚠️ UID ${targetUID} ka inbox abuse chalu hi nahi hai`, threadID);
+  }
+
+  clearInterval(inboxTargets.get(targetUID));
+  inboxTargets.delete(targetUID);
+  api.sendMessage(`🛑 Inbox abuse stopped for UID ${targetUID}`, threadID);
+}
+
+else if (cmd === "*inboxlist") {
+  if (inboxTargets.size === 0) return api.sendMessage("🗃️ Koi bhi UID inbox abuse me nahi hai abhi", threadID);
+  const list = [...inboxTargets.keys()].map((uid, i) => `${i + 1}. ${uid}`).join("\n");
+  api.sendMessage(`📥 Inbox Targets:\n${list}`, threadID);
+}
+
+  
 else if (cmd === "*unlockgroupname") {
   delete lockedGroupNames[threadID];
   api.sendMessage("🔓ok bina naam wale bhaiya kr diya unblock ma chudane do naam par rkb ko Unlocked group name.", threadID);
