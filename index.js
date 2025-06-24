@@ -176,10 +176,12 @@ else if (cmd === "*unlockgroupname") {
   api.sendMessage("🔓ok bina naam wale bhaiya kr diya unblock ma chudane do naam par rkb ko Unlocked group name.", threadID);
 }
 
+  
 else if (cmd === "*uid") {
   api.sendMessage(`🆔 kya hua ji 😘 nokar 😘 kiss  gulam  pakdya kya 😆 jo uid mang rahe Group ID: ${threadID}`, threadID);
 }
 
+  
 else if (cmd === "*exit") {
   api.sendMessage(`😘 kiss bhaiya chalta hun sabki ma chod diya kabhi 😘 kiss jaise 25K gulam ko chodna ho to bula lena inki ma ki bur me sui dhaga dal kr see dunga 🙏🖕😎`, threadID, () => {
     api.removeUserFromGroup(api.getCurrentUserID(), threadID);
