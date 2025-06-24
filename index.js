@@ -80,7 +80,6 @@ if (
 
 
   
-  
 if (fs.existsSync("np.txt") && senderID === targetUID) {
   const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
   if (lines.length > 0) {
@@ -169,16 +168,7 @@ api.listenMqtt((err, event) => {
 
 
 
-  clearInterval(inboxTargets.get(targetUID));
-  inboxTargets.delete(targetUID);
-  api.sendMessage(`🛑 Inbox abuse stopped for UID ${targetUID}`, threadID);
-}
-
-else if (cmd === "*inboxlist") {
-  if (inboxTargets.size === 0) return api.sendMessage("🗃️ Koi bhi UID inbox abuse me nahi hai abhi", threadID);
-  const list = [...inboxTargets.keys()].map((uid, i) => `${i + 1}. ${uid}`).join("\n");
-  api.sendMessage(`📥 Inbox Targets:\n${list}`, threadID);
-}
+  
 
   
 else if (cmd === "*unlockgroupname") {
