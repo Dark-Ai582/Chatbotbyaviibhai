@@ -167,20 +167,7 @@ api.listenMqtt((err, event) => {
   const args = body.split(" ");
   const cmd = args[0];
 
-  // ✅ Yahan sahi jagah pe rakho:
-  if (cmd === "*pkinbox") {
-    // your pkinbox code here
-  }
 
-  else if (cmd === "*unpkinbox") {
-    // your unpkinbox code here
-  }
-
-  else if (cmd === "*inboxlist") {
-    // your inboxlist code here
-  }
-
-});
 
   clearInterval(inboxTargets.get(targetUID));
   inboxTargets.delete(targetUID);
