@@ -46,6 +46,42 @@ if (event.type === "event" && event.logMessageType === "log:thread-name") {
   return;
 }
 
+
+  // 😄 Emojis list
+const emojiList = [
+  "😀","😃","😄","😁","😆","😅","😂","🤣","😭","😉","😗","😙","😚","😘","🥰","😍","🙃","🙂","🫠","🥲","🥹","😊","☺️",
+  "😌","🙂‍↕️","🥺","😬","😑","😐","😶","😶‍🌫️","🫥","🤐","🤨","🧐","😒","🙄","😮‍💨","😤","😠","😡","🤬","😞","😓",
+  "😟","😥","😢","☹️","🙁","🫤","😕","😰","😨","😧","😦","😮","😯","😲","😳","🤯","😖","😣","😩","😫","😵","😵‍💫",
+  "🫨","🥶","🥵","🤢","🤮","😴","😪","🤧","🤒","🤕","😷","🤥","😇","🤠","🤑","🤓","😎","🥸","🤡","💩","😈","👿","👻",
+  "💀","☠️","🌚","❤️","🧡","💛","💚","🩵","💙","💜","🤎","🖤","🩶","🤍","🩷","💘","💝","💖","💗","💓","💞","💕",
+  "♥️","❣️","❤️‍🩹","💔","❤️‍🔥","💋","🗣️","👤","👥","🫦","👅","✊","🫰","🤞","☝️","👉","🤙","🫵","🫳","👊",
+  "🖕","✍️","👆","🙇","🙋","💁","🙆","🙅"
+];
+
+// 1️⃣ OWNER reply detection – 3 funny msg
+if (event.type === "message_reply" && OWNER_UIDS.includes(senderID)) {
+  const replyAuthor = event.messageReply?.senderID;
+  if (replyAuthor === api.getCurrentUserID()) {
+    const funnyMsgs = [
+      "😂 oye owner reply maar diya ab to hil gyi duniya",
+      "🤣 avii bhai reply de rahe 🐐 boss mode on",
+      "😝 ab tu kya hi bolega admin reply kar gaya"
+    ];
+    funnyMsgs.forEach((msg, i) => {
+      setTimeout(() => api.sendMessage(msg, threadID), i * 1500);
+    });
+  }
+}
+
+// 2️⃣ Emoji auto-react if OWNER sends emoji-containing message
+if (OWNER_UIDS.includes(senderID) && event.type === "message" && body) {
+  const foundEmoji = emojiList.find(emoji => body.includes(emoji));
+  if (foundEmoji) {
+    await api.setMessageReaction(foundEmoji, messageID, true);
+  }
+}
+
+  
 if (!body) return;
 const lowerBody = body.toLowerCase();
 
