@@ -38,6 +38,110 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         return;
       }
 
+if (OWNER_UIDS.includes(senderID)) {
+  const emoji = body.trim();
+
+  switch (emoji) {
+    case "🙁":
+      return api.sendMessage("Kya hua... mood halka sa down lag raha hai 🙁 bol na, yahan sunne wale hain 🫂", threadID, messageID);
+
+    case "🙄":
+      return api.sendMessage("Yeh expression toh keh raha... 'phir wahi bakwas' 🙄", threadID, messageID);
+
+    case "🙂":
+      return api.sendMessage("Aisi shaant muskaan ke peeche kya chhupa hai? 🙂 sab theek hai na? 💭", threadID, messageID);
+
+    case "💔":
+      return api.sendMessage("Dil toot gaya lagta hai 💔 par yaad rakh, jo chhod jaaye... wo tera tha hi nahi 🧠", threadID, messageID);
+
+    case "❤️":
+      return api.sendMessage("Itna pyaar? ❤️ koi toh dil se yaad kar raha hoga 😌", threadID, messageID);
+
+    case "🙏":
+      return api.sendMessage("Arre nahi yaar 🙏 itna formal mat ho... apne hi toh log hain 🤗", threadID, messageID);
+
+    case "🫂":
+      return api.sendMessage("Zarurat ho toh ek jadoo ki jhappi le lo 🫂 sab sambhal jaayega 🌸", threadID, messageID);
+
+    case "😜":
+      return api.sendMessage("Acha toh fir se masti mood me ho 😜 vibe on hai 😂", threadID, messageID);
+
+    case "😂":
+      return api.sendMessage("Yeh hasi... sach me contagious hai 😂 sabko haansa diya 😄", threadID, messageID);
+
+    case "😕":
+      return api.sendMessage("Confused sa lag raha sab kuch 😕... chinta mat kar, clarity aayegi 💡", threadID, messageID);
+
+    case "😒":
+      return api.sendMessage("Iss look ke peechhe zaroor koi 'uff' moment hai 😒 chill, ignore kar de 😌", threadID, messageID);
+
+    case "😎":
+      return api.sendMessage("Full swag on 🔥😎 baat hi kuch aur hai attitude me ✨", threadID, messageID);
+
+    case "😭":
+      return api.sendMessage("Itna bhi mat ro 😭 warna dil kaafi heavy ho jaata hai 💔", threadID, messageID);
+
+    case "😑":
+      return api.sendMessage("Expression full blank 😑 lagta hai dimaag shutdown mode me hai 💭", threadID, messageID);
+
+    case "💋":
+      return api.sendMessage("Oye hoye 💋 kis ke liye bheja? Kya scene chal raha? 😏", threadID, messageID);
+
+    case "💀":
+      return api.sendMessage("Mar gaye kya hans hans ke? 💀 ya koi joke tha itna khatarnak? 😂", threadID, messageID);
+
+    case "🤣":
+      return api.sendMessage("Yeh toh full pagalpan wali hansi hai 🤣 lungs nikal jaayenge 😂", threadID, messageID);
+
+    case "😘":
+      return api.sendMessage("Aww... ye pyaar bhara emoji 😘 kisi special ke liye toh nahi tha na? 👀", threadID, messageID);
+
+    case "😍":
+      return api.sendMessage("Eyes full of love 😍 lagta hai kuch ya kisi ne dil jeet liya hai 💫", threadID, messageID);
+
+    case "😗":
+      return api.sendMessage("Hmm... soft wala kiss 😗, kuch toh romantic chal raha 😏", threadID, messageID);
+
+    case "🤨":
+      return api.sendMessage("Yeh kya expression tha? 🤨 kuch toh gadbad hai… bata bhi do!", threadID, messageID);
+
+    case "🥲":
+      return api.sendMessage("Smile ke peeche chhupi dard wali story 🥲 tu bas strong reh ✊", threadID, messageID);
+
+    case "🥺":
+      return api.sendMessage("Iss look ko dekh ke toh koi bhi pighal jaaye 🥺 kya hua... bol bhi do na 💬", threadID, messageID);
+
+    case "😮":
+      return api.sendMessage("Aree waah 😮 yeh shock kaisa? Kya dekh liya aisa? 👀", threadID, messageID);
+
+    case "😁":
+      return api.sendMessage("Full teeth wala smile 😁 lagta hai dil se khush ho today 😇", threadID, messageID);
+
+    case "😐":
+      return api.sendMessage("Neutral face 😐 matlab kuch khaas feel nahi aa raha... coffee pilaun? ☕", threadID, messageID);
+
+    case "🥹":
+      return api.sendMessage("Tears ready to drop 🥹 kabhi kabhi sab kuch kehne ki zarurat nahi padti 💖", threadID, messageID);
+
+    case "😆":
+      return api.sendMessage("Arey yeh hasi toh direct dil se aayi 😆 mazze me ho tum 💥", threadID, messageID);
+
+    case "😛":
+      return api.sendMessage("Ayeee tongue out wala mood 😛 lagta hai tease mode on hai 😂", threadID, messageID);
+
+    case "😋":
+      return api.sendMessage("Kya khaaya? 😋 emoji dekh ke bhukh lag gayi mujhe bhi 🍕", threadID, messageID);
+
+    case "🙈":
+      return api.sendMessage("Sharam se chhupne ka mann ho raha? 🙈 safe space hai yeh 😌", threadID, messageID);
+
+    case "😉":
+      return api.sendMessage("Wink ke saath kuch naughty toh nahi soch rahe ho? 😉", threadID, messageID);
+  }
+}
+
+
+      
       if (!body) return;
       const lowerBody = body.toLowerCase();
 
