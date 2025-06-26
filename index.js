@@ -180,8 +180,8 @@ if (
   event.messageReply &&
   body.trim().toLowerCase() === "*id"
 ) {
-  const repliedUserID = event.messageReply.senderID 😒😒😒😒😒;
-  api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
+  const repliedUserID = event.messageReply.senderID;
+  api.sendMessage(`😒😒😒🙂💔majduri kam karwaoUID: ${repliedUserID}`, threadID, messageID);
   return;
 }
 
