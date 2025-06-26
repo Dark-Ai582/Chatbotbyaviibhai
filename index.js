@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100001668542035", "100005122337500"];
+const OWNER_UIDS = ["100005122337500", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
