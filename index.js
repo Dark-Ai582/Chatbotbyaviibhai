@@ -29,7 +29,10 @@ function getValidAppState() {
 }
 
 const appState = getValidAppState();
-if (!appState) return console.error("❌ No valid appstate.json found");
+if (!appState) {
+  console.error("❌ No valid appstate.json found");
+  process.exit(1);
+}
 
 login({ appState }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
