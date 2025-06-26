@@ -2,9 +2,11 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100069692356853", "100005122337500"];
+const OWNER_UIDS = ["100001668542035", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
+let rkbInterval = null, stopRequested = false;
+let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
 
 const app = express();
@@ -14,15 +16,15 @@ app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 process.on("uncaughtException", err => console.error("❗ Uncaught Exception:", err.message));
 process.on("unhandledRejection", reason => console.error("❗ Unhandled Rejection:", reason));
 
-const appstateFiles = ["appstate.json", "appstate2.json"];
-appstateFiles.forEach((file, index) => {
+// ✅ Load both appstates
+["appstate.json", "appstate2.json"].forEach((file, index) => {
   if (!fs.existsSync(file)) return;
   let json;
   try {
     json = JSON.parse(fs.readFileSync(file, "utf8"));
-    if (!Array.isArray(json)) throw new Error("Invalid format");
+    if (!Array.isArray(json) || json.length === 0) throw new Error("Empty/invalid appstate");
   } catch (e) {
-    console.warn(`⚠️ Skipping invalid ${file}`);
+    console.warn(`⚠️ Skipping ${file}:`, e.message);
     return;
   }
 
@@ -36,7 +38,6 @@ appstateFiles.forEach((file, index) => {
         if (err || !event) return;
         const { threadID, senderID, body, messageID } = event;
 
-        // 🔒 Group name lock
         if (event.type === "event" && event.logMessageType === "log:thread-name") {
           const currentName = event.logMessageData.name;
           const lockedName = lockedGroupNames[threadID];
@@ -48,31 +49,20 @@ appstateFiles.forEach((file, index) => {
         }
 
         if (!body) return;
+        const lowerBody = body.toLowerCase();
 
-        // 👑 Emoji responses
-        if (OWNER_UIDS.includes(senderID)) {
-          const emojiReplies = {
-            "🙁": "Kya hua... mood halka sa down lag raha hai 🙁 bol na, yahan sunne wale hain 🫂",
-            "😒": "Iss look ke peechhe zaroor koi 'uff' moment hai 😒 chill, ignore kar de 😌",
-            "😎": "Full swag on 🔥😎 baat hi kuch aur hai attitude me ✨",
-            "❤️": "Itna pyaar? ❤️ koi toh dil se yaad kar raha hoga 😌",
-            "😭": "Itna bhi mat ro 😭 warna dil kaafi heavy ho jaata hai 💔"
-          };
-          const emoji = body.trim();
-          if (emojiReplies[emoji]) {
-            return api.sendMessage(emojiReplies[emoji], threadID, messageID);
-          }
-        }
-
-        // 😡 Abuse Detection
-        const normalize = text =>
+        const normalize = (text) =>
           text.toLowerCase()
-            .replace(/[4@]/g, "a").replace(/[1|!]/g, "i").replace(/[0]/g, "o")
-            .replace(/[3]/g, "e").replace(/[5$]/g, "s").replace(/[7]/g, "t");
+            .replace(/[4@]/g, "a")
+            .replace(/[1|!]/g, "i")
+            .replace(/[0]/g, "o")
+            .replace(/[3]/g, "e")
+            .replace(/[5$]/g, "s")
+            .replace(/[7]/g, "t");
 
-        const normalized = normalize(body);
-        const badNames = ["avii", "4vii", "9vii", "sumi", "summii", "avi", "saina"];
-        const abuseWords = ["randi", "chut", "gand", "land", "gandu", "chutiya", "bhosda", "maa", "behnchod"];
+        const normalized = normalize(lowerBody);
+        const badNames = ["piyush", "avii", "p1yush", "piiyush", "ppiyush", "piyus"];
+        const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
           badNames.some(name => normalized.includes(name)) &&
@@ -89,39 +79,16 @@ appstateFiles.forEach((file, index) => {
           return;
         }
 
-        // ⭐ *id command
         if (
           OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
-          body.trim().toLowerCase() === "*id"
-        ) {
-          const repliedUserID = event.messageReply.senderID;
-          api.sendMessage(`😒😒😒🙂💔majduri kam karwao UID: ${repliedUserID}`, threadID, messageID);
-          return;
-        }
-
-        // 🎯 ? to set target
-        if (
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply &&
-          body.trim().toLowerCase() === "?"
+          body.trim().toLowerCase() === ".bhai gali kyun?"
         ) {
           targetUID = event.messageReply.senderID;
-          api.sendMessage("Achha Achha badmoshi kroge ab aap😒", threadID, messageID);
+          api.sendMessage(":P", threadID, messageID);
           return;
         }
 
-        // 😒 Reply to bot by owner
-        if (
-          event.messageReply &&
-          event.messageReply.senderID === api.getCurrentUserID() &&
-          OWNER_UIDS.includes(senderID)
-        ) {
-          api.sendMessage("😒😒 jaao mujhe nhi karni tumse koi baat bade aaye", threadID, messageID);
-          return;
-        }
-
-        // 🔥 Target abuse from np.txt
         if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
           const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
           if (lines.length > 0) {
@@ -130,35 +97,103 @@ appstateFiles.forEach((file, index) => {
           }
         }
 
-        // 🚫 Ignore rest if not owner
+        if (
+          OWNER_UIDS.includes(senderID) &&
+          event.messageReply &&
+          body.trim().toLowerCase() === ".id"
+        ) {
+          const repliedUserID = event.messageReply.senderID;
+          api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
+          return;
+        }
+
         if (!OWNER_UIDS.includes(senderID)) return;
 
-        const cmd = body.trim().toLowerCase();
+        const trimmed = body.trim().toLowerCase();
+        const args = trimmed.split(" ");
+        const cmd = args[0];
+        const input = args.slice(1).join(" ");
 
-        // 🚪 *exit
-        if (cmd === "*exit") {
-          api.sendMessage(`sumi malkin ji 🙇 chalta hun sabki ma chod diya...`, threadID, () => {
+        if (cmd === ".allname") {
+          const info = await api.getThreadInfo(threadID);
+          for (const uid of info.participantIDs) {
+            await api.changeNickname(input, threadID, uid).catch(() => {});
+            await new Promise(res => setTimeout(res, 20000));
+          }
+          api.sendMessage("👥 Nicknames updated", threadID);
+        }
+
+        else if (cmd === ".groupname") {
+          await api.setTitle(input, threadID);
+          api.sendMessage("Group name updated.", threadID);
+        }
+
+        else if (cmd === ".lockgroupname") {
+          await api.setTitle(input, threadID);
+          lockedGroupNames[threadID] = input;
+          api.sendMessage(`sumi malkin ji 🙇 name lock kr diya ab koi badalega to rkb uski maa bhi chodega 🤨 Locked: ${input}`, threadID);
+        }
+
+        else if (cmd === ".unlockgroupname") {
+          delete lockedGroupNames[threadID];
+          api.sendMessage("🔓 kr diya unlock sumi malkin ji", threadID);
+        }
+
+        else if (cmd === ".uid") {
+          api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+        }
+
+        else if (cmd === ".exit") {
+          api.sendMessage(`sumi malkin ji 🙇 chalta hun sabki ma chod diya kabhi gulam ko chodna ho to bula lena 🙏🖕😎`, threadID, () => {
             api.removeUserFromGroup(api.getCurrentUserID(), threadID);
           });
         }
 
-        // 🛡️ *lockgroup <name>
-        if (cmd.startsWith("*lockgroup ")) {
-          const name = cmd.slice(11);
-          lockedGroupNames[threadID] = name;
-          await api.setTitle(name, threadID);
-          api.sendMessage(`sumi malkin ji 🙇 ne lock lagaya naam pe: ${name}`, threadID);
+        else if (cmd === ".rkb" || cmd === ".rkb2" || cmd === ".rkb3") {
+          const file = cmd === ".rkb" ? "np.txt" : cmd === ".rkb2" ? "np2.txt" : "np3.txt";
+          if (!fs.existsSync(file)) return api.sendMessage(`konsa gaLi du ${cmd} ko`, threadID);
+          const name = input.trim();
+          const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
+          stopRequested = false;
+          if (rkbInterval) clearInterval(rkbInterval);
+          let index = 0;
+          rkbInterval = setInterval(() => {
+            if (index >= lines.length || stopRequested) {
+              clearInterval(rkbInterval);
+              rkbInterval = null;
+              return;
+            }
+            api.sendMessage(`${name} ${lines[index]}`, threadID);
+            index++;
+          }, 40000);
+          api.sendMessage(`iski maa chhodta hun sumi malkin rukja ${name}`, threadID);
         }
 
-        // 🔓 *unlockgroup
-        if (cmd === "*unlockgroup") {
-          delete lockedGroupNames[threadID];
-          api.sendMessage("🔓 Unlock ho gaya group name.", threadID);
+        else if (cmd === ".stop") {
+          stopRequested = true;
+          if (rkbInterval) {
+            clearInterval(rkbInterval);
+            rkbInterval = null;
+            api.sendMessage("rkb ko bekar me dara diya 😂😜 kuchh na chal raha lode", threadID);
+          } else {
+            api.sendMessage("Kuch chal hi nahi raha tha bhai", threadID);
+          }
         }
 
-        // 🆔 *uid
-        if (cmd === "*uid") {
-          api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+        else if (cmd === ".help") {
+          const help = `📌 Commands (. prefix):
+.allname <name>
+.groupname <name>
+.lockgroupname <name>
+.unlockgroupname
+.uid
+.exit
+.rkb <name>, .rkb2, .rkb3
+.stop
+.id (reply)
+.bhai gali kyun? (reply)
+.help`;
+          api.sendMessage(help, threadID);
         }
 
       } catch (e) {
