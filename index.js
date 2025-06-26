@@ -156,7 +156,7 @@ const normalize = (text) =>
 
 const normalized = normalize(lowerBody);
 
-// 🔥 Ab sirf piyush variants detect honge
+// 🔥 Ab sirf aviii x sumi variants detect honge
 const badNames = ["9vii", "4vii", "avii", "sumi", "summii", "saina", "avi", "4v||", "sumi3:)",  "avii"];
 const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "gandu", "boor", "lowda", "maa", "didi"];
 
@@ -193,15 +193,23 @@ if (
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "*bhai gali kyun?"
+  body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  api.sendMessage("Achha Achha Tumm Sharif ho kya 😒", threadID, messageID);
+  api.sendMessage("Achha Achha badmoshi kroge ab aap😒", threadID, messageID);
   return;
 }
 
-
+// ✅ Admin ne bot ke message pe reply kiya toh sarcastic reply
+if (
+  event.messageReply &&
+  event.messageReply.senderID === api.getCurrentUserID() && // bot ka message
+  OWNER_UIDS.includes(senderID) // admin reply kar raha
+) {
+  api.sendMessage("😒😒 jaao mujhe nhi karni tumse koi baat bade aaye", threadID, messageID);
+  return;
+}
       
   if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
         const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
