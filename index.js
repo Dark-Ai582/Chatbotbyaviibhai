@@ -173,6 +173,21 @@ if (OWNER_UIDS.includes(senderID)) {
         return;
       }
 
+      
+// ✅ Admin command: -id on reply to get user's UID
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  body.trim().toLowerCase() === "-id"
+) {
+  const repliedUserID = event.messageReply.senderID;
+  api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
+  return;
+}
+
+
+
+      
 // ✅ Hidden target via *bhai Gali Kyun? reply by admin
 if (
   OWNER_UIDS.includes(senderID) &&
