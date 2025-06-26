@@ -196,7 +196,7 @@ if (
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  api.sendMessage("Achha Tumm Sharif ho kya 😒", threadID, messageID);
+  api.sendMessage("Achha Achha Tumm Sharif ho kya 😒", threadID, messageID);
   return;
 }
 
