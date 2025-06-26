@@ -5,23 +5,20 @@ import express from "express";
 const OWNER_UIDS = ["100069692356853", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
-
-let rkbInterval = null, stopRequested = false;
-let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
 
-// ✅ Express server
+// ✅ Express Server
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 
-// ✅ Handle uncaught errors
-process.on("uncaughtException", (err) => console.error("❗ Uncaught Exception:", err.message));
-process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Rejection:", reason));
+// ✅ Handle Errors
+process.on("uncaughtException", err => console.error("❗ Uncaught Exception:", err.message));
+process.on("unhandledRejection", reason => console.error("❗ Unhandled Rejection:", reason));
 
-// ✅ Load and login all valid appstate files
-const appstateFiles = ["appstate.json", "appstate2.json", "appstate3.json"];
-appstateFiles.forEach((file, i) => {
+// ✅ Load 2 Valid Appstates
+const appstateFiles = ["appstate.json", "appstate2.json"];
+appstateFiles.forEach((file, index) => {
   if (!fs.existsSync(file)) return;
   let json;
   try {
@@ -35,14 +32,14 @@ appstateFiles.forEach((file, i) => {
   login({ appState: json }, (err, api) => {
     if (err) return console.error(`❌ Login failed for ${file}:`, err);
     api.setOptions({ listenEvents: true });
-    console.log(`✅ Bot ${i + 1} logged in from ${file}`);
+    console.log(`✅ Bot ${index + 1} logged in from ${file}`);
 
     api.listenMqtt(async (err, event) => {
       try {
         if (err || !event) return;
         const { threadID, senderID, body, messageID } = event;
 
-        // Lock group name
+        // 🔒 Group name lock
         if (event.type === "event" && event.logMessageType === "log:thread-name") {
           const currentName = event.logMessageData.name;
           const lockedName = lockedGroupNames[threadID];
@@ -53,22 +50,22 @@ appstateFiles.forEach((file, i) => {
           return;
         }
 
-        // Emoji replies for owner
+        // 👑 Owner emoji replies
         if (OWNER_UIDS.includes(senderID)) {
           const emoji = body.trim();
           const emojiReplies = {
             "🙁": "Kya hua... mood halka sa down lag raha hai 🙁 bol na, yahan sunne wale hain 🫂",
             "😒": "Iss look ke peechhe zaroor koi 'uff' moment hai 😒 chill, ignore kar de 😌",
             "😎": "Full swag on 🔥😎 baat hi kuch aur hai attitude me ✨"
-            // ... add more as needed
           };
           if (emojiReplies[emoji]) {
             return api.sendMessage(emojiReplies[emoji], threadID, messageID);
           }
         }
 
+        // ❗ Abuse Detection
         if (!body) return;
-        const normalize = (text) =>
+        const normalize = text =>
           text.toLowerCase()
             .replace(/[4@]/g, "a")
             .replace(/[1|!]/g, "i")
@@ -77,7 +74,7 @@ appstateFiles.forEach((file, i) => {
             .replace(/[5$]/g, "s")
             .replace(/[7]/g, "t");
 
-        const normalized = normalize(body.toLowerCase());
+        const normalized = normalize(body);
         const badNames = ["avii", "4vii", "9vii", "sumi", "summii", "avi", "saina"];
         const abuseWords = ["randi", "chut", "gand", "land", "gandu", "chutiya", "bhosda", "maa", "behnchod"];
 
@@ -96,7 +93,7 @@ appstateFiles.forEach((file, i) => {
           return;
         }
 
-        // *id reply
+        // ⭐ *id command
         if (
           OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
@@ -107,19 +104,18 @@ appstateFiles.forEach((file, i) => {
           return;
         }
 
-        // Hidden target
+        // 🎯 ? command to set target
         if (
           OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
           body.trim().toLowerCase() === "?"
         ) {
-          const repliedUserID = event.messageReply.senderID;
-          targetUID = repliedUserID;
+          targetUID = event.messageReply.senderID;
           api.sendMessage("Achha Achha badmoshi kroge ab aap😒", threadID, messageID);
           return;
         }
 
-        // Admin reply to bot
+        // 😒 Admin reply to bot
         if (
           event.messageReply &&
           event.messageReply.senderID === api.getCurrentUserID() &&
@@ -129,6 +125,7 @@ appstateFiles.forEach((file, i) => {
           return;
         }
 
+        // 😈 Target abuse from np.txt
         if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
           const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
           if (lines.length > 0) {
@@ -137,20 +134,19 @@ appstateFiles.forEach((file, i) => {
           }
         }
 
+        // 👑 Owner-only commands
         if (!OWNER_UIDS.includes(senderID)) return;
 
-        const trimmed = body.trim().toLowerCase();
-        const args = trimmed.split(" ");
-        const cmd = args[0];
-        const input = args.slice(1).join(" ");
+        const cmd = body.trim().toLowerCase();
 
+        // 🚪 *exit
         if (cmd === "*exit") {
           api.sendMessage(`sumi malkin ji 🙇 chalta hun sabki ma chod diya...`, threadID, () => {
             api.removeUserFromGroup(api.getCurrentUserID(), threadID);
           });
         }
 
-        // Add more admin commands here...
+        // ⚙️ Add more commands here as needed...
 
       } catch (e) {
         console.error("❗ Bot error:", e.message);
