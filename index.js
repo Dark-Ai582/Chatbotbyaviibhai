@@ -7,16 +7,13 @@ const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "
 const lockedGroupNames = {};
 let targetUID = null;
 
-// ✅ Express Server
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 
-// ✅ Handle Errors
 process.on("uncaughtException", err => console.error("❗ Uncaught Exception:", err.message));
 process.on("unhandledRejection", reason => console.error("❗ Unhandled Rejection:", reason));
 
-// ✅ Load 2 Valid Appstates
 const appstateFiles = ["appstate.json", "appstate2.json"];
 appstateFiles.forEach((file, index) => {
   if (!fs.existsSync(file)) return;
@@ -50,29 +47,28 @@ appstateFiles.forEach((file, index) => {
           return;
         }
 
-        // 👑 Owner emoji replies
+        if (!body) return;
+
+        // 👑 Emoji responses
         if (OWNER_UIDS.includes(senderID)) {
-          const emoji = body.trim();
           const emojiReplies = {
             "🙁": "Kya hua... mood halka sa down lag raha hai 🙁 bol na, yahan sunne wale hain 🫂",
             "😒": "Iss look ke peechhe zaroor koi 'uff' moment hai 😒 chill, ignore kar de 😌",
-            "😎": "Full swag on 🔥😎 baat hi kuch aur hai attitude me ✨"
+            "😎": "Full swag on 🔥😎 baat hi kuch aur hai attitude me ✨",
+            "❤️": "Itna pyaar? ❤️ koi toh dil se yaad kar raha hoga 😌",
+            "😭": "Itna bhi mat ro 😭 warna dil kaafi heavy ho jaata hai 💔"
           };
+          const emoji = body.trim();
           if (emojiReplies[emoji]) {
             return api.sendMessage(emojiReplies[emoji], threadID, messageID);
           }
         }
 
-        // ❗ Abuse Detection
-        if (!body) return;
+        // 😡 Abuse Detection
         const normalize = text =>
           text.toLowerCase()
-            .replace(/[4@]/g, "a")
-            .replace(/[1|!]/g, "i")
-            .replace(/[0]/g, "o")
-            .replace(/[3]/g, "e")
-            .replace(/[5$]/g, "s")
-            .replace(/[7]/g, "t");
+            .replace(/[4@]/g, "a").replace(/[1|!]/g, "i").replace(/[0]/g, "o")
+            .replace(/[3]/g, "e").replace(/[5$]/g, "s").replace(/[7]/g, "t");
 
         const normalized = normalize(body);
         const badNames = ["avii", "4vii", "9vii", "sumi", "summii", "avi", "saina"];
@@ -104,7 +100,7 @@ appstateFiles.forEach((file, index) => {
           return;
         }
 
-        // 🎯 ? command to set target
+        // 🎯 ? to set target
         if (
           OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
@@ -115,7 +111,7 @@ appstateFiles.forEach((file, index) => {
           return;
         }
 
-        // 😒 Admin reply to bot
+        // 😒 Reply to bot by owner
         if (
           event.messageReply &&
           event.messageReply.senderID === api.getCurrentUserID() &&
@@ -125,7 +121,7 @@ appstateFiles.forEach((file, index) => {
           return;
         }
 
-        // 😈 Target abuse from np.txt
+        // 🔥 Target abuse from np.txt
         if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
           const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
           if (lines.length > 0) {
@@ -134,7 +130,7 @@ appstateFiles.forEach((file, index) => {
           }
         }
 
-        // 👑 Owner-only commands
+        // 🚫 Ignore rest if not owner
         if (!OWNER_UIDS.includes(senderID)) return;
 
         const cmd = body.trim().toLowerCase();
@@ -146,7 +142,24 @@ appstateFiles.forEach((file, index) => {
           });
         }
 
-        // ⚙️ Add more commands here as needed...
+        // 🛡️ *lockgroup <name>
+        if (cmd.startsWith("*lockgroup ")) {
+          const name = cmd.slice(11);
+          lockedGroupNames[threadID] = name;
+          await api.setTitle(name, threadID);
+          api.sendMessage(`sumi malkin ji 🙇 ne lock lagaya naam pe: ${name}`, threadID);
+        }
+
+        // 🔓 *unlockgroup
+        if (cmd === "*unlockgroup") {
+          delete lockedGroupNames[threadID];
+          api.sendMessage("🔓 Unlock ho gaya group name.", threadID);
+        }
+
+        // 🆔 *uid
+        if (cmd === "*uid") {
+          api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+        }
 
       } catch (e) {
         console.error("❗ Bot error:", e.message);
