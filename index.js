@@ -132,41 +132,23 @@ login(
             messageID
           );
         }
-// .senapati command: gender-based royal reply system
-if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
-  const userInfo = await api.getUserInfo(senderID);
-  const gender = userInfo[senderID]?.gender || "male"; // fallback: male
-  const title = gender === "female" ? "maharani ji" : "maharaj ji";
 
+        // .senapati command: royal reply with maharani + fielding
+if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   api.sendMessage(
-    `🤣🤣 Ha ha ha ${title}, ID ke gender dekh ke hi to farmaan sunaya jaa raha hai.`,
+    "🤴 Maharani ji, aapka sipahi hazir hai... bataiye kis haramkhor ki fielding set karni hai 🫡",
     threadID
   );
 
   setTimeout(() => {
     api.sendMessage(
-      `🙇‍♂️ Boliye ${title}, aapka gulam hazir hai... Kiske fielding set karni hai, naam batayein us madarchod ka.`,
+      "💥 Ek baar aapka ishaara mil jaaye Maharani ji, uski maa ki choot kii chatni bana dengey 😈",
       threadID
     );
   }, 2000);
 
-  setTimeout(() => {
-    api.sendMessage(
-      `👉 Chaliye ${title}, agle mohim ke liye dusre point par pravesh karte hain.`,
-      threadID
-    );
-  }, 4000);
-
-  setTimeout(() => {
-    api.sendMessage(
-      `😎 Aap bas hukum do ${title}, us madarchod ki ulte ginti shuru kar denge. 🙇‍♂️🙇‍♂️`,
-      threadID
-    );
-  }, 6000);
-
   return;
 }
-
         // Admin-only commands below this point
         if (!OWNER_UIDS.includes(senderID)) return;
 
