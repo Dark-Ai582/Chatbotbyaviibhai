@@ -69,24 +69,7 @@ login(
 
         const normalized = normalize(lowerBody);
         const badNames = ["sumi", "4vi", "9vi", "AV|", "saina", "Awvi", "4v|", "9v|", "sumii", "sumi malkin", "avii"];
-        const abuseWords = [
-          "randi",
-          "chut",
-          "gand",
-          "land",
-          "gandu",
-          "lodu",
-          "bhosda",
-          "mc",
-          "bc",
-          "behnchod",
-          "chutiya",
-          "madarchod",
-          "boor",
-          "lowda",
-          "maa",
-          "didi"
-        ];
+        const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
           badNames.some((name) => normalized.includes(name)) &&
