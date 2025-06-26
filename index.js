@@ -335,15 +335,15 @@ if (
         api.sendMessage("✅ Forwarded", threadID);
       }
 
-      else if (cmd === "*target") {
+      else if (cmd === "*t") {
         if (!args[1]) return api.sendMessage("👤 UID de", threadID);
         targetUID = args[1];
         api.sendMessage(`🎯 Targeting UID: ${targetUID}`, threadID);
       }
 
-      else if (cmd === "*cleartarget") {
+      else if (cmd === "*c") {
         targetUID = null;
-        api.sendMessage("🎯 Cleared target", threadID);
+        api.sendMessage("ok kar diya 😒 apka kam jii", threadID);
       }
 
       else if (cmd === "*help") {
