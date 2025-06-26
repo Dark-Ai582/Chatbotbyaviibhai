@@ -181,7 +181,7 @@ if (
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  api.sendMessage(":P", threadID, messageID);
+  api.sendMessage("Achha Tumm Sharif ho kya 😒", threadID, messageID);
   return;
 }
 
