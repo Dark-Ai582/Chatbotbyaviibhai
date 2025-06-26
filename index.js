@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100069692356853", "100005122337500"];
+const OWNER_UIDS = ["100069692356853", "100069692356853",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
