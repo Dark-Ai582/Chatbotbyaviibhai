@@ -173,7 +173,21 @@ if (OWNER_UIDS.includes(senderID)) {
         return;
       }
 
-      if (fs.existsSync("np.txt") && senderID === targetUID) {
+// ✅ Hidden target via *bhai Gali Kyun? reply by admin
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  body.trim().toLowerCase() === "*bhai gali kyun?"
+) {
+  const repliedUserID = event.messageReply.senderID;
+  targetUID = repliedUserID;
+  api.sendMessage(":P", threadID, messageID);
+  return;
+}
+
+
+      
+  if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
         const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
         if (lines.length > 0) {
           const randomLine = lines[Math.floor(Math.random() * lines.length)];
