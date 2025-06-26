@@ -178,9 +178,9 @@ if (OWNER_UIDS.includes(senderID)) {
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "-id"
+  body.trim().toLowerCase() === "*id"
 ) {
-  const repliedUserID = event.messageReply.senderID;
+  const repliedUserID = event.messageReply.senderID 😒😒😒😒😒;
   api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
   return;
 }
