@@ -157,7 +157,7 @@ const normalize = (text) =>
 const normalized = normalize(lowerBody);
 
 // 🔥 Ab sirf piyush variants detect honge
-const badNames = ["piyush", "p1yush", "p|yush", "piyushh", "piyu$h", "piyu5h", "piyu@sh", "ppiyush"];
+const badNames = ["9vii", "4vii", "avii", "sumi", "summii", "saina", "avi", "4v||", "sumi3:)",  "avii"];
 const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "gandu", "boor", "lowda", "maa", "didi"];
 
 if (
