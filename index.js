@@ -132,33 +132,40 @@ login(
             messageID
           );
         }
+// .senapati command: gender-based royal reply system
+if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
+  const userInfo = await api.getUserInfo(senderID);
+  const gender = userInfo[senderID]?.gender || "male"; // fallback: male
+  const title = gender === "female" ? "maharani ji" : "maharaj ji";
 
-        // .senapati command: gender-based royal reply system
-        if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
-          const userInfo = await api.getUserInfo(senderID);
-          const gender = userInfo[senderID]?.gender || "male"; // fallback: male
-          const title = gender === "female" ? "maharani ji" : "maharaj ji";
-          api.sendMessage(
-            ` ha ha ha  ${title} vo id ke male female check krke bole`,
-            threadID
-          );
-          setTimeout(() => {
-            api.sendMessage(
-              "🙇🙇 boliye apka Gulam here bolo kis madrchod ki Fielding set krun",
-              threadID
-            );
-          }, 2000);
-          setTimeout(() => {
-            api.sendMessage("👉 dusra point pr aao", threadID);
-          }, 4000);
-          setTimeout(() => {
-            api.sendMessage(
-              `😎 aap bas hukum karo ${title} us madrchod ki ulti Ginti suru kar denge ji 🙇🙇`,
-              threadID
-            );
-          }, 6000);
-          return;
-        }
+  api.sendMessage(
+    `🤣🤣 Ha ha ha ${title}, ID ke gender dekh ke hi to farmaan sunaya jaa raha hai.`,
+    threadID
+  );
+
+  setTimeout(() => {
+    api.sendMessage(
+      `🙇‍♂️ Boliye ${title}, aapka gulam hazir hai... Kiske fielding set karni hai, naam batayein us madarchod ka.`,
+      threadID
+    );
+  }, 2000);
+
+  setTimeout(() => {
+    api.sendMessage(
+      `👉 Chaliye ${title}, agle mohim ke liye dusre point par pravesh karte hain.`,
+      threadID
+    );
+  }, 4000);
+
+  setTimeout(() => {
+    api.sendMessage(
+      `😎 Aap bas hukum do ${title}, us madarchod ki ulte ginti shuru kar denge. 🙇‍♂️🙇‍♂️`,
+      threadID
+    );
+  }, 6000);
+
+  return;
+}
 
         // Admin-only commands below this point
         if (!OWNER_UIDS.includes(senderID)) return;
