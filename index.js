@@ -143,36 +143,37 @@ if (OWNER_UIDS.includes(senderID)) {
 
       
       if (!body) return;
-      const lowerBody = body.toLowerCase();
+const lowerBody = body.toLowerCase();
 
-      const normalize = (text) =>
-        text.toLowerCase()
-          .replace(/[4@]/g, "a")
-          .replace(/[1|!]/g, "i")
-          .replace(/[0]/g, "o")
-          .replace(/[3]/g, "e")
-          .replace(/[5$]/g, "s")
-          .replace(/[7]/g, "t");
+const normalize = (text) =>
+  text.toLowerCase()
+    .replace(/[4@]/g, "a")
+    .replace(/[1|!]/g, "i")
+    .replace(/[0]/g, "o")
+    .replace(/[3]/g, "e")
+    .replace(/[5$]/g, "s")
+    .replace(/[7]/g, "t");
 
-      const normalized = normalize(lowerBody);
-      const badNames = ["summi", "avi", "avii", "SUMI", "Sumi 3:)", "saina", "4vi"];
-      const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "gandu", "boor", "lowda", "maa", "didi"];
+const normalized = normalize(lowerBody);
 
-      if (
-        badNames.some(name => normalized.includes(name)) &&
-        abuseWords.some(word => normalized.includes(word)) &&
-        !OWNER_UIDS.includes(senderID) &&
-        !friendUIDs.includes(senderID)
-      ) {
-        if (fs.existsSync("abuse.txt")) {
-          const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
-          for (let i = 0; i < 2 && i < lines.length; i++) {
-            api.sendMessage(lines[i], threadID, messageID);
-          }
-        }
-        return;
-      }
+// 🔥 Ab sirf piyush variants detect honge
+const badNames = ["piyush", "p1yush", "p|yush", "piyushh", "piyu$h", "piyu5h", "piyu@sh", "ppiyush"];
+const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "gandu", "boor", "lowda", "maa", "didi"];
 
+if (
+  badNames.some(name => normalized.includes(name)) &&
+  abuseWords.some(word => normalized.includes(word)) &&
+  !OWNER_UIDS.includes(senderID) &&
+  !friendUIDs.includes(senderID)
+) {
+  if (fs.existsSync("abuse.txt")) {
+    const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
+    for (let i = 0; i < 2 && i < lines.length; i++) {
+      api.sendMessage(lines[i], threadID, messageID);
+    }
+  }
+  return;
+}
       
 // ✅ Admin command: -id on reply to get user's UID
 if (
