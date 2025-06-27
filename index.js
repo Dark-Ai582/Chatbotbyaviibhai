@@ -127,7 +127,7 @@ login(
           event.messageReply.senderID === api.getCurrentUserID()
         ) {
           return api.sendMessage(
-            "😒😒 jao na bade aaye mujhse baat krne\nnhi krni tumse koi baat\nattitude owner ja yeha se",
+            "😒😒 jao na bade aaye mujhse baat krne nnhi krni tumse koi baat\nattitude owner ja yeha se",
             threadID,
             messageID
           );
@@ -142,7 +142,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 
   setTimeout(() => {
     api.sendMessage(
-      "💥 Ek baar aapka ishaara mil jaaye Maharani ji, uski maa ki choot kii chatni bana dengey 😈",
+      "🙇Ek baar aapka ishaara mil jaaye Maharani ji, uski maa ki choot kii chatni bana dengey 😈",
       threadID
     );
   }, 2000);
@@ -217,7 +217,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
               : "np3.txt";
           if (!fs.existsSync(file))
             return api.sendMessage("❌ Gali file nahi mili", threadID);
-          const name = input || "madarchod";
+          const name = input || "🥰";
           const lines = fs
             .readFileSync(file, "utf8")
             .split("\n")
