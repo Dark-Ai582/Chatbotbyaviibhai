@@ -102,6 +102,16 @@ login(
           return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
         }
 
+let botUID = 61557918223217; // 👈 upar global define karo
+
+login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
+  if (err) return console.error("❌ Login failed:", err);
+
+  botUID = api.getCurrentUserID(); // ✅ yeh line jaruri hai
+
+  api.setOptions({ listenEvents: true });
+  console.log("✅ Logged");
+        
         if (
           isOwner &&
           event.messageReply &&
