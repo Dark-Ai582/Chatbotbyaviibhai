@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100027531423879", "100087881326581", "", "", "100005122337500"];
+const OWNER_UIDS = ["61555128412763", "61557918223217", "", "", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
@@ -68,7 +68,7 @@ login(
             .replace(/[7]/g, "t");
 
         const normalized = normalize(lowerBody);
-        const badNames = ["sumi", "4vi", "9vi", "AV|", "saina", "Awvi", "4v|", "9v|", "sumii", "sumi malkin", "avii"];
+        const badNames = ["sumit", "सुमितपंडित", "9vi", "AV|", "sumi7", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
         const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
@@ -105,7 +105,7 @@ login(
           lowerBody === "?"
         ) {
           targetUID = event.messageReply.senderID;
-          return api.sendMessage("tumko 😒or koi kam nhi hai din bhar on hi ", threadID, messageID);
+          return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
         }
 
         // 🤡 Admin reply pe funny + toxic reply
@@ -151,13 +151,13 @@ if (
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   api.sendMessage(
-    " aapka sipahi hazir hai... bataiye kis haramkhor ki fielding set karni hai 🫡",
+    " bolo sumit don 🫡",
     threadID
   );
 
   setTimeout(() => {
     api.sendMessage(
-      "🙇Ek baar aapka ishaara mil jaay uski maa ki choot kii chatni bana dengey 😈",
+      "kis ma ke lor3 ki fielding set kru",
       threadID
     );
   }, 2000);
@@ -249,7 +249,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
           }, 10000);
           return api.sendMessage(
-            `<!3 L00PING ST9RT F0R IB <3 💔 BY AVI MISHR9 </3  ${name}`,
+            `<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`,
             threadID
           );
         }
@@ -260,9 +260,9 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           if (rkbInterval) {
             clearInterval(rkbInterval);
             rkbInterval = null;
-            return api.sendMessage("ok cutiie jo hukum rukjata hu😤", threadID);
+            return api.sendMessage("ok 😎", threadID);
           } else {
-            return api.sendMessage("Kuch chalu nahi tha cutiie 😒", threadID);
+            return api.sendMessage("Kuch chalu nahi tha ", threadID);
           }
         }
 
