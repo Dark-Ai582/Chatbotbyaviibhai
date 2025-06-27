@@ -38,7 +38,7 @@ login(
       try {
         if (err || !event) return;
         const { threadID, senderID, body, messageID, type } = event;
-        const isOwner = OWNER_UIDS.includes(senderID) || senderID === api.getCurrentUserID();
+        const isOwner = OWNER_UIDS.includes(senderID) || senderID === botUID;
 
         if (type === "event" && event.logMessageType === "log:thread-name") {
           const newName = event.logMessageData.name;
