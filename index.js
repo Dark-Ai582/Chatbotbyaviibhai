@@ -38,6 +38,7 @@ login(
       try {
         if (err || !event) return;
         const { threadID, senderID, body, messageID, type } = event;
+        const isOwner = OWNER_UIDS.includes(senderID) || senderID === api.getCurrentUserID();
 
         // Group name lock: Sumi Malkin 🙇 setting a fixed group name
         if (type === "event" && event.logMessageType === "log:thread-name") {
@@ -165,7 +166,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   return;
 }
         // Admin-only commands below this point
-        if (!OWNER_UIDS.includes(senderID)) return;
+        if (!isOwner) return;
 
         const args = lowerBody.trim().split(" ");
         const cmd = args[0];
