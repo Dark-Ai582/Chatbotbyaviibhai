@@ -46,7 +46,7 @@ login(
           if (lockedName && newName !== lockedName) {
             await api.setTitle(lockedName, threadID);
             api.sendMessage(
-              `oi Randike yehan Sumi Malkin 🙇 ne name rakha gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`,
+              `oi R 🙇  gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`,
               threadID
             );
           }
@@ -146,29 +146,18 @@ if (
           return;
         }
 
-        // If owner replies on a bot message, send a funny attitude reply
-        if (
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply &&
-          event.messageReply.senderID === api.getCurrentUserID()
-        ) {
-          return api.sendMessage(
-            "😒😒 jao na bade aaye mujhse baat krne nnhi krni tumse koi baat\nattitude owner ja yeha se",
-            threadID,
-            messageID
-          );
-        }
+        
 
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   api.sendMessage(
-    "🤴 Maharani ji, aapka sipahi hazir hai... bataiye kis haramkhor ki fielding set karni hai 🫡",
+    " aapka sipahi hazir hai... bataiye kis haramkhor ki fielding set karni hai 🫡",
     threadID
   );
 
   setTimeout(() => {
     api.sendMessage(
-      "🙇Ek baar aapka ishaara mil jaaye Maharani ji, uski maa ki choot kii chatni bana dengey 😈",
+      "🙇Ek baar aapka ishaara mil jaay uski maa ki choot kii chatni bana dengey 😈",
       threadID
     );
   }, 2000);
@@ -203,7 +192,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
           return api.sendMessage(
-            `Sumi Malkin 🙇 ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
+            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
             threadID
           );
         }
@@ -212,20 +201,20 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         if (cmd === ".unlockgroupname") {
           delete lockedGroupNames[threadID];
           return api.sendMessage(
-            "🔓  Sumi Malkin 🙇 kar diya ma chudane do inko ab name par",
+            "ok boss 🙇 kar diya ma chudane do inko ab name par",
             threadID
           );
         }
 
         // .uid command: display group ID
         if (cmd === ".uid") {
-          return api.sendMessage(`lo cutiie apke liye to dil bhi hazir he uid kya chiz hai❤️‍🩹🥰 ${threadID}`, threadID);
+          return api.sendMessage(` 🙄 ${threadID}`, threadID);
         }
 
         // .exit command: exit from group with farewell message
         if (cmd === ".exit") {
           return api.sendMessage(
-            `Sumi Malkin 🙇 chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho 🙏🖕😎`,
+            `chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho 🙏🖕😎`,
             threadID,
             () => {
               api.removeUserFromGroup(api.getCurrentUserID(), threadID);
