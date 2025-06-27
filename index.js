@@ -32,14 +32,14 @@ login(
   (err, api) => {
     if (err) return console.error("❌ Login failed:", err);
     api.setOptions({ listenEvents: true });
-    console.log("✅ Logged");
+    console.log("✅ Logged  ");
 
     api.listenMqtt(async (err, event) => {
       try {
         if (err || !event) return;
         const { threadID, senderID, body, messageID, type } = event;
-        const isOwner = OWNER_UIDS.includes(senderID) || senderID === botUID;
 
+        // Group name lock: Sumi Malkin 🙇 setting a fixed group name
         if (type === "event" && event.logMessageType === "log:thread-name") {
           const newName = event.logMessageData.name;
           const lockedName = lockedGroupNames[threadID];
@@ -56,6 +56,7 @@ login(
         if (!body) return;
         const lowerBody = body.toLowerCase();
 
+        // Normalize text for abuse detection
         const normalize = (text) =>
           text
             .toLowerCase()
@@ -73,11 +74,14 @@ login(
         if (
           badNames.some((name) => normalized.includes(name)) &&
           abuseWords.some((word) => normalized.includes(word)) &&
-          !isOwner &&
+          !OWNER_UIDS.includes(senderID) &&
           !friendUIDs.includes(senderID)
         ) {
           if (fs.existsSync("abuse.txt")) {
-            const lines = fs.readFileSync("abuse.txt", "utf8").split("\n").filter(Boolean);
+            const lines = fs
+              .readFileSync("abuse.txt", "utf8")
+              .split("\n")
+              .filter(Boolean);
             for (let i = 0; i < 2 && i < lines.length; i++) {
               api.sendMessage(lines[i], threadID, messageID);
             }
@@ -85,16 +89,18 @@ login(
           return;
         }
 
+        // .unsent command: unsend the replied message
         if (
-          isOwner &&
+          OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
           lowerBody.startsWith(".unsent")
         ) {
           return api.unsendMessage(event.messageReply.messageID);
         }
 
+        // .bhai gali kyun? command via reply: set targetUID
         if (
-          isOwner &&
+          OWNER_UIDS.includes(senderID) &&
           event.messageReply &&
           lowerBody === "?"
         ) {
@@ -102,63 +108,70 @@ login(
           return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
         }
 
-let botUID = 61557918223217; // 👈 upar global define karo
-
-login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
-  if (err) return console.error("❌ Login failed:", err);
-
-  botUID = api.getCurrentUserID(); // ✅ yeh line jaruri hai
-
-  api.setOptions({ listenEvents: true });
-  console.log("✅ Logged");
-        
-        if (
-          isOwner &&
-          event.messageReply &&
-          event.messageReply.senderID === api.getCurrentUserID()
-        ) {
-          const funnyReplies = [
-            "ha re gandu beta mat bol 🤨",
-            "hosh me bol bhosdike, admin he to kya... maa chod dunga 😒",
-            "abe madarchod, reply dene se pyaar nahi hota 😭",
-            "chal chutiye, tujhme baat hi kya hai bot se baat karne layak 😏",
-            "bhadwe, admin ho par baap to mai hi hu 💪",
-            "ae pyare bhikhari, reply deke kya kar lega? mai bot hu 🤖",
-            "oye gandu, thoda attitude kam kar warna HDD format kar dunga 😈",
-            "chal nikal pehli fursat me... admin hai ya attention whore? 🤭",
-            "kya karu teri reply ka? PDF bna ke share karu kya group me? 📄",
-            "abe reply deke tujhe kya milega? maa ka pyar? 🍼",
-            "abe admin ke tattoo, mujhe impress mat kar... mai AI hu AI 😎",
-            "tu reply kare ya suicide kare... mujhe kya 😭",
-            "teri maa ne bola tha bot se pyar mat kar... ab dekh 🤣",
-            "bhaiya itna reply mat diya karo, server lag karta hai 😩",
-            "tum reply do ya gali... mai to chomu hi hu 😅"
-          ];
-          const msg = funnyReplies[Math.floor(Math.random() * funnyReplies.length)];
-          return api.sendMessage(msg, threadID, messageID);
-        }
-
+        // 🤡 Admin reply pe funny + toxic reply
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  event.messageReply.senderID === api.getCurrentUserID()
+) {
+  const funnyReplies = [
+    "ha re gandu beta mat bol 🤨",
+    "hosh me bol bhosdike, admin he to kya... maa chod dunga 😒",
+    "abe madarchod, reply dene se pyaar nahi hota 😭",
+    "chal chutiye, tujhme baat hi kya hai bot se baat karne layak 😏",
+    "bhadwe, admin ho par baap to mai hi hu 💪",
+    "ae pyare bhikhari, reply deke kya kar lega? mai bot hu 🤖",
+    "oye gandu, thoda attitude kam kar warna HDD format kar dunga 😈",
+    "chal nikal pehli fursat me... admin hai ya attention whore? 🤭",
+    "kya karu teri reply ka? PDF bna ke share karu kya group me? 📄",
+    "abe reply deke tujhe kya milega? maa ka pyar? 🍼",
+    "abe admin ke tattoo, mujhe impress mat kar... mai AI hu AI 😎",
+    "tu reply kare ya suicide kare... mujhe kya 😭",
+    "teri maa ne bola tha bot se pyar mat kar... ab dekh 🤣",
+    "bhaiya itna reply mat diya karo, server lag karta hai 😩",
+    "tum reply do ya gali... mai to chomu hi hu 😅"
+  ];
+  const msg = funnyReplies[Math.floor(Math.random() * funnyReplies.length)];
+  return api.sendMessage(msg, threadID, messageID);
+}
+        // Delay reply to targetUID with np.txt content (gali loop for individual target)
         if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
-          const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+          const lines = fs
+            .readFileSync("np.txt", "utf8")
+            .split("\n")
+            .filter(Boolean);
           const line = lines[Math.floor(Math.random() * lines.length)];
+          // Delay between 4 to 6 seconds
           setTimeout(() => api.sendMessage(line, threadID, messageID), 4000 + Math.random() * 2000);
           return;
         }
 
-        if (isOwner && lowerBody.includes("sena pati")) {
-          api.sendMessage(" bolo sumit don 🫡", threadID);
-          setTimeout(() => {
-            api.sendMessage("kis ma ke lor3 ki fielding set kru", threadID);
-          }, 2000);
-          return;
-        }
+        
 
-        if (!isOwner) return;
+        // .senapati command: royal reply with maharani + fielding
+if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
+  api.sendMessage(
+    " bolo sumit don 🫡",
+    threadID
+  );
+
+  setTimeout(() => {
+    api.sendMessage(
+      "kis ma ke lor3 ki fielding set kru",
+      threadID
+    );
+  }, 2000);
+
+  return;
+}
+        // Admin-only commands below this point
+        if (!OWNER_UIDS.includes(senderID)) return;
 
         const args = lowerBody.trim().split(" ");
         const cmd = args[0];
         const input = args.slice(1).join(" ");
 
+        // .allname command: change nickname for all participants
         if (cmd === ".allname") {
           const info = await api.getThreadInfo(threadID);
           for (const uid of info.participantIDs) {
@@ -168,38 +181,62 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           return api.sendMessage("👥 Nicknames updated", threadID);
         }
 
+        // .groupname command: set group name
         if (cmd === ".groupname") {
           await api.setTitle(input, threadID);
           return api.sendMessage("Group name updated.", threadID);
         }
 
+        // .lockgroupname command: lock the group name to prevent changes
         if (cmd === ".lockgroupname") {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
-          return api.sendMessage(`sumit bhai ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`, threadID);
+          return api.sendMessage(
+            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
+            threadID
+          );
         }
 
+        // .unlockgroupname command: remove the lock on group name
         if (cmd === ".unlockgroupname") {
           delete lockedGroupNames[threadID];
-          return api.sendMessage("sumit bhai kar diya ma chudane do inko ab name par", threadID);
+          return api.sendMessage(
+            "ok boss 🙇 kar diya ma chudane do inko ab name par",
+            threadID
+          );
         }
 
+        // .uid command: display group ID
         if (cmd === ".uid") {
-          return api.sendMessage(` han sumit bhai ye lo${threadID}`, threadID);
+          return api.sendMessage(` 🙄 ${threadID}`, threadID);
         }
 
+        // .exit command: exit from group with farewell message
         if (cmd === ".exit") {
-          return api.sendMessage(`chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho 🙏🖕😎`, threadID, () => {
-            api.removeUserFromGroup(api.getCurrentUserID(), threadID);
-          });
+          return api.sendMessage(
+            `chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho 🙏🖕😎`,
+            threadID,
+            () => {
+              api.removeUserFromGroup(api.getCurrentUserID(), threadID);
+            }
+          );
         }
 
+        // .rkb, .rkb2, .rkb3 commands: send looping abusive messages from file
         if (cmd === ".rkb" || cmd === ".rkb2" || cmd === ".rkb3") {
-          const file = cmd === ".rkb" ? "np.txt" : cmd === ".rkb2" ? "np2.txt" : "np3.txt";
+          const file =
+            cmd === ".rkb"
+              ? "np.txt"
+              : cmd === ".rkb2"
+              ? "np2.txt"
+              : "np3.txt";
           if (!fs.existsSync(file))
             return api.sendMessage("❌ Gali file nahi mili", threadID);
           const name = input || "🥰";
-          const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
+          const lines = fs
+            .readFileSync(file, "utf8")
+            .split("\n")
+            .filter(Boolean);
           stopRequested = false;
           if (rkbInterval) clearInterval(rkbInterval);
           let index = 0;
@@ -210,25 +247,34 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
               return;
             }
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
-          }, 40000);
-          return api.sendMessage(`<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`, threadID);
+          }, 10000);
+          return api.sendMessage(
+            `<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`,
+            threadID
+          );
         }
 
+        // .stop command: stop the ongoing abusive loop
         if (cmd === ".stop") {
           stopRequested = true;
           if (rkbInterval) {
             clearInterval(rkbInterval);
             rkbInterval = null;
-            return api.sendMessage("ok sumit bhai 😎", threadID);
+            return api.sendMessage("ok 😎", threadID);
           } else {
-            return api.sendMessage("Kuch chalu nahi tha sumit bhai", threadID);
+            return api.sendMessage("Kuch chalu nahi tha ", threadID);
           }
         }
 
+        // .photo command: start media loop; wait for media within 1 min
         if (cmd === ".photo") {
           api.sendMessage("📸 Send media in 1 min", threadID);
           const handler = async (ev) => {
-            if (ev.type === "message" && ev.threadID === threadID && ev.attachments.length > 0) {
+            if (
+              ev.type === "message" &&
+              ev.threadID === threadID &&
+              ev.attachments.length > 0
+            ) {
               lastMedia = { attachments: ev.attachments };
               if (mediaLoopInterval) clearInterval(mediaLoopInterval);
               mediaLoopInterval = setInterval(() => {
@@ -240,6 +286,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           api.on("message", handler);
         }
 
+        // .stopphoto command: stop media loop
         if (cmd === ".stopphoto") {
           if (mediaLoopInterval) {
             clearInterval(mediaLoopInterval);
@@ -248,6 +295,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           }
         }
 
+        // .forward command: forward a replied message to all group members
         if (cmd === ".forward") {
           const reply = event.messageReply;
           if (!reply)
@@ -255,28 +303,40 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           const info = await api.getThreadInfo(threadID);
           for (const uid of info.participantIDs) {
             if (uid !== api.getCurrentUserID()) {
-              await api.sendMessage({ body: reply.body || "", attachment: reply.attachments || [] }, uid);
+              await api.sendMessage(
+                { body: reply.body || "", attachment: reply.attachments || [] },
+                uid
+              );
               await new Promise((r) => setTimeout(r, 2000));
             }
           }
           return api.sendMessage("✅ Forwarded", threadID);
         }
 
+        // .t command: set targetUID manually
         if (cmd === ".t") {
-          if (!args[1]) return api.sendMessage("👤 UID dedo ji", threadID);
+          if (!args[1])
+            return api.sendMessage("👤 UID dedo ji", threadID);
           targetUID = args[1];
-          return api.sendMessage(`ye rkb chudega ab ${targetUID}`, threadID);
+          return api.sendMessage(`😎 ${targetUID}`, threadID);
         }
 
+        // .c command: clear targetUID
         if (cmd === ".c") {
           targetUID = null;
-          return api.sendMessage("😜", threadID);
+          return api.sendMessage("😭", threadID);
         }
 
+        // .id command: show UID of the replied message sender
         if (cmd === ".id" && event.messageReply) {
-          return api.sendMessage(`lo sumit bhaii ♥️: ${event.messageReply.senderID}`, threadID, messageID);
+          return api.sendMessage(
+            `le pakad 😒: ${event.messageReply.senderID}`,
+            threadID,
+            messageID
+          );
         }
 
+        // .help command: list all available commands
         if (cmd === ".help") {
           return api.sendMessage(
             `🆘 Commands:
