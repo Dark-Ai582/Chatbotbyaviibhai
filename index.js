@@ -200,7 +200,7 @@ login(
               return;
             }
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
-          }, 10000);
+          }, 40000);
           return api.sendMessage(`<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`, threadID);
         }
 
