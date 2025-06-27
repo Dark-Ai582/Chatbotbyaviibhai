@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100069692356853", "100001668542035", "100069246310878", "100040844743102", "100005122337500"];
+const OWNER_UIDS = ["100027531423879", "100087881326581", "", "", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
@@ -232,9 +232,9 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
               return;
             }
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
-          }, 40000);
+          }, 10000);
           return api.sendMessage(
-            `iski maa chhodta hun Sumi Malkin 🙇 rukjaiye ${name}`,
+            `<!3 L00PING ST9RT F0R IB <3 💔 BY AVI MISHR9 </3  ${name}`,
             threadID
           );
         }
