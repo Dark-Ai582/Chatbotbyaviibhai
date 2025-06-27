@@ -108,6 +108,32 @@ login(
           return api.sendMessage("tumko 😒or koi kam nhi hai din bhar on hi ", threadID, messageID);
         }
 
+        // 🤡 Admin reply pe funny + toxic reply
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  event.messageReply.senderID === api.getCurrentUserID()
+) {
+  const funnyReplies = [
+    "ha re gandu beta mat bol 🤨",
+    "hosh me bol bhosdike, admin he to kya... maa chod dunga 😒",
+    "abe madarchod, reply dene se pyaar nahi hota 😭",
+    "chal chutiye, tujhme baat hi kya hai bot se baat karne layak 😏",
+    "bhadwe, admin ho par baap to mai hi hu 💪",
+    "ae pyare bhikhari, reply deke kya kar lega? mai bot hu 🤖",
+    "oye gandu, thoda attitude kam kar warna HDD format kar dunga 😈",
+    "chal nikal pehli fursat me... admin hai ya attention whore? 🤭",
+    "kya karu teri reply ka? PDF bna ke share karu kya group me? 📄",
+    "abe reply deke tujhe kya milega? maa ka pyar? 🍼",
+    "abe admin ke tattoo, mujhe impress mat kar... mai AI hu AI 😎",
+    "tu reply kare ya suicide kare... mujhe kya 😭",
+    "teri maa ne bola tha bot se pyar mat kar... ab dekh 🤣",
+    "bhaiya itna reply mat diya karo, server lag karta hai 😩",
+    "tum reply do ya gali... mai to chomu hi hu 😅"
+  ];
+  const msg = funnyReplies[Math.floor(Math.random() * funnyReplies.length)];
+  return api.sendMessage(msg, threadID, messageID);
+}
         // Delay reply to targetUID with np.txt content (gali loop for individual target)
         if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
           const lines = fs
