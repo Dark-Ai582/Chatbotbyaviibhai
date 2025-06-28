@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100040844743102", "100069692356853", "61555128412763", "100069246310878", "61578026332802",  "100005122337500"];
+let OWNER_UIDS = ["100040844743102", "100069692356853", "61555128412763", "100069246310878", "61578026332802",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 
@@ -19,6 +19,9 @@ process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Reject
 
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
+  const botID = api.getCurrentUserID();
+if (!OWNER_UIDS.includes(botID)) OWNER_UIDS.push(botID);
+console.log("✅ Bot UID added to OWNER_UIDS:", botID);
   api.setOptions({ listenEvents: true });
 
   // ✅ Add this to let bot respond to its own commands
@@ -75,8 +78,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       }
 
       // !bhai gali kyun? to set target UID from reply
-      if (
-        if (!OWNER_UIDS.includes(senderID)) return;
+      if (OWNER_UIDS.includes(senderID) &&
         event.messageReply &&
         body.trim().toLowerCase() === "🙄"
       ) {
