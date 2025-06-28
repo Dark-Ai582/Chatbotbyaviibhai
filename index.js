@@ -368,7 +368,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           );
         }
 
-        // .help command: list all available commands
+// .help command: list all available commands
         if (cmd === ".help") {
           return api.sendMessage(
             `🆘 Commands:
@@ -390,10 +390,9 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             threadID
           );
         }
-
-        // ✅ This was misplaced, now placed safely as an extra safety step (optional)
-        try {
-          await api.removeUserFromGroup(event.threadID, event.senderID);
-        } finally {
-          console.log("Tried to remove user");
-        }
+      } catch (e) {
+        console.error("❗ Bot error:", e.message);
+      }
+    });
+  }
+);
