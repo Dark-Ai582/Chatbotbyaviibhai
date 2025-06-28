@@ -390,8 +390,9 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             threadID
           );
         }
-      });
-  } catch (e) {
-    console.error("❗ Bot error:", e.message);
+      } catch (e) {
+        console.error("❗ Bot error:", e.message);
+      }
+    });
   }
-});
+);
