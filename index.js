@@ -76,7 +76,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 
       // !bhai gali kyun? to set target UID from reply
       if (
-        OWNER_UIDS.includes(senderID) &&
+        if (!OWNER_UIDS.includes(senderID)) return;
         event.messageReply &&
         body.trim().toLowerCase() === "🙄"
       ) {
