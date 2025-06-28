@@ -31,8 +31,12 @@ login(
   { appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) },
   (err, api) => {
     if (err) return console.error("❌ Login failed:", err);
+
+    // ✅ Automatically make bot's own ID an owner
+    OWNER_UIDS.push(api.getCurrentUserID());
+
     api.setOptions({ listenEvents: true });
-    console.log("✅ Logged  ");
+    console.log("✅ Logged ");
 
     api.listenMqtt(async (err, event) => {
       try {
@@ -98,15 +102,30 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // .bhai gali kyun? command via reply: set targetUID
-        if (
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply &&
-          lowerBody === "?"
-        ) {
-          targetUID = event.messageReply.senderID;
-          return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
+        
+      // !bhai gali kyun? with delay
+      if (
+        OWNER_UIDS.includes(senderID) &&
+        event.messageReply &&
+        body.trim().toLowerCase() === "hi"
+      ) {
+        const repliedUserID = event.messageReply.senderID;
+        targetUID = repliedUserID;
+        setTimeout(() => {
+          api.sendMessage(":P", threadID, messageID);
+        }, 4000);
+        return;
+      }
+
+      // auto abuse on targetUID from np.txt
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
         }
+      }
+
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
@@ -164,6 +183,11 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 
   return;
 }
+     
+    let targetUID = null;
+
+
+        
         // Admin-only commands below this point
         if (!OWNER_UIDS.includes(senderID)) return;
 
