@@ -103,7 +103,7 @@ login(
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "-bhai gali kyun?"
+  body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
