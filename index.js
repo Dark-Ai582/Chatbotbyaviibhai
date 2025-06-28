@@ -99,27 +99,54 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // ✅ Hidden target via *bhai Gali Kyun? reply by admin
+        // 🔁 Global variables for multi-target tracking
+const activeTargets = {}; // Format: { uid: true, ... }
+const activeTimers = {};  // Format: { uid: [setTimeoutID, ...] }
+const handledMessages = {}; // Format: { uid: Set of messageIDs }
+
+// ✅ Admin reply: "-bhai gali kyun?" sets target
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "?"
+  body.trim().toLowerCase() === "-bhai gali kyun?"
 ) {
   const repliedUserID = event.messageReply.senderID;
-  targetUID = repliedUserID;
-  api.sendMessage("kya kar rahe ho P", threadID, messageID);
+  activeTargets[repliedUserID] = true;
+  if (!activeTimers[repliedUserID]) activeTimers[repliedUserID] = [];
+  if (!handledMessages[repliedUserID]) handledMessages[repliedUserID] = new Set();
+  api.sendMessage(":P", threadID, messageID);
   return;
 }
 
-// ✅ Auto gali to targetUID with 7 sec delay
-if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
-  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  if (lines.length > 0) {
-    const randomLine = lines[Math.floor(Math.random() * lines.length)];
-    setTimeout(() => {
-      api.sendMessage(randomLine, threadID, messageID);
-    }, 7000); // 7 sec delay
+// ✅ If a targeted user sends message (any type), send 2 gali
+if (activeTargets[senderID]) {
+  if (!handledMessages[senderID]) handledMessages[senderID] = new Set();
+
+  // Prevent replying to the same message twice
+  if (handledMessages[senderID].has(messageID)) return;
+  handledMessages[senderID].add(messageID);
+
+  // Read gali lines
+  if (fs.existsSync("np.txt")) {
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    if (lines.length === 0) return;
+
+    // 1st gali - immediately
+    const firstGali = lines[Math.floor(Math.random() * lines.length)];
+    api.sendMessage(firstGali, threadID, messageID);
+
+    // 2nd gali - 9 sec later
+    const secondGali = lines[Math.floor(Math.random() * lines.length)];
+    const timeoutID = setTimeout(() => {
+      api.sendMessage(secondGali, threadID, messageID);
+    }, 9000);
+
+    // Store timeout for potential cancellation
+    if (!activeTimers[senderID]) activeTimers[senderID] = [];
+    activeTimers[senderID].push(timeoutID);
   }
+
+  return;
 }
 
         // 🤡 Admin reply pe funny + toxic reply
