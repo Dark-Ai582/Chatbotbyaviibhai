@@ -98,47 +98,16 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // ✅ Auto target system from reply + gali loop
-if (
-  !targetUID &&  // pehle se target set nahi hai
-  event.messageReply &&  // kisi ke message pe reply kiya gaya
-  OWNER_UIDS.includes(senderID) // sirf owner (including bot itself)
-) {
-  targetUID = event.messageReply.senderID;
-  targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  targetIndex = 0;
-  api.sendMessage(`🎯 Target set: ${targetUID}`, threadID);
-}
+        // .bhai gali kyun? command via reply: set targetUID
+        if (
+          OWNER_UIDS.includes(senderID) &&
+          event.messageReply &&
+          lowerBody === "?"
+        ) {
+          targetUID = event.messageReply.senderID;
+          return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
+        }
 
-// ✅ Jab targetUID set ho aur target message bheje -> 2 gali reply ho
-if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
-  if (targetLines.length === 0) {
-    targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  }
-
-  for (let i = 0; i < 2; i++) {
-    const line = targetLines[targetIndex];
-    targetIndex = (targetIndex + 1) % targetLines.length;
-
-    setTimeout(() => {
-      api.sendMessage(line, threadID, messageID);
-    }, 2000 * (i + 1));
-  }
-}
-
-// ✅ .c command se stop
-if (
-  OWNER_UIDS.includes(senderID) &&
-  lowerBody.trim() === ".c"
-) {
-  targetUID = null;
-  targetLines = [];
-  targetIndex = 0;
-  return api.sendMessage("⛔ Target removed", threadID);
-}
-
-  return;
-}
         // 🤡 Admin reply pe funny + toxic reply
 if (
   OWNER_UIDS.includes(senderID) &&
