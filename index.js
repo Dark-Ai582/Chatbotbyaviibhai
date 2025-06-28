@@ -32,7 +32,7 @@ login(
   (err, api) => {
     if (err) return console.error("❌ Login failed:", err);
 
-    // ✅ Automatically make bot's own ID an owner
+    // ✅ Ye line zarur daalni hai
     OWNER_UIDS.push(api.getCurrentUserID());
 
     api.setOptions({ listenEvents: true });
