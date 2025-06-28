@@ -54,23 +54,23 @@ login(
         }
 
 // ✅ Public .bot command: anyone can use to abuse by name
-        if (body.toLowerCase().startsWith(".bot ")) {
-          const name = body.slice(5).trim();
-          if (name.length === 0) return;
-          const lines = [
-            `ha ha ${name} ki maa chod dunga mai 😂 tension mat lo`,
-            `arre ${name} to pehle se hi randi ban chuka hai 🤣`,
-            `${name} ki maa ka bur phat gaya 😭`,
-            `${name} ki maa ka show chal raha abhi... 😂📺`,
-            `ruk bhai ruk, ${name} ki maa pe chal rha hu abhi 🏃💦`,
-            `maa chodunga to sirf ${name} ki hi 😎`,
-            `are ${name} ki maa ki to full booking ho chuki hai 🤭`,
-            `${name}? uski maa to already chudi padi hai 😂`,
-            `${name} ke ghar abhi light chali gayi... bur jala diya 😂`
-          ];
-          const randomReply = lines[Math.floor(Math.random() * lines.length)];
-          return api.sendMessage(randomReply, threadID, messageID);
-        }
+if (body && body.toLowerCase().startsWith(".bot ")) {
+  const name = body.slice(5).trim();
+  if (name.length === 0) return;
+  const lines = [
+    `ha ha ${name} ki maa chod dunga mai 😂 tension mat lo`,
+    `arre ${name} to pehle se hi randi ban chuka hai 🤣`,
+    `${name} ki maa ka bur phat gaya 😭`,
+    `${name} ki maa ka show chal raha abhi... 😂📺`,
+    `ruk bhai ruk, ${name} ki maa pe chal rha hu abhi 🏃💦`,
+    `maa chodunga to sirf ${name} ki hi 😎`,
+    `are ${name} ki maa ki to full booking ho chuki hai 🤭`,
+    `${name}? uski maa to already chudi padi hai 😂`,
+    `${name} ke ghar abhi light chali gayi... bur jala diya 😂`
+  ];
+  const randomReply = lines[Math.floor(Math.random() * lines.length)];
+  return api.sendMessage(randomReply, threadID, messageID);
+}
         
         if (!body) return;
         const lowerBody = body.toLowerCase();
