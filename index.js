@@ -35,18 +35,10 @@ login(
     console.log("✅ Logged  ");
 
     api.listenMqtt(async (err, event) => {
-  try {
-    if (err || !event) return;
+      try {
+        if (err || !event) return;
+        const { threadID, senderID, body, messageID, type } = event;
 
-    const { threadID, senderID, body, messageID, type } = event;
-
-    // ✅ YAHI PE tera pura pura logic chalega (jo tu already likh chuka hai)
-    // Abuse check, commands, .rkb, .c, targetUID, bhai gali kyun, etc.
-
-  } catch (e) {
-    console.error("⚠️ Error in event handler:", e);
-  }
-});
         // Group name lock: Sumi Malkin 🙇 setting a fixed group name
         if (type === "event" && event.logMessageType === "log:thread-name") {
           const newName = event.logMessageData.name;
@@ -54,7 +46,7 @@ login(
           if (lockedName && newName !== lockedName) {
             await api.setTitle(lockedName, threadID);
             api.sendMessage(
-              `Achha Randike bachhe naam change karega teri mkb sumit ne lock lagya hai`,
+              `oi R 🙇  gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`,
               threadID
             );
           }
@@ -106,97 +98,24 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-let targetUID = null;
-let targetIndex = 0;
-let targetLines = [];
-
-// .bhai gali kyun? via reply: set targetUID, intro gali + sticker
-if (
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&
-  lowerBody === "hi"
-) {
-  targetUID = event.messageReply.senderID;
-  targetIndex = 0;
-  targetLines = [];
-
-  api.sendMessage(
-    "hello bhai tum wohi hona jo ayush ki maa ch*d rahe dusre group me 🤨",
-    threadID,
-    messageID
-  );
-
-  if (fs.existsSync("np.txt")) {
-    const introLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    const count = 3 + Math.floor(Math.random() * 2); // 3-4 lines
-
-    for (let i = 0; i < count && i < introLines.length; i++) {
-      setTimeout(() => {
-        api.sendMessage(introLines[i], threadID, messageID);
-      }, 2000 * (i + 1));
-    }
-  }
-
-  // Optional sticker send
-  setTimeout(() => {
-    const stickerPath = "media/sticker.webp";
-    if (fs.existsSync(stickerPath)) {
-      const sticker = fs.createReadStream(stickerPath);
-      api.sendMessage({ attachment: sticker }, threadID, messageID);
-    }
-  }, 10000);
-
-  return;
-}
-
-// 🧠 Target UID response system: har message pe 2 gali
-if (targetUID && senderID === targetUID) {
-  if (targetLines.length === 0 && fs.existsSync("np.txt")) {
+        // 🔁 Target reply loop system: Jab tak .c na diya jaye, har message pe gali dega
+if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
+  if (targetLines.length === 0) {
     targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
   }
 
-  if (targetLines.length > 0) {
-    for (let i = 0; i < 2; i++) {
-      const line = targetLines[targetIndex];
-      targetIndex = (targetIndex + 1) % targetLines.length;
+  // 2 gali per message
+  for (let i = 0; i < 2; i++) {
+    const line = targetLines[targetIndex];
+    targetIndex = (targetIndex + 1) % targetLines.length;
 
-      setTimeout(() => {
-        api.sendMessage(line, threadID, messageID); // reply to every message
-      }, 1500 * (i + 1));
-    }
+    setTimeout(() => {
+      api.sendMessage(line, threadID, messageID);
+    }, 2000 * (i + 1));
   }
 
   return;
 }
-
-// ❌ .c command to clear targetUID and stop gali
-if (cmd === ".c") {
-  targetUID = null;
-  targetIndex = 0;
-  targetLines = [];
-  return api.sendMessage("☠️ Target ko chod diya gaya bhai", threadID);
-}
-
-  // Sticker ya photo bhejna
-  setTimeout(() => {
-    const stickerPath = "media/sticker.webp"; // Change this if image alag path pe ho
-    if (fs.existsSync(stickerPath)) {
-      const imgStream = fs.createReadStream(stickerPath);
-      api.sendMessage({ attachment: imgStream }, threadID, messageID);
-    }
-  }, 9000); // After 3-4 replies
-  return;
-}
-
-  // Optional: Send a random sticker or photo (1 sec after all replies)
-  setTimeout(() => {
-    const stickerPath = "media/sticker.webp"; // apne pass koi sticker ya photo rakh le
-    const imgStream = fs.createReadStream(stickerPath);
-    api.sendMessage({ attachment: imgStream }, threadID, messageID);
-  }, 9000); // after 3–4 replies
-  return;
-}
-
         // 🤡 Admin reply pe funny + toxic reply
 if (
   OWNER_UIDS.includes(senderID) &&
@@ -235,9 +154,7 @@ if (
           return;
         }
 
-        const botUID = api.getCurrentUserID();
-if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
-console.log("🤖 Bot UID added to OWNER_UIDS:", botUID);
+        
 
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
@@ -283,7 +200,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
           return api.sendMessage(
-            `tere baap sumit ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
+            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
             threadID
           );
         }
@@ -292,7 +209,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         if (cmd === ".unlockgroupname") {
           delete lockedGroupNames[threadID];
           return api.sendMessage(
-            "done sumit  kar diya ma chudane do inko ab name par",
+            "ok boss 🙇 kar diya ma chudane do inko ab name par",
             threadID
           );
         }
@@ -340,7 +257,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
           }, 10000);
           return api.sendMessage(
-            `sumit inbox dekh  ${name}`,
+            `<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`,
             threadID
           );
         }
@@ -427,9 +344,10 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           );
         }
 
-// .help command ke baad bas return karo
-return api.sendMessage(
-  `🆘 Commands:
+        // .help command: list all available commands
+        if (cmd === ".help") {
+          return api.sendMessage(
+            `🆘 Commands:
 .allname <name>
 .groupname <name>
 .lockgroupname <name>
@@ -445,5 +363,12 @@ return api.sendMessage(
 .senapati
 .unsent (on reply)
 .help`,
-  threadID
+            threadID
+          );
+        }
+      } catch (e) {
+        console.error("❗ Bot error:", e.message);
+      }
+    });
+  }
 );
