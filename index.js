@@ -166,26 +166,7 @@ if (fs.existsSync("h8.txt")) {
 }
 
 
-        // 🔁 Group tracking
-const knownThreads = new Set();
-
-// 🧠 Collect all active thread IDs
-api.listenMqtt(async (err, event) => {
-  if (event?.threadID) knownThreads.add(event.threadID);
-});
-
-// 🔁 Message sender function
-function sendGoodNight(api) {
-  const msg = "Good night bhadvon sojao ✨♥️ chalo jao";
-  for (const tid of knownThreads) {
-    api.sendMessage(msg, tid);
-  }
-}
-
-// ⏰ Schedule every 8 hours (3x a day)
-setInterval(() => {
-  setTimeout(() => sendGoodNight(api), Math.floor(Math.random() * 600000)); // max 10 min delay
-}, 8 * 60 * 60 * 1000); // 8h * 3 = 24h
+        
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
