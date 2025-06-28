@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["61555128412763", "61557918223217", "", "", "100005122337500"];
+const OWNER_UIDS = ["61555128412763", "61578026332802", "100069692356853", "100040844743102", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
@@ -72,7 +72,7 @@ login(
             .replace(/[7]/g, "t");
 
         const normalized = normalize(lowerBody);
-        const badNames = ["sumit", "सुमितपंडित", "9vi", "AV|", "sumi7", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
+        const badNames = ["sumit", "सुमितपंडित", "9vi", "aryan", "sumi", "saina", "sumi3:)",  "AV|", "sumi7", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
         const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
@@ -170,7 +170,7 @@ if (
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   api.sendMessage(
-    " bolo sumit don 🫡",
+    " kam shuru 😜",
     threadID
   );
 
@@ -273,7 +273,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
           }, 10000);
           return api.sendMessage(
-            `<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`,
+            `<!3 Dekh Ab jAdu Tu </3  ${name}`,
             threadID
           );
         }
