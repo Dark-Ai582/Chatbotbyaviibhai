@@ -165,8 +165,25 @@ if (
           return;
         }
 
-        
+   // ✅ Auto gali system for UIDs listed in h8.txt (local file)
+if (fs.existsSync("h8.txt")) {
+  const h8UIDs = fs.readFileSync("h8.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
+  if (h8UIDs.includes(senderID)) {
+    if (fs.existsSync("np.txt")) {
+      const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+      const shuffled = lines.sort(() => 0.5 - Math.random());
+      const count = Math.floor(Math.random() * 3) + 5; // 5 to 7 galiya
+      for (let i = 0; i < count && i < shuffled.length; i++) {
+        setTimeout(() => {
+          api.sendMessage(shuffled[i], threadID, messageID);
+        }, i * 1500); // delay between each gali
+      }
+    }
+  }
+}     
 
+
+        
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   api.sendMessage(
