@@ -99,15 +99,29 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // .bhai gali kyun? command via reply: set targetUID
-        if (
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply &&
-          lowerBody === "hi"
-        ) {
-          targetUID = event.messageReply.senderID;
-          return api.sendMessage("sun ib msg krna ek kaam hai ", threadID, messageID);
-        }
+        let targetUID = null;
+let abuseLines = fs.readFileSync("np.txt", "utf-8").split("\n").filter(line => line.trim() !== "");
+let abuseIndex = 0;
+
+// Command to set targetUID via reply
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  lowerBody === "hi"
+) {
+  targetUID = event.messageReply.senderID;
+  return api.sendMessage("sun ib msg krna ek kaam hai", threadID, messageID);
+}
+
+// Target system: Har message pr gali
+if (targetUID && senderID === targetUID) {
+  setTimeout(() => {
+    // Gali reply karo with abuse.txt or np.txt line-by-line
+    const gali = abuseLines[abuseIndex];
+    abuseIndex = (abuseIndex + 1) % abuseLines.length; // Loop back
+    api.sendMessage(gali, threadID, messageID);
+  }, 8000 + Math.floor(Math.random() * 2000)); // 8-10 sec delay
+}
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
@@ -147,24 +161,41 @@ if (
           return;
         }
 
-// ✅ Gali system with 6–7 sec delay for UIDs in h8.txt
+const activeH8Timers = {}; // Store per-UID active timeout IDs
+
 if (fs.existsSync("h8.txt")) {
   const h8UIDs = fs.readFileSync("h8.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
+
   if (h8UIDs.includes(senderID)) {
+    // Cancel old timeouts if exist
+    if (activeH8Timers[senderID]) {
+      for (const timeoutID of activeH8Timers[senderID]) {
+        clearTimeout(timeoutID);
+      }
+    }
+
+    activeH8Timers[senderID] = []; // Reset timer list
+
     if (fs.existsSync("np.txt")) {
       const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+
+      // Shuffle and take unique random 5-7 lines
       const shuffled = lines.sort(() => 0.5 - Math.random());
-      const count = Math.floor(Math.random() * 3) + 5; // 5 to 7 galiya
-      for (let i = 0; i < count && i < shuffled.length; i++) {
-        const delay = (i + 1) * (6000 + Math.floor(Math.random() * 1000)); // 6-7 sec gap
-        setTimeout(() => {
-          api.sendMessage(shuffled[i], threadID, messageID);
+      const count = Math.floor(Math.random() * 3) + 5; // 5 to 7
+      const selectedLines = shuffled.slice(0, count);
+
+      selectedLines.forEach((line, index) => {
+        const delay = (index + 1) * (6000 + Math.floor(Math.random() * 1000)); // 6–7 sec per msg
+
+        const timeoutID = setTimeout(() => {
+          api.sendMessage(line, threadID, messageID);
         }, delay);
-      }
+
+        activeH8Timers[senderID].push(timeoutID); // Save timeout ID to cancel later
+      });
     }
   }
 }
-
 
         
         
