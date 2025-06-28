@@ -102,7 +102,7 @@ login(
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  lowerBody === "?"
+  lowerBody === "hi"
 ) {
   targetUID = event.messageReply.senderID;
   api.sendMessage("hello bhai tum wohi hona jo ayush ki ma chod rahe dusre grp me ", threadID, messageID);
@@ -390,9 +390,8 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             threadID
           );
         }
-      } catch (e) {
-        console.error("❗ Bot error:", e.message);
-      }
-    });
+      });
+  } catch (e) {
+    console.error("❗ Bot error:", e.message);
   }
-);
+});
