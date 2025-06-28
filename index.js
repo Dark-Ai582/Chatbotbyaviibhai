@@ -99,32 +99,25 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        let targetUID = null;
-let abuseLines = fs.readFileSync("np.txt", "utf-8").split("\n").filter(line => line.trim() !== "");
-let abuseIndex = 0;
-
-// !bhai gali kyun? with delay
-      if (
-        OWNER_UIDS.includes(senderID) &&
-        event.messageReply &&
-        body.trim().toLowerCase() === "hi"
-      ) {
-        const repliedUserID = event.messageReply.senderID;
-        targetUID = repliedUserID;
-        setTimeout(() => {
-          api.sendMessage(":P", threadID, messageID);
-        }, 4000);
-        return;
-      }
-
-      if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
-  const lines = fs
-    .readFileSync("np.txt", "utf8")
-    .split("\n")
-    .filter(Boolean);
-  const line = lines[Math.floor(Math.random() * lines.length)];
-  setTimeout(() => api.sendMessage(line, threadID, messageID), 4000 + Math.random() * 2000);
+        // ✅ Hidden target via *bhai Gali Kyun? reply by admin
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  body.trim().toLowerCase() === "-bhai gali kyun?"
+) {
+  const repliedUserID = event.messageReply.senderID;
+  targetUID = repliedUserID;
+  api.sendMessage(":P", threadID, messageID);
   return;
+}
+
+      
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
+        }
       }
 
         // 🤡 Admin reply pe funny + toxic reply
