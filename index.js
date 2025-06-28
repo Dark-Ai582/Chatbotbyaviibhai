@@ -388,7 +388,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 .unsent (on reply)
 .help`,
             try {
-    await api.removeUserFromGroup(event.threadID, event.senderID);
-} catch (err) {
-    console.error("Error removing user:", err);
+  await api.removeUserFromGroup(event.threadID, event.senderID);
+} finally {
+  console.log("Tried to remove user");
           }
