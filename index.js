@@ -98,25 +98,76 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-// .bhai gali kyun? command via reply: set targetUID and reply 3–4 times + sticker/photo
+let targetUID = null;
+let targetIndex = 0;
+let targetLines = [];
+
+// .bhai gali kyun? via reply: set targetUID, intro gali + sticker
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   lowerBody === "hi"
 ) {
   targetUID = event.messageReply.senderID;
-  api.sendMessage("hello bhai tum wohi hona jo ayush ki ma chod rahe dusre grp me ", threadID, messageID);
+  targetIndex = 0;
+  targetLines = [];
+
+  api.sendMessage(
+    "hello bhai tum wohi hona jo ayush ki maa ch*d rahe dusre group me 🤨",
+    threadID,
+    messageID
+  );
 
   if (fs.existsSync("np.txt")) {
-    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    const count = 3 + Math.floor(Math.random() * 2); // 3 or 4 lines
+    const introLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    const count = 3 + Math.floor(Math.random() * 2); // 3-4 lines
 
-    for (let i = 0; i < count && i < lines.length; i++) {
+    for (let i = 0; i < count && i < introLines.length; i++) {
       setTimeout(() => {
-        api.sendMessage(lines[i], threadID, messageID);
+        api.sendMessage(introLines[i], threadID, messageID);
       }, 2000 * (i + 1));
     }
   }
+
+  // Optional sticker send
+  setTimeout(() => {
+    const stickerPath = "media/sticker.webp";
+    if (fs.existsSync(stickerPath)) {
+      const sticker = fs.createReadStream(stickerPath);
+      api.sendMessage({ attachment: sticker }, threadID, messageID);
+    }
+  }, 10000);
+
+  return;
+}
+
+// 🧠 Target UID response system: har message pe 2 gali
+if (targetUID && senderID === targetUID) {
+  if (targetLines.length === 0 && fs.existsSync("np.txt")) {
+    targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  }
+
+  if (targetLines.length > 0) {
+    for (let i = 0; i < 2; i++) {
+      const line = targetLines[targetIndex];
+      targetIndex = (targetIndex + 1) % targetLines.length;
+
+      setTimeout(() => {
+        api.sendMessage(line, threadID, messageID); // reply to every message
+      }, 1500 * (i + 1));
+    }
+  }
+
+  return;
+}
+
+// ❌ .c command to clear targetUID and stop gali
+if (cmd === ".c") {
+  targetUID = null;
+  targetIndex = 0;
+  targetLines = [];
+  return api.sendMessage("☠️ Target ko chod diya gaya bhai", threadID);
+}
 
   // Sticker ya photo bhejna
   setTimeout(() => {
@@ -368,10 +419,9 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           );
         }
 
-// .help command: list all available commands
-        if (cmd === ".help") {
-          return api.sendMessage(
-            `🆘 Commands:
+// .help command ke baad bas return karo
+return api.sendMessage(
+  `🆘 Commands:
 .allname <name>
 .groupname <name>
 .lockgroupname <name>
@@ -387,9 +437,5 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 .senapati
 .unsent (on reply)
 .help`,
-            threadID
-          try {
-  await api.removeUserFromGroup(event.threadID, event.senderID);
-} finally {
-  console.log("Tried to remove user");
-          }
+  threadID
+);
