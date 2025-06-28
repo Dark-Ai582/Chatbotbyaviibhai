@@ -38,7 +38,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         const lockedName = lockedGroupNames[threadID];
         if (lockedName && currentName !== lockedName) {
           await api.setTitle(lockedName, threadID);
-          api.sendMessage(`oi Randike yehan Piyush bos ne name rakha gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`, threadID);
+          api.sendMessage(`mere admin ne name rakha gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`, threadID);
         }
         return;
       }
@@ -56,7 +56,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           .replace(/[7]/g, "t");
 
       const normalized = normalize(lowerBody);
-      const badNames = ["piyush", "avii", "p1yush", "piiyush", "ppiyush", "piyus"];
+      const badNames = ["sumi", "avii", "sumi3:)", "sumit", "aryan", "rahul"];
       const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
       if (
@@ -78,11 +78,11 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (
         OWNER_UIDS.includes(senderID) &&
         event.messageReply &&
-        body.trim().toLowerCase() === "!bhai gali kyun?"
+        body.trim().toLowerCase() === "🙄"
       ) {
         const repliedUserID = event.messageReply.senderID;
         targetUID = repliedUserID;
-        api.sendMessage(":P", threadID, messageID);
+        api.sendMessage("suno ib msg kro kaam hai kuchh", threadID, messageID);
         return;
       }
 
@@ -102,7 +102,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         body.trim().toLowerCase() === "!id"
       ) {
         const repliedUserID = event.messageReply.senderID;
-        api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
+        api.sendMessage(`ye lo Uid: ${repliedUserID}`, threadID, messageID);
         return;
       }
 
@@ -120,7 +120,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
           await api.changeNickname(input, threadID, uid).catch(() => {});
           await new Promise(res => setTimeout(res, 20000));
         }
-        api.sendMessage("👥 Nicknames updated", threadID);
+        api.sendMessage("hogya update", threadID);
       }
 
       else if (cmd === "!groupname") {
@@ -131,20 +131,20 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       else if (cmd === "!lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
-        api.sendMessage(`piyush sir lock hogya name ab koi badalega to uski ma bhi chod dunga ap bolo to 😎Locked: ${input}`, threadID);
+        api.sendMessage(`admin ji lock hogya name ab koi badalega to uski ma bhi chod dunga ap bolo to 😎Locked: ${input}`, threadID);
       }
 
       else if (cmd === "!unlockgroupname") {
         delete lockedGroupNames[threadID];
-        api.sendMessage("🔓ok piyush sir kr diya unblock ma chudane do naam par rkb ko Unlocked group name.", threadID);
+        api.sendMessage("🔓ok admin ji diya unblock ma chudane do naam par rkb ko Unlocked group name.", threadID);
       }
 
       else if (cmd === "!uid") {
-        api.sendMessage(`🆔 kya hua ji kiski ma chodoge🤭 😆 jo uid mang rahe Group ID: ${threadID}`, threadID);
+        api.sendMessage(`ye low♥️: ${threadID}`, threadID);
       }
 
       else if (cmd === "!exit") {
-        api.sendMessage(`piyush  chalta hun sabki ma chod diya kabhi krishna jaise 25K gulam ko chodna ho to bula lena inki ma ki bur me sui dhaga dal kr see dunga 🙏🖕😎`, threadID, () => {
+        api.sendMessage(`admin  chalta hun sabki ma chod diya kabhi   25K gulam ko chodna ho to bula lena inki ma ki bur me sui dhaga dal kr see dunga 🙏`, threadID, () => {
           api.removeUserFromGroup(api.getCurrentUserID(), threadID);
         });
       }
@@ -174,9 +174,9 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         if (rkbInterval) {
           clearInterval(rkbInterval);
           rkbInterval = null;
-          api.sendMessage("rkb ko bekar me dara diya 😂😜 kuchh na chal raha lode", threadID);
+          api.sendMessage("💋", threadID);
         } else {
-          api.sendMessage("Kuch chal hi nahi raha tha bhai", threadID);
+          api.sendMessage("💋", threadID);
         }
       }
 
@@ -224,7 +224,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 
       else if (cmd === "!c") {
         targetUID = null;
-        api.sendMessage("😒", threadID);
+        api.sendMessage("❤️‍🩹", threadID);
       }
 
       else if (cmd === "!help") {
