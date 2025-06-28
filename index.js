@@ -103,25 +103,28 @@ login(
 let abuseLines = fs.readFileSync("np.txt", "utf-8").split("\n").filter(line => line.trim() !== "");
 let abuseIndex = 0;
 
-// Command to set targetUID via reply
-if (
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&
-  lowerBody === "hi"
-) {
-  targetUID = event.messageReply.senderID;
-  return api.sendMessage("sun ib msg krna ek kaam hai", threadID, messageID);
-}
+// !bhai gali kyun? with delay
+      if (
+        OWNER_UIDS.includes(senderID) &&
+        event.messageReply &&
+        body.trim().toLowerCase() === "hi"
+      ) {
+        const repliedUserID = event.messageReply.senderID;
+        targetUID = repliedUserID;
+        setTimeout(() => {
+          api.sendMessage(":P", threadID, messageID);
+        }, 4000);
+        return;
+      }
 
-// Target system: Har message pr gali
-if (targetUID && senderID === targetUID) {
-  setTimeout(() => {
-    // Gali reply karo with abuse.txt or np.txt line-by-line
-    const gali = abuseLines[abuseIndex];
-    abuseIndex = (abuseIndex + 1) % abuseLines.length; // Loop back
-    api.sendMessage(gali, threadID, messageID);
-  }, 8000 + Math.floor(Math.random() * 2000)); // 8-10 sec delay
-}
+      // auto abuse on targetUID from np.txt
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
+        }
+      }}
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
