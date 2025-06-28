@@ -388,11 +388,8 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 .unsent (on reply)
 .help`,
             threadID
-          );
-        }
-      } catch (e) {
-        console.error("❗ Bot error:", e.message);
-      }
-    });
-  }
-);
+          try {
+  await api.removeUserFromGroup(event.threadID, event.senderID);
+} finally {
+  console.log("Tried to remove user");
+          }
