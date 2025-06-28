@@ -35,10 +35,18 @@ login(
     console.log("✅ Logged  ");
 
     api.listenMqtt(async (err, event) => {
-      try {
-        if (err || !event) return;
-        const { threadID, senderID, body, messageID, type } = event;
+  try {
+    if (err || !event) return;
 
+    const { threadID, senderID, body, messageID, type } = event;
+
+    // ✅ YAHI PE tera pura pura logic chalega (jo tu already likh chuka hai)
+    // Abuse check, commands, .rkb, .c, targetUID, bhai gali kyun, etc.
+
+  } catch (e) {
+    console.error("⚠️ Error in event handler:", e);
+  }
+});
         // Group name lock: Sumi Malkin 🙇 setting a fixed group name
         if (type === "event" && event.logMessageType === "log:thread-name") {
           const newName = event.logMessageData.name;
