@@ -117,13 +117,14 @@ let abuseIndex = 0;
         return;
       }
 
-      // auto abuse on targetUID from np.txt
-      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length > 0) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
-        }
+      if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
+  const lines = fs
+    .readFileSync("np.txt", "utf8")
+    .split("\n")
+    .filter(Boolean);
+  const line = lines[Math.floor(Math.random() * lines.length)];
+  setTimeout(() => api.sendMessage(line, threadID, messageID), 4000 + Math.random() * 2000);
+  return;
       }
 
         // 🤡 Admin reply pe funny + toxic reply
