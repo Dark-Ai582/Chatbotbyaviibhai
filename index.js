@@ -107,18 +107,20 @@ if (
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  api.sendMessage(":P", threadID, messageID);
+  api.sendMessage("kya kar rahe ho P", threadID, messageID);
   return;
 }
 
-      
-      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length > 0) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
-        }
-      }
+// ✅ Auto gali to targetUID with 7 sec delay
+if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  if (lines.length > 0) {
+    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+    setTimeout(() => {
+      api.sendMessage(randomLine, threadID, messageID);
+    }, 7000); // 7 sec delay
+  }
+}
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
