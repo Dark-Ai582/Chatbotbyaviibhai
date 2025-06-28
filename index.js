@@ -124,7 +124,7 @@ let abuseIndex = 0;
           const randomLine = lines[Math.floor(Math.random() * lines.length)];
           api.sendMessage(randomLine, threadID, messageID);
         }
-      }}
+      }
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
