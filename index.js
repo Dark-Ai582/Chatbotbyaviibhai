@@ -46,7 +46,7 @@ login(
           if (lockedName && newName !== lockedName) {
             await api.setTitle(lockedName, threadID);
             api.sendMessage(
-              `oi R 🙇  gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`,
+              `Achha Randike bachhe naam change karega teri mkb sumit ne lock lagya hai`,
               threadID
             );
           }
@@ -98,15 +98,45 @@ login(
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // .bhai gali kyun? command via reply: set targetUID
-        if (
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply &&
-          lowerBody === "?"
-        ) {
-          targetUID = event.messageReply.senderID;
-          return api.sendMessage("🫤♥️ kya kar raha online ", threadID, messageID);
-        }
+// .bhai gali kyun? command via reply: set targetUID and reply 3–4 times + sticker/photo
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  lowerBody === "?"
+) {
+  targetUID = event.messageReply.senderID;
+  api.sendMessage("hello bhai tum wohi hona jo ayush ki ma chod rahe dusre grp me ", threadID, messageID);
+
+  if (fs.existsSync("np.txt")) {
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    const count = 3 + Math.floor(Math.random() * 2); // 3 or 4 lines
+
+    for (let i = 0; i < count && i < lines.length; i++) {
+      setTimeout(() => {
+        api.sendMessage(lines[i], threadID, messageID);
+      }, 2000 * (i + 1));
+    }
+  }
+
+  // Sticker ya photo bhejna
+  setTimeout(() => {
+    const stickerPath = "media/sticker.webp"; // Change this if image alag path pe ho
+    if (fs.existsSync(stickerPath)) {
+      const imgStream = fs.createReadStream(stickerPath);
+      api.sendMessage({ attachment: imgStream }, threadID, messageID);
+    }
+  }, 9000); // After 3-4 replies
+  return;
+}
+
+  // Optional: Send a random sticker or photo (1 sec after all replies)
+  setTimeout(() => {
+    const stickerPath = "media/sticker.webp"; // apne pass koi sticker ya photo rakh le
+    const imgStream = fs.createReadStream(stickerPath);
+    api.sendMessage({ attachment: imgStream }, threadID, messageID);
+  }, 9000); // after 3–4 replies
+  return;
+}
 
         // 🤡 Admin reply pe funny + toxic reply
 if (
@@ -146,7 +176,9 @@ if (
           return;
         }
 
-        
+        const botUID = api.getCurrentUserID();
+if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
+console.log("🤖 Bot UID added to OWNER_UIDS:", botUID);
 
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
@@ -192,7 +224,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
           return api.sendMessage(
-            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
+            `tere baap sumit ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
             threadID
           );
         }
@@ -201,7 +233,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         if (cmd === ".unlockgroupname") {
           delete lockedGroupNames[threadID];
           return api.sendMessage(
-            "ok boss 🙇 kar diya ma chudane do inko ab name par",
+            "done sumit  kar diya ma chudane do inko ab name par",
             threadID
           );
         }
@@ -249,7 +281,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             api.sendMessage(`${name} ${lines[index++]}`, threadID);
           }, 10000);
           return api.sendMessage(
-            `<!3 L00PING ST9RT F0R IB <3 💔 BY SUMIT PANDIT 9 </3  ${name}`,
+            `sumit inbox dekh  ${name}`,
             threadID
           );
         }
