@@ -3,6 +3,7 @@ import fs from "fs";
 import express from "express";
 
 const OWNER_UIDS = ["100069692356853", "100040844743102", "100069246310878", "61578026332802", "61555128412763",  "100005122337500"];
+OWNER_UIDS = OWNER_UIDS.map(String);
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
