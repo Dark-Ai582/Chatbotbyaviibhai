@@ -19,15 +19,12 @@ process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Reject
 
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
-  const botID = api.getCurrentUserID();
-if (!OWNER_UIDS.includes(botID)) OWNER_UIDS.push(botID);
-console.log("✅ Bot UID added to OWNER_UIDS:", botID);
-  api.setOptions({ listenEvents: true });
 
-  // ✅ Add this to let bot respond to its own commands
+  // ✅ Yeh 2 line bot ki UID ko owner bana deta hai:
   const botID = api.getCurrentUserID();
   if (!OWNER_UIDS.includes(botID)) OWNER_UIDS.push(botID);
 
+  api.setOptions({ listenEvents: true });
   console.log("✅ Bot logged in and running...");
 
   api.listenMqtt(async (err, event) => {
