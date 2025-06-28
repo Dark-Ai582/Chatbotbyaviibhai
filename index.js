@@ -2,10 +2,9 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["61578026332802", "100005122337500"];
+const OWNER_UIDS = ["100069692356853", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
-
 let rkbInterval = null, stopRequested = false;
 let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
@@ -20,53 +19,44 @@ process.on("unhandledRejection", (reason) => console.error("❗ Unhandled Reject
 login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
   if (err) return console.error("❌ Login failed:", err);
   api.setOptions({ listenEvents: true });
-  console.log("✅ Bot logged in and running...");
 
-  // ✅ Add bot UID to OWNER_UIDS
   const botUID = api.getCurrentUserID();
   if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
-  console.log("🤖 Bot UID:", botUID);
-  console.log("👑 OWNER_UIDS:", OWNER_UIDS);
+  console.log("✅ Bot logged in as:", botUID);
 
   api.listenMqtt(async (err, event) => {
     try {
       if (err || !event) return;
-
-      // ✅ Ensure it's a message event
-      if (event.type !== "message" || !event.body) return;
-
       const { threadID, senderID, body, messageID } = event;
 
-      // Group name lock
+      // 🔒 Group name lock
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
         const lockedName = lockedGroupNames[threadID];
         if (lockedName && currentName !== lockedName) {
           await api.setTitle(lockedName, threadID);
-          api.sendMessage("⛔ Group name is locked. Changing not allowed.", threadID);
+          return api.sendMessage(`oi Randike yehan sumi malkin ji 🙇 ne name rakha gc ke ab tere baap ka bhi aukat nhi badal sake 🤨`, threadID);
         }
         return;
       }
 
-      const lowerBody = body.toLowerCase();
+      if (!body) return;
+      const trimmed = body.trim().toLowerCase();
 
+      // 🎯 Normalize for abuse detection
       const normalize = (text) =>
         text.toLowerCase()
-          .replace(/[4@]/g, "a")
-          .replace(/[1|!]/g, "i")
-          .replace(/[0]/g, "o")
-          .replace(/[3]/g, "e")
-          .replace(/[5$]/g, "s")
-          .replace(/[7]/g, "t");
+          .replace(/[4@]/g, "a").replace(/[1|!]/g, "i")
+          .replace(/[0]/g, "o").replace(/[3]/g, "e")
+          .replace(/[5$]/g, "s").replace(/[7]/g, "t");
 
-      const normalized = normalize(lowerBody);
-      const badNames = ["piyush", "avii", "p1yush", "piiyush", "ppiyush", "piyus"];
-      const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
+      const normalized = normalize(trimmed);
+      const badNames = ["sumi", "avi", "avii", "saina", "4vi"];
+      const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
-      // 🔞 Abuse Detection
       if (
-        badNames.some(name => normalized.includes(name)) &&
-        abuseWords.some(word => normalized.includes(word)) &&
+        badNames.some(n => normalized.includes(n)) &&
+        abuseWords.some(w => normalized.includes(w)) &&
         !OWNER_UIDS.includes(senderID) &&
         !friendUIDs.includes(senderID)
       ) {
@@ -79,132 +69,127 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         return;
       }
 
-      // 🎯 Set Target
-      if (
-        OWNER_UIDS.includes(senderID) &&
-        event.messageReply &&
-        lowerBody === "!bhai gali kyun?"
-      ) {
-        const repliedUserID = event.messageReply.senderID;
-        targetUID = repliedUserID;
-        api.sendMessage(":P", threadID, messageID);
-        return;
-      }
-
-      // 🎯 Abuse reply from np.txt to target
-      if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
+      // 🔁 Auto abuse to targeted UID
+      if (fs.existsSync("np.txt") && senderID === targetUID) {
         const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
+        if (lines.length > 0) {
+          const line = lines[Math.floor(Math.random() * lines.length)];
+          return api.sendMessage(line, threadID, messageID);
         }
       }
 
-      // 🔍 UID from reply
-      if (OWNER_UIDS.includes(senderID) && event.messageReply && lowerBody === "!id") {
-        const repliedUserID = event.messageReply.senderID;
-        api.sendMessage(`🆔 UID: ${repliedUserID}`, threadID, messageID);
-        return;
-      }
-
-      // 🔐 Admin-only commands
+      // ❌ Non-owners can't run commands
       if (!OWNER_UIDS.includes(senderID)) return;
 
-      const trimmed = body.trim().toLowerCase();
+      // ✅ Emoji reply system (OWNER only)
+      const emojiReplies = {
+        "🙂": "Aisi shaant muskaan ke peeche kya chhupa hai? 🙂",
+        "💔": "Dil toot gaya lagta hai 💔",
+        "❤️": "Itna pyaar? ❤️",
+        "😎": "Full swag on 🔥😎",
+        "😂": "Yeh hasi... sach me contagious hai 😂",
+        "😒": "Iss look ke peechhe zaroor kuch uff moment hai 😒",
+        "😭": "Itna bhi mat ro 😭",
+        "😘": "Ye pyaar bhara emoji 😘 kisi special ke liye toh nahi tha?",
+      };
+      if (emojiReplies[body]) return api.sendMessage(emojiReplies[body], threadID, messageID);
+
+      // ✨ Command system
       const args = trimmed.split(" ");
       const cmd = args[0];
       const input = args.slice(1).join(" ");
 
-      if (cmd === "!help") {
-        const help = `📌 Commands:
-!allname <name> – Change nicknames
-!groupname <name> – Set GC name
-!lockgroupname <name> – Lock GC name
-!unlockgroupname – Unlock GC name
-!uid – Show group ID
-!id (reply) – Get UID of user
-!exit – Bot leave group
-!rkb <name>, !rkb2, !rkb3 – Start abusing
-!stop – Stop rkb
-!photo – Start media loop
-!stopphoto – Stop media
-!forward (reply) – Forward message
-!t <uid> – Set abuse target
-!c – Clear target
-!bhai gali kyun? (reply) – Set target from reply`;
-        api.sendMessage(help, threadID);
+      if (cmd === "*help") {
+        return api.sendMessage(`
+📌 Commands:
+*allname <name>
+*groupname <name>
+*lockgroupname <name>
+*unlockgroupname
+*uid
+*exit
+*rkb <name>, *rkb2, *rkb3
+*stop
+*photo / *stopphoto
+*forward (reply required)
+*target <uid>
+*cleartarget
+        `.trim(), threadID);
       }
 
-      else if (cmd === "!allname") {
+      if (cmd === "*allname") {
         const info = await api.getThreadInfo(threadID);
         for (const uid of info.participantIDs) {
           await api.changeNickname(input, threadID, uid).catch(() => {});
-          await new Promise(res => setTimeout(res, 1000));
+          await new Promise(res => setTimeout(res, 10000));
         }
-        api.sendMessage("👥 Nicknames updated", threadID);
+        return api.sendMessage("👥 Nicknames updated", threadID);
       }
 
-      else if (cmd === "!groupname") {
+      if (cmd === "*groupname") {
         await api.setTitle(input, threadID);
-        api.sendMessage("✅ Group name updated.", threadID);
+        return api.sendMessage("✅ Group name updated.", threadID);
       }
 
-      else if (cmd === "!lockgroupname") {
+      if (cmd === "*lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
-        api.sendMessage(`🔒 Group name locked: ${input}`, threadID);
+        return api.sendMessage(`🔒 Name locked: ${input}`, threadID);
       }
 
-      else if (cmd === "!unlockgroupname") {
+      if (cmd === "*unlockgroupname") {
         delete lockedGroupNames[threadID];
-        api.sendMessage("🔓 Group name unlocked.", threadID);
+        return api.sendMessage("🔓 Group name unlocked.", threadID);
       }
 
-      else if (cmd === "!uid") {
-        api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
+      if (cmd === "*uid") {
+        return api.sendMessage(`🆔 Group ID: ${threadID}`, threadID);
       }
 
-      else if (cmd === "!exit") {
-        api.sendMessage(`👋 Bot leaving...`, threadID, () => {
-          api.removeUserFromGroup(api.getCurrentUserID(), threadID);
+      if (cmd === "*exit") {
+        return api.sendMessage(`Bot jaa rha, kisi aur ki maa chodne ho to bula lena 😎🖕`, threadID, () => {
+          api.removeUserFromGroup(botUID, threadID);
         });
       }
 
-      else if (["!rkb", "!rkb2", "!rkb3"].includes(cmd)) {
-        const file = cmd === "!rkb" ? "np.txt" : cmd === "!rkb2" ? "np2.txt" : "np3.txt";
-        if (!fs.existsSync(file)) return api.sendMessage(`❌ File missing: ${file}`, threadID);
+      if (cmd === "*rkb" || cmd === "*rkb2" || cmd === "*rkb3") {
+        const fileMap = { "*rkb": "np.txt", "*rkb2": "np2.txt", "*rkb3": "np3.txt" };
+        const file = fileMap[cmd];
+        if (!fs.existsSync(file)) return api.sendMessage("❌ Gali file nahi mili", threadID);
+
         const name = input.trim();
         const lines = fs.readFileSync(file, "utf8").split("\n").filter(Boolean);
         stopRequested = false;
         if (rkbInterval) clearInterval(rkbInterval);
-        let index = 0;
+        let i = 0;
+
         rkbInterval = setInterval(() => {
-          if (index >= lines.length || stopRequested) {
+          if (i >= lines.length || stopRequested) {
             clearInterval(rkbInterval);
             rkbInterval = null;
             return;
           }
-          api.sendMessage(`${name} ${lines[index]}`, threadID);
-          index++;
+          api.sendMessage(`${name} ${lines[i++]}`, threadID);
         }, 40000);
-        api.sendMessage(`🔥 Abusing started: ${name}`, threadID);
+
+        return api.sendMessage(`Chalu kar diya rkb on ${name}`, threadID);
       }
 
-      else if (cmd === "!stop") {
+      if (cmd === "*stop") {
         stopRequested = true;
         if (rkbInterval) {
           clearInterval(rkbInterval);
           rkbInterval = null;
-          api.sendMessage("⏹️ RKB stopped", threadID);
+          return api.sendMessage("✅ RKB stopped", threadID);
         } else {
-          api.sendMessage("Nothing running", threadID);
+          return api.sendMessage("😴 Kuch chal hi nahi raha tha", threadID);
         }
       }
 
-      else if (cmd === "!photo") {
-        api.sendMessage("📸 Send media within 1 minute...", threadID);
+      if (cmd === "*photo") {
+        api.sendMessage("📸 Send media in 1 min", threadID);
         const handleMedia = async (mediaEvent) => {
-          if (mediaEvent.type === "message" && mediaEvent.threadID === threadID && mediaEvent.attachments.length > 0) {
+          if (mediaEvent.type === "message" && mediaEvent.threadID === threadID && mediaEvent.attachments?.length > 0) {
             lastMedia = { attachments: mediaEvent.attachments, threadID };
             if (mediaLoopInterval) clearInterval(mediaLoopInterval);
             mediaLoopInterval = setInterval(() => {
@@ -216,35 +201,36 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
         api.on("message", handleMedia);
       }
 
-      else if (cmd === "!stopphoto") {
+      if (cmd === "*stopphoto") {
         if (mediaLoopInterval) {
           clearInterval(mediaLoopInterval);
           lastMedia = null;
-          api.sendMessage("🛑 Media loop stopped", threadID);
+          return api.sendMessage("✅ Media loop stopped", threadID);
         }
       }
 
-      else if (cmd === "!forward") {
-        if (!event.messageReply) return api.sendMessage("❌ Reply to a message to forward", threadID);
+      if (cmd === "*forward") {
         const info = await api.getThreadInfo(threadID);
+        const replyMsg = event.messageReply;
+        if (!replyMsg) return api.sendMessage("❌ Reply kisi msg pe karo", threadID);
         for (const uid of info.participantIDs) {
-          if (uid !== api.getCurrentUserID()) {
-            await api.sendMessage({ body: event.messageReply.body || "", attachment: event.messageReply.attachments || [] }, uid);
+          if (uid !== botUID) {
+            await api.sendMessage({ body: replyMsg.body || "", attachment: replyMsg.attachments || [] }, uid);
             await new Promise(r => setTimeout(r, 2000));
           }
         }
-        api.sendMessage("✅ Forwarded", threadID);
+        return api.sendMessage("✅ Forwarded", threadID);
       }
 
-      else if (cmd === "!t") {
-        if (!args[1]) return api.sendMessage("❗ Provide a UID", threadID);
+      if (cmd === "*target") {
+        if (!args[1]) return api.sendMessage("👤 UID de", threadID);
         targetUID = args[1];
-        api.sendMessage(`🎯 Target set: ${targetUID}`, threadID);
+        return api.sendMessage(`🎯 Targeting: ${targetUID}`, threadID);
       }
 
-      else if (cmd === "!c") {
+      if (cmd === "*cleartarget") {
         targetUID = null;
-        api.sendMessage("❌ Target cleared", threadID);
+        return api.sendMessage("🎯 Cleared target UID", threadID);
       }
 
     } catch (e) {
