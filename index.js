@@ -184,7 +184,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
   return;
 }
      
-    let targetUID = null;
+    
 
 
         
