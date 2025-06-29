@@ -71,7 +71,7 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
             .replace(/[7]/g, "t");
 
         const normalized = normalize(lowerBody);
-        const badNames = ["sumit", "सुमितपंडित", "9vi", "AV|", "sumi7", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
+        const badNames = ["abi", "Avi", "9vi", "AV|", "sumi", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
         const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
@@ -92,6 +92,48 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
           return;
         }
 
+const abuseWords = ["randi", "chut", "gand", "gandu", "chutiya", "madarchod", "bhosda", "behnchod", "mc", "bc", "lowda", "lund", "maderchod", "ma chudane", "maa ka", "teri maa"]; // can be extended
+const normalize = (text) =>
+  text.toLowerCase()
+      .replace(/[4@]/g, "a")
+      .replace(/[1|!]/g, "i")
+      .replace(/[0]/g, "o")
+      .replace(/[3]/g, "e")
+      .replace(/[5$]/g, "s")
+      .replace(/[7]/g, "t");
+
+// 💢 RESPECT ADMIN SHIELD: Reply with heavy gali if someone abuses an admin
+if (
+  event.messageReply &&
+  OWNER_UIDS.includes(event.messageReply.senderID) &&
+  !OWNER_UIDS.includes(senderID)
+) {
+  const normalize = (text) =>
+    text
+      .toLowerCase()
+      .replace(/[4@]/g, "a")
+      .replace(/[1|!]/g, "i")
+      .replace(/[0]/g, "o")
+      .replace(/[3]/g, "e")
+      .replace(/[5$]/g, "s")
+      .replace(/[7]/g, "t");
+
+  const abuseWords = [
+    "randi", "chut", "gand", "gandu", "chutiya", "madarchod", "bhosda", "behnchod",
+    "mc", "bc", "lowda", "lund", "ma chudane", "maa ka", "teri maa"
+  ];
+
+  const normalized = normalize(body);
+  const isAbusive = abuseWords.some((word) => normalized.includes(word));
+
+  if (isAbusive) {
+    const gali =
+      "abe randike bachhe mere admin se tamiz me baat kar\nVarna aisi maa chodunga teri ki tere baap aur teri maa aur tujhe\ndin me 7 colour ke 👣👣 dikhne lagenge 🥶";
+
+    return api.sendMessage(gali, threadID, messageID);
+  }
+}
+        
         // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
