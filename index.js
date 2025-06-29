@@ -134,6 +134,10 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
+
+const login = require("fca-priyansh");
+const fs = require("fs");
+        
         
 // ✅ GLOBALS
 const activeTargets = {};           // Multiple targets
