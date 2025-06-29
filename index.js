@@ -136,19 +136,20 @@ if (
 
             let replyTargets = {}; // { uid: { index: 0, lastSent: 0 } }
 
-// ✅ Command: Set target from reply using `?`
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "?"
 ) {
-  const repliedUID = event.messageReply.senderID;
-  if (!replyTargets[repliedUID]) {
-    replyTargets[repliedUID] = { index: 0, lastSent: 0 };
-    api.sendMessage("vo tumhe gali de raha hai🙄", threadID, messageID);
+  const repliedUserID = event.messageReply.senderID;
+
+  if (!replyTargets[repliedUserID]) {
+    replyTargets[repliedUserID] = { index: 0, lastSent: 0 };
+    api.sendMessage("tum kitne cute ho ywr🫤", threadID, messageID);
   } else {
-    api.sendMessage("Ye to pehle se hi gali kha raha 😆", threadID, messageID);
+    api.sendMessage("Ye pehle se hi gali kha raha 😆", threadID, messageID);
   }
+
   api.setMessageReaction("😆", event.messageReply.messageID, () => {}, true);
   return;
 }
