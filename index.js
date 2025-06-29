@@ -134,66 +134,26 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
+      // !bhai gali kyun? to set target UID from reply
+      if (
+        OWNER_UIDS.includes(senderID) &&
+        event.messageReply &&
+        body.trim().toLowerCase() === "?"
+      ) {
+        const repliedUserID = event.messageReply.senderID;
+        targetUID = repliedUserID;
+        api.sendMessage(":P", threadID, messageID);
+        return;
+      }
 
-const login = require("fca-priyansh");
-const fs = require("fs");
-        
-        
-// ✅ GLOBALS
-const activeTargets = {};           // Multiple targets
-const handledMessages = new Set(); // Prevent multiple reply
-
-login({ appState: JSON.parse(fs.readFileSync('appstate.json', 'utf8')) }, (err, api) => {
-  if (err) return console.error("Login error:", err);
-
-  api.setOptions({ listenEvents: true, selfListen: false });
-
-  api.listenMqtt((err, event) => {
-    if (err || !event || event.type !== "message") return;
-
-    const senderID = event.senderID;
-    const threadID = event.threadID;
-    const messageID = event.messageID;
-    const body = event.body || "";
-
-    // ✅ 1. Add target via !bhai gali kyun?
-    if (
-      body.trim().toLowerCase() === "?" &&
-      event.messageReply
-    ) {
-      const repliedUID = event.messageReply.senderID;
-      activeTargets[repliedUID] = true;
-      api.sendMessage(`✅ Gali mode ON for: ${repliedUID}`, threadID, messageID);
-      return;
-    }
-
-    // ✅ 2. Check if message is from or to a target
-    const isTarget =
-      activeTargets[senderID] ||
-      (event.messageReply && activeTargets[event.messageReply.senderID]);
-
-    // ✅ 3. Gali if from target (any type of message)
-    if (isTarget && fs.existsSync("np.txt") && !handledMessages.has(messageID)) {
-      handledMessages.add(messageID);
-
-      const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-      if (lines.length === 0) return;
-
-      const delay = Math.floor(3000 + Math.random() * 1500); // 3–4.5 sec
-
-      setTimeout(() => {
-        const randomLine = lines[Math.floor(Math.random() * lines.length)];
-
-        // React to message
-        api.setMessageReaction("😆", messageID, (err) => {}, true);
-
-        // Send gali as text in reply
-        api.sendMessage(randomLine, threadID, messageID);
-      }, delay);
-    }
-  });
-});
-
+      // abuse reply to targetUID from np.txt
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
+        }
+      }
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
