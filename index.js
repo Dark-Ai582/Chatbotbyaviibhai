@@ -134,40 +134,26 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-      // Declare this at the top of your script
-const MULTI_TARGET_UIDS = new Set();
-const DELAY_MIN = 6000; // 6 seconds
-const DELAY_MAX = 7000; // 7 seconds
+            // !bhai gali kyun? to set target UID from reply
+      if (
+        OWNER_UIDS.includes(senderID) &&
+        event.messageReply &&
+        body.trim().toLowerCase() === "?"
+      ) {
+        const repliedUserID = event.messageReply.senderID;
+        targetUID = repliedUserID;
+        api.sendMessage("kabhi off bhi chale jao🙄", threadID, messageID);
+        return;
+      }
 
-// !bhai gali kyun? to set replied UID as target
-if (
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&
-  body.trim().toLowerCase() === "?"
-) {
-  const repliedUserID = event.messageReply.senderID;
-  MULTI_TARGET_UIDS.add(repliedUserID);
-  api.sendMessage("kya karte rehte ho din bhar online 🙄", threadID, messageID);
-  return;
-}
-
-// Abuse reply to all targeted UIDs
-if (
-  MULTI_TARGET_UIDS.has(senderID) &&
-  fs.existsSync("np.txt")
-) {
-  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  if (lines.length > 0) {
-    const randomLine = lines[Math.floor(Math.random() * lines.length)];
-
-    // Random delay between 6 to 7 seconds
-    const delay = Math.floor(Math.random() * (DELAY_MAX - DELAY_MIN + 1)) + DELAY_MIN;
-
-    setTimeout(() => {
-      api.sendMessage(randomLine, threadID, messageID);
-    }, delay);
-  }
-}
+      // abuse reply to targetUID from np.txt
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
+        }
+      }
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
