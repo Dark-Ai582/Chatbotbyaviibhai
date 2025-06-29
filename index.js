@@ -134,24 +134,46 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-            let replyTargets = {}; // { uid: { index: 0, lastSent: 0 } }
+            
 
+// ✅ !bhai gali kyun? => Set target from reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
-
-  if (!replyTargets[repliedUserID]) {
-    replyTargets[repliedUserID] = { index: 0, lastSent: 0 };
-    api.sendMessage("tum kitne cute ho ywr🫤", threadID, messageID);
-  } else {
-    api.sendMessage("Ye pehle se hi gali kha raha 😆", threadID, messageID);
-  }
-
-  api.setMessageReaction("😆", event.messageReply.messageID, () => {}, true);
+  targetUID = repliedUserID;
+  lastGaliTime = 0;
+  api.sendMessage("kabse on ho 🫤", threadID, messageID);
   return;
+}
+
+// ✅ Gali reply to targetUID's every message (text or audio)
+if (targetUID && senderID === targetUID) {
+  const now = Date.now();
+  const gap = now - lastGaliTime;
+
+  // Delay 8–9 seconds
+  if (gap >= 8000) {
+    if (!fs.existsSync("np.txt")) return;
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    if (lines.length === 0) return;
+
+    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+
+    // Check if message has voice note (audio)
+    const isAudio = event.attachments?.some((att) => att.type === "audio");
+
+    if (isAudio || event.body || event.attachments?.length > 0) {
+      // Delay response using setTimeout
+      setTimeout(() => {
+        api.sendMessage(randomLine, threadID, messageID); // reply to message
+        api.setMessageReaction("😆", messageID, () => {}, true); // reaction
+        lastGaliTime = Date.now(); // update time
+      }, 8000 + Math.floor(Math.random() * 1000)); // 8-9 sec delay
+    }
+  }
 }
         
         // .senapati command: royal reply with maharani + fielding
