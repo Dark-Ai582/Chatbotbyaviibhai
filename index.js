@@ -134,26 +134,45 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-            // !bhai gali kyun? to set target UID from reply
-      if (
-        OWNER_UIDS.includes(senderID) &&
-        event.messageReply &&
-        body.trim().toLowerCase() === "?"
-      ) {
-        const repliedUserID = event.messageReply.senderID;
-        targetUID = repliedUserID;
-        api.sendMessage("kabhi off bhi chale jao🙄", threadID, messageID);
-        return;
-      }
+            let activeTargets = {}; // { uid: { index: 0, intervalId: setIntervalRef } }
 
-      // abuse reply to targetUID from np.txt
-      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length > 0) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
-        }
-      }
+// Set target by reply — auto start loop
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  body.trim().toLowerCase() === "?"
+) {
+  const targetId = event.messageReply.senderID;
+
+  if (!activeTargets[targetId]) {
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    if (lines.length === 0) return api.sendMessage("❌ np.txt is empty", threadID);
+
+    let index = 0;
+
+    const intervalId = setInterval(() => {
+      api.sendMessage(lines[index], targetId);
+      index = (index + 1) % lines.length;
+    }, 10000); // Every 10 sec
+
+    activeTargets[targetId] = { index, intervalId };
+    api.setMessageReaction("😆", event.messageReply.messageID, () => {}, true);
+    api.sendMessage(`online itna mat raho🙂ok`, threadID, messageID);
+  } else {
+    api.sendMessage("Already targeting this UID.", threadID, messageID);
+  }
+
+  return;
+}
+
+// Stop all targets manually using `.c` command
+if (cmd === ".c") {
+  for (const uid in activeTargets) {
+    clearInterval(activeTargets[uid].intervalId);
+    delete activeTargets[uid];
+  }
+  return api.sendMessage("😭😭", threadID);
+}
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
