@@ -134,102 +134,83 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        // 🔁 Global variables for multi-target tracking
-const activeTargets = {}; // Format: { uid: true, ... }
-const activeTimers = {};  // Format: { uid: [setTimeoutID, ...] }
-const handledMessages = {}; // Format: { uid: Set of messageIDs }
-
-// !bhai gali kyun? with delay and full reply system
+        
+// 📌 Step 1: Command to set target via reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "?"
 ) {
-  const repliedUserID = event.messageReply.senderID;
-  targetUID = repliedUserID;
-  setTimeout(() => {
-    api.sendMessage("😒kam kr ke kuch din bhar on ", threadID, messageID);
-  }, 4000);
+  const repliedUID = event.messageReply.senderID;
+  activeTargets[repliedUID] = true;
+  api.sendMessage("Ek baat yad aayi😂", threadID, messageID);
   return;
 }
 
-// Auto abuse on targetUID from np.txt with full content handling + random reply count + react
+// 📌 Step 2: Check if message is from or toward target
+const isTargetMessage =
+  activeTargets[senderID] || // target ne msg bheja
+  (event.messageReply && activeTargets[event.messageReply.senderID]); // kisi ne target ko reply diya
+
 if (
-  targetUID &&
-  senderID === targetUID &&
-  fs.existsSync("np.txt")
+  isTargetMessage &&
+  fs.existsSync("np.txt") &&
+  !handledMessages.has(messageID)
 ) {
+  handledMessages.add(messageID);
+
   const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  if (lines.length === 0) return;
 
-  if (lines.length > 0) {
-    // Only reply to new messages (not the same repeated one)
-    const currentMsgID = messageID;
+  const delay = Math.floor(4000 + Math.random() * 1500); // 4–5.5 sec delay
 
-    // Random delay: 6 to 7.5 seconds
-    const delay = Math.floor(6000 + Math.random() * 1500);
+  setTimeout(() => {
+    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+    const replyType = Math.floor(Math.random() * 6); // 0–5
+    const mediaPath = __dirname + "/media/";
 
-    // Random 1 or 2 replies
-    const replyCount = Math.random() < 0.5 ? 1 : 2;
+    // 😆 React to message
+    api.setMessageReaction("😆", messageID, (err) => {}, true);
 
-    setTimeout(() => {
-      for (let i = 0; i < replyCount; i++) {
-        const randomLine = lines[Math.floor(Math.random() * lines.length)];
-        api.sendMessage(randomLine, threadID, currentMsgID);
-      }
+    switch (replyType) {
+      case 0: // Text
+        api.sendMessage(randomLine, threadID, messageID);
+        break;
 
-      // Always react with 😆 to target's message
-      api.setMessageReaction("😆", currentMsgID, (err) => {}, true);
-    }, delay);
-  }
-}
-        
-        // Delay reply to targetUID with np.txt content (gali loop for individual target)
-        if (targetUID && senderID === targetUID && fs.existsSync("np.txt")) {
-          const lines = fs
-            .readFileSync("np.txt", "utf8")
-            .split("\n")
-            .filter(Boolean);
-          const line = lines[Math.floor(Math.random() * lines.length)];
-          // Delay between 4 to 6 seconds
-          setTimeout(() => api.sendMessage(line, threadID, messageID), 4000 + Math.random() * 2000);
-          return;
-        }
+      case 1: // Voice
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "voice.mp3")
+        }, threadID, messageID);
+        break;
 
-const activeH8Timers = {}; // Store per-UID active timeout IDs
+      case 2: // Gif
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "anim.gif")
+        }, threadID, messageID);
+        break;
 
-if (fs.existsSync("h8.txt")) {
-  const h8UIDs = fs.readFileSync("h8.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
+      case 3: // Image
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "pic.jpg")
+        }, threadID, messageID);
+        break;
 
-  if (h8UIDs.includes(senderID)) {
-    // Cancel old timeouts if exist
-    if (activeH8Timers[senderID]) {
-      for (const timeoutID of activeH8Timers[senderID]) {
-        clearTimeout(timeoutID);
-      }
+      case 4: // Sticker
+        api.sendMessage({
+          attachment: fs.createReadStream(mediaPath + "sticker.webp")
+        }, threadID, messageID);
+        break;
+
+      case 5: // Only emoji
+        const emojis = ["😜", "🫤", "😂", "😆", "😛", "😴", "🤡", "😝"];
+        api.sendMessage(`${emojis[Math.floor(Math.random() * emojis.length)]} ${randomLine}`, threadID, messageID);
+        break;
     }
-
-    activeH8Timers[senderID] = []; // Reset timer list
-
-    if (fs.existsSync("np.txt")) {
-      const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-
-      // Shuffle and take unique random 5-7 lines
-      const shuffled = lines.sort(() => 0.5 - Math.random());
-      const count = Math.floor(Math.random() * 3) + 5; // 5 to 7
-      const selectedLines = shuffled.slice(0, count);
-
-      selectedLines.forEach((line, index) => {
-        const delay = (index + 1) * (6000 + Math.floor(Math.random() * 1000)); // 6–7 sec per msg
-
-        const timeoutID = setTimeout(() => {
-          api.sendMessage(line, threadID, messageID);
-        }, delay);
-
-        activeH8Timers[senderID].push(timeoutID); // Save timeout ID to cancel later
-      });
-    }
-  }
-}
+  }, delay);
+          }   
 
         
         
