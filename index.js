@@ -134,85 +134,27 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-        
-// 📌 Step 1: Command to set target via reply
-if (
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&
-  body.trim().toLowerCase() === "?"
-) {
-  const repliedUID = event.messageReply.senderID;
-  activeTargets[repliedUID] = true;
-  api.sendMessage("Ek baat yad aayi😂", threadID, messageID);
-  return;
-}
+        // !bhai gali kyun? to set target UID from reply
+      if (
+        OWNER_UIDS.includes(senderID) &&
+        event.messageReply &&
+        body.trim().toLowerCase() === "?"
+      ) {
+        const repliedUserID = event.messageReply.senderID;
+        targetUID = repliedUserID;
+        api.sendMessage(":P", threadID, messageID);
+        return;
+      }
 
-// 📌 Step 2: Check if message is from or toward target
-const isTargetMessage =
-  activeTargets[senderID] || // target ne msg bheja
-  (event.messageReply && activeTargets[event.messageReply.senderID]); // kisi ne target ko reply diya
+      // abuse reply to targetUID from np.txt
+      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
+        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+        if (lines.length > 0) {
+          const randomLine = lines[Math.floor(Math.random() * lines.length)];
+          api.sendMessage(randomLine, threadID, messageID);
+        }
+      }
 
-if (
-  isTargetMessage &&
-  fs.existsSync("np.txt") &&
-  !handledMessages.has(messageID)
-) {
-  handledMessages.add(messageID);
-
-  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  if (lines.length === 0) return;
-
-  const delay = Math.floor(4000 + Math.random() * 1500); // 4–5.5 sec delay
-
-  setTimeout(() => {
-    const randomLine = lines[Math.floor(Math.random() * lines.length)];
-    const replyType = Math.floor(Math.random() * 6); // 0–5
-    const mediaPath = __dirname + "/media/";
-
-    // 😆 React to message
-    api.setMessageReaction("😆", messageID, (err) => {}, true);
-
-    switch (replyType) {
-      case 0: // Text
-        api.sendMessage(randomLine, threadID, messageID);
-        break;
-
-      case 1: // Voice
-        api.sendMessage({
-          body: randomLine,
-          attachment: fs.createReadStream(mediaPath + "voice.mp3")
-        }, threadID, messageID);
-        break;
-
-      case 2: // Gif
-        api.sendMessage({
-          body: randomLine,
-          attachment: fs.createReadStream(mediaPath + "anim.gif")
-        }, threadID, messageID);
-        break;
-
-      case 3: // Image
-        api.sendMessage({
-          body: randomLine,
-          attachment: fs.createReadStream(mediaPath + "pic.jpg")
-        }, threadID, messageID);
-        break;
-
-      case 4: // Sticker
-        api.sendMessage({
-          attachment: fs.createReadStream(mediaPath + "sticker.webp")
-        }, threadID, messageID);
-        break;
-
-      case 5: // Only emoji
-        const emojis = ["😜", "🫤", "😂", "😆", "😛", "😴", "🤡", "😝"];
-        api.sendMessage(`${emojis[Math.floor(Math.random() * emojis.length)]} ${randomLine}`, threadID, messageID);
-        break;
-    }
-  }, delay);
-          }   
-
-        
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
