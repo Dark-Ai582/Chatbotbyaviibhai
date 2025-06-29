@@ -92,15 +92,7 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
           return;
         }
 
-const abuseWords = ["randi", "chut", "gand", "gandu", "chutiya", "madarchod", "bhosda", "behnchod", "mc", "bc", "lowda", "lund", "maderchod", "ma chudane", "maa ka", "teri maa"]; // can be extended
-const normalize = (text) =>
-  text.toLowerCase()
-      .replace(/[4@]/g, "a")
-      .replace(/[1|!]/g, "i")
-      .replace(/[0]/g, "o")
-      .replace(/[3]/g, "e")
-      .replace(/[5$]/g, "s")
-      .replace(/[7]/g, "t");
+
 
 // 💢 RESPECT ADMIN SHIELD: Reply with heavy gali if someone abuses an admin
 if (
