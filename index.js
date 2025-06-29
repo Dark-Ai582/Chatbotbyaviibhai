@@ -118,13 +118,13 @@ if (
       .replace(/[5$]/g, "s")
       .replace(/[7]/g, "t");
 
-  const abuseWords = [
+  const galiWords = [
     "randi", "chut", "gand", "gandu", "chutiya", "madarchod", "bhosda", "behnchod",
     "mc", "bc", "lowda", "lund", "ma chudane", "maa ka", "teri maa"
   ];
 
   const normalized = normalize(body);
-  const isAbusive = abuseWords.some((word) => normalized.includes(word));
+  const isAbusive = galiWords.some((word) => normalized.includes(word));
 
   if (isAbusive) {
     const gali =
