@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100069692356853", "61562687054710", "100053326246767", "61578026332802", "100040844743102", "61555128412763", "100069246310878", "100005122337500"];
+const OWNER_UIDS = ["100069692356853", "61577620543563", "100053326246767", "61578026332802", "100040844743102", "61555128412763", "100069246310878", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
   ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim())
   : [];
@@ -31,7 +31,9 @@ login(
   { appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) },
   (err, api) => {
     if (err) return console.error("❌ Login failed:", err);
-    api.setOptions({ listenEvents: true });
+   api.setOptions({ listenEvents: true, selfListen: true });
+   const botUID = api.getCurrentUserID();
+if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
     console.log("✅ Logged  ");
 
     api.listenMqtt(async (err, event) => {
