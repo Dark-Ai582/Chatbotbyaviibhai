@@ -128,12 +128,11 @@ if (
 
   if (isAbusive) {
     const gali =
-      "abe randike bachhe mere admin se tamiz me baat kar\nVarna aisi maa chodunga teri ki tere baap aur teri maa aur tujhe\ndin me 7 colour ke 👣👣 dikhne lagenge 🥶";
+      "Abey Cancer bhosde se nikala hua bachha mere admin ke reply me se sahi se baat kr vrna teri ma chod dunga vo";
 
     return api.sendMessage(gali, threadID, messageID);
   }
-}
-        
+}        
         // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
