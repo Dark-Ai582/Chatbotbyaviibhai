@@ -136,42 +136,43 @@ if (
 
             
 
-// ✅ !bhai gali kyun? => Set target from reply
+let targetUIDs = {}; // Track multiple targets with lastGaliTime
+
+// ✅ !bhai gali kyun? → Add target from reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "?"
+  body.trim().toLowerCase() === "!bhai gali kyun?"
 ) {
   const repliedUserID = event.messageReply.senderID;
-  targetUID = repliedUserID;
-  lastGaliTime = 0;
-  api.sendMessage("kabse on ho 🫤", threadID, messageID);
+  targetUIDs[repliedUserID] = 0;
+  api.sendMessage("😁 Target set ho gaya randike pe", threadID, messageID);
   return;
 }
 
-// ✅ Gali reply to targetUID's every message (text or audio)
-if (targetUID && senderID === targetUID) {
+// ✅ Auto gali system for all targetUIDs
+if (senderID in targetUIDs) {
   const now = Date.now();
-  const gap = now - lastGaliTime;
+  const lastTime = targetUIDs[senderID];
+  const gap = now - lastTime;
 
-  // Delay 8–9 seconds
-  if (gap >= 8000) {
+  if (gap >= 9000) {
     if (!fs.existsSync("np.txt")) return;
     const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
     if (lines.length === 0) return;
 
-    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+    const line = lines[Math.floor(Math.random() * lines.length)];
 
-    // Check if message has voice note (audio)
-    const isAudio = event.attachments?.some((att) => att.type === "audio");
+    const hasMessage =
+      event.body ||
+      (event.attachments && event.attachments.length > 0);
 
-    if (isAudio || event.body || event.attachments?.length > 0) {
-      // Delay response using setTimeout
+    if (hasMessage) {
       setTimeout(() => {
-        api.sendMessage(randomLine, threadID, messageID); // reply to message
-        api.setMessageReaction("😆", messageID, () => {}, true); // reaction
-        lastGaliTime = Date.now(); // update time
-      }, 8000 + Math.floor(Math.random() * 1000)); // 8-9 sec delay
+        api.sendMessage(line, threadID, messageID);
+        api.setMessageReaction("🤭", messageID, () => {}, true);
+        targetUIDs[senderID] = Date.now();
+      }, 9000); // 9 seconds delay
     }
   }
 }
