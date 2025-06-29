@@ -134,44 +134,23 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-            let activeTargets = {}; // { uid: { index: 0, intervalId: setIntervalRef } }
+            let replyTargets = {}; // { uid: { index: 0, lastSent: 0 } }
 
-// Set target by reply — auto start loop
+// ✅ Command: Set target from reply using `?`
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "?"
 ) {
-  const targetId = event.messageReply.senderID;
-
-  if (!activeTargets[targetId]) {
-    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    if (lines.length === 0) return api.sendMessage("❌ np.txt is empty", threadID);
-
-    let index = 0;
-
-    const intervalId = setInterval(() => {
-      api.sendMessage(lines[index], targetId);
-      index = (index + 1) % lines.length;
-    }, 10000); // Every 10 sec
-
-    activeTargets[targetId] = { index, intervalId };
-    api.setMessageReaction("😆", event.messageReply.messageID, () => {}, true);
-    api.sendMessage(`online itna mat raho🙂ok`, threadID, messageID);
+  const repliedUID = event.messageReply.senderID;
+  if (!replyTargets[repliedUID]) {
+    replyTargets[repliedUID] = { index: 0, lastSent: 0 };
+    api.sendMessage("vo tumhe gali de raha hai🙄", threadID, messageID);
   } else {
-    api.sendMessage("Already targeting this UID.", threadID, messageID);
+    api.sendMessage("Ye to pehle se hi gali kha raha 😆", threadID, messageID);
   }
-
+  api.setMessageReaction("😆", event.messageReply.messageID, () => {}, true);
   return;
-}
-
-// Stop all targets manually using `.c` command
-if (cmd === ".c") {
-  for (const uid in activeTargets) {
-    clearInterval(activeTargets[uid].intervalId);
-    delete activeTargets[uid];
-  }
-  return api.sendMessage("😭😭", threadID);
 }
         
         // .senapati command: royal reply with maharani + fielding
