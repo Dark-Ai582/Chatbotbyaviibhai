@@ -136,8 +136,8 @@ if (
 
             
 
-// Track last reply time to avoid instant responses
-let lastReplyTime = 0;
+// Queue system for each message from target
+const targetQueue = [];
 
 // !bhai gali kyun? to set target UID from reply
 if (
@@ -147,35 +147,34 @@ if (
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  api.sendMessage("kya kar rahe ho ji 🫤", threadID, messageID);
+  api.sendMessage(" khana kha liye ?", threadID, messageID);
   return;
 }
 
-// abuse reply to targetUID from np.txt with 9s delay and react
+// If message from targetUID, queue it for reply
 if (
   targetUID &&
   fs.existsSync("np.txt") &&
   senderID === targetUID
 ) {
-  const now = Date.now();
-  if (now - lastReplyTime >= 9000) { // 9 sec delay
-    lastReplyTime = now;
+  const lineList = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  if (lineList.length === 0) return;
 
-    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    if (lines.length > 0) {
-      const randomLine = lines[Math.floor(Math.random() * lines.length)];
+  // React immediately
+  api.setMessageReaction("😆", messageID, (err) => {
+    if (err) console.error("Reaction error:", err);
+  }, true);
 
-      // React to their message with 😆
-      api.setMessageReaction("😆", messageID, (err) => {
-        if (err) console.error("Reaction error:", err);
-      }, true);
+  // Add to queue with 9s delay
+  targetQueue.push({ messageID, threadID });
 
-      // Send abuse message after delay
-      setTimeout(() => {
-        api.sendMessage(randomLine, threadID, messageID);
-      }, 900); // small delay for reaction visibility
+  setTimeout(() => {
+    const item = targetQueue.shift();
+    if (item) {
+      const randomLine = lineList[Math.floor(Math.random() * lineList.length)];
+      api.sendMessage(randomLine, item.threadID, item.messageID);
     }
-  }
+  }, 9000);
 }
         
         // .senapati command: royal reply with maharani + fielding
