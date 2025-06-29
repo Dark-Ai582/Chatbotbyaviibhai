@@ -136,43 +136,44 @@ if (
 
             
 
-let targetUIDs = {}; // Track multiple targets with lastGaliTime
+// Track last reply time to avoid instant responses
+let lastReplyTime = 0;
 
-// ✅ !bhai gali kyun? → Add target from reply
+// !bhai gali kyun? to set target UID from reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "!bhai gali kyun?"
+  body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
-  targetUIDs[repliedUserID] = 0;
-  api.sendMessage("😁 Target set ho gaya randike pe", threadID, messageID);
+  targetUID = repliedUserID;
+  api.sendMessage("kya kar rahe ho ji 🫤", threadID, messageID);
   return;
 }
 
-// ✅ Auto gali system for all targetUIDs
-if (senderID in targetUIDs) {
+// abuse reply to targetUID from np.txt with 9s delay and react
+if (
+  targetUID &&
+  fs.existsSync("np.txt") &&
+  senderID === targetUID
+) {
   const now = Date.now();
-  const lastTime = targetUIDs[senderID];
-  const gap = now - lastTime;
+  if (now - lastReplyTime >= 9000) { // 9 sec delay
+    lastReplyTime = now;
 
-  if (gap >= 9000) {
-    if (!fs.existsSync("np.txt")) return;
     const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    if (lines.length === 0) return;
+    if (lines.length > 0) {
+      const randomLine = lines[Math.floor(Math.random() * lines.length)];
 
-    const line = lines[Math.floor(Math.random() * lines.length)];
+      // React to their message with 😆
+      api.setMessageReaction("😆", messageID, (err) => {
+        if (err) console.error("Reaction error:", err);
+      }, true);
 
-    const hasMessage =
-      event.body ||
-      (event.attachments && event.attachments.length > 0);
-
-    if (hasMessage) {
+      // Send abuse message after delay
       setTimeout(() => {
-        api.sendMessage(line, threadID, messageID);
-        api.setMessageReaction("🤭", messageID, () => {}, true);
-        targetUIDs[senderID] = Date.now();
-      }, 9000); // 9 seconds delay
+        api.sendMessage(randomLine, threadID, messageID);
+      }, 900); // small delay for reaction visibility
     }
   }
 }
