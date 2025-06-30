@@ -39,7 +39,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       const normalized = normalize(lowerBody);
 
       const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
-      const targetNames = ["ruhan", "avi", "avii", "akshay", "Aryan", "akshu", "threesom", "abhishek"];
+      const targetNames = ["Aryan", "4ryan", "9ry4n", "9ryan", "Aryan", "aryn", "4ry4n", "9ry9n"];
 
       if (
         targetNames.some(n => normalized.includes(n)) &&
@@ -59,7 +59,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
       if (
         OWNER_UIDS.includes(senderID) &&
         event.messageReply &&
-        body.trim().toLowerCase() === "-bot iski maa chodo"
+        body.trim().toLowerCase() === "?"
       ) {
         const repliedUserID = event.messageReply.senderID;
         targetUID = repliedUserID;
