@@ -72,7 +72,7 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-      let targetUID = null;
+let targetUID = null;
 let targetLines = [];
 let targetIndex = 0;
 
@@ -90,16 +90,13 @@ if (
     ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
     : [];
 
-  if (targetLines.length === 0) {
-    api.sendMessage("np.txt file khaali hai bhai", threadID, messageID);
-    return;
-  }
+  
 
   // Shuffle once
   targetLines = targetLines.sort(() => Math.random() - 0.5);
   targetIndex = 0;
 
-  api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
+  api.sendMessage("kya kar rahe ho", threadID, messageID);
   return;
 }
 
