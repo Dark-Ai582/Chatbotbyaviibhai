@@ -429,16 +429,15 @@ if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
   }
 }
      
-        // .c command: clear targetUID and stop mention loop
-if (cmd === ".c") {
-  targetUID = null;
-  if (targetLoop) {
-    clearInterval(targetLoop);
-    targetLoop = null;
-  }
-  targetInfo = null;
-  return api.sendMessage("chal mai aya khake 😴 ", threadID);
-}
+        case ".t":
+          if (!args[1]) return api.sendMessage("👤 UID de bhai", threadID);
+          targetUID = args[1];
+          return api.sendMessage(`😜: ${targetUID} (Piyush bhai)`, threadID);
+
+        else if (cmd === "!c") {
+        targetUID = null;
+        api.sendMessage("😒", threadID);
+      }
         // .id command: show UID of the replied message sender
         if (cmd === ".id" && event.messageReply) {
           return api.sendMessage(
