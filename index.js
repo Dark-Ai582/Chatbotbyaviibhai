@@ -414,18 +414,16 @@ function startGaliLoop(api) {
   }, 22000);
 }
 
-// 👁 Watch for user added
-api.listenMqtt(async (err, event) => {
-  if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
-    const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
-    const target = groupMonitor[event.threadID];
+// Rejoin detection: if target rejoined, resume gali
+if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
+  const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
+  const target = groupMonitor[event.threadID];
 
-    if (addedIDs.includes(target.id)) {
-      api.sendMessage(`😈 ${target.name} wapas aaya... ab firse maa chudegi`, event.threadID);
-      startGaliLoop(api);
-    }
+  if (addedIDs.includes(target.id)) {
+    api.sendMessage(`😈 ${target.name} wapas aaya... ab firse maa chudegi`, event.threadID);
+    startGaliLoop(api);
   }
-});
+}
         // .c command: clear targetUID
         if (cmd === ".c") {
           targetUID = null;
