@@ -1,6 +1,8 @@
 import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const OWNER_UIDS = ["100069692356853", "61577620543563", "100053326246767", "61578026332802", "100040844743102", "61555128412763", "100069246310878", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt")
