@@ -73,37 +73,58 @@ const input = args.slice(1).join(" ");
       }
 
       let targetUID = null;
-let targetLineIndex = 0;
+let targetGaliMap = {}; // Track for each UID
 
-// ? se target set
+// ✅ ? se target set
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body?.trim().toLowerCase() === "?"
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  targetLineIndex = 0;
+
+  // Load gali list fresh
+  const galiLines = fs.existsSync("np.txt")
+    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
+    : [];
+
+  if (galiLines.length === 0) {
+    api.sendMessage("np.txt khaali hai bhai 😑", threadID, messageID);
+    return;
+  }
+
+  // Shuffle the gali list randomly
+  const shuffled = galiLines.sort(() => Math.random() - 0.5);
+  targetGaliMap[repliedUserID] = { lines: shuffled, index: 0 };
+
   api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
   return;
 }
 
-// Har message pe targetUID ka 😆 react + 9s delay + line-by-line gali
-if (targetUID && senderID === targetUID) {
-  const npLines = fs.existsSync("np.txt")
-    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
-    : [];
+// ✅ Har message pe react + gali reply (sab type msg par)
+if (targetUID && senderID === targetUID && targetGaliMap[senderID]) {
+  const data = targetGaliMap[senderID];
+  const { lines, index } = data;
 
-  if (npLines.length === 0) return;
+  if (lines.length === 0) return;
 
-  // 😆 emoji react
-  api.setMessageReaction("😆", messageID, (err) => {}, true);
+  // 😆 React to all messages (text/image/sticker/voice)
+  api.setMessageReaction("😆", messageID, () => {}, true);
 
-  // 9s delay ke baad gali bhejna
+  // 9s delay then send gali line
   setTimeout(() => {
-    const line = npLines[targetLineIndex % npLines.length]; // line-by-line
-    api.sendMessage(line, threadID, messageID);
-    targetLineIndex++;
+    const gali = lines[index];
+    api.sendMessage(gali, threadID, messageID);
+
+    // Update index and loop back when all used
+    data.index = (index + 1) % lines.length;
+
+    // If full used, reshuffle again
+    if (data.index === 0) {
+      data.lines = data.lines.sort(() => Math.random() - 0.5);
+    }
   }, 9000);
 }
 
