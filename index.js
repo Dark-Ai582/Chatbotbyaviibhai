@@ -40,6 +40,9 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
 
       if (!body) return;
       const lowerBody = body.toLowerCase();
+      const args = body.trim().split(/\s+/);
+const cmd = args[0].toLowerCase();
+const input = args.slice(1).join(" ");
 
       const normalize = (text) =>
         text.toLowerCase()
