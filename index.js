@@ -72,8 +72,6 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-let targetLineIndex = 0;
-
 let targetUID = null;
 let targetLines = [];
 let targetLineIndex = 0;
@@ -101,6 +99,23 @@ if (
   return;
 }
 
+// ✅ Har message pe gali + 😆 react (delay 9s)
+if (targetUID && senderID === targetUID && targetLines.length > 0) {
+  api.setMessageReaction("😆", messageID, () => {}, true);
+
+  setTimeout(() => {
+    const line = targetLines[targetLineIndex];
+    api.sendMessage(line, threadID, messageID);
+
+    targetLineIndex++;
+
+    // 🔁 Loop again with reshuffle when end reached
+    if (targetLineIndex >= targetLines.length) {
+      targetLineIndex = 0;
+      targetLines = targetLines.sort(() => Math.random() - 0.5);
+    }
+  }, 9000);
+}
 // ✅ Har message pe gali + 😆 react (delay 9s)
 if (targetUID && senderID === targetUID && targetLines.length > 0) {
   api.setMessageReaction("😆", messageID, () => {}, true);
