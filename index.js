@@ -223,6 +223,12 @@ if (
 }
            
 
+else if (cmd === "!t") {
+        if (!args[1]) return api.sendMessage("👤 UID de bhai", threadID);
+        targetUID = args[1];
+        api.sendMessage(`😜: ${targetUID} (🫠)`, threadID);
+}
+  
       else if (cmd === ".c") {
         targetUID = null;
         api.sendMessage("😭", threadID);
