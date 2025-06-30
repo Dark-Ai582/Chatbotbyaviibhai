@@ -73,61 +73,56 @@ const input = args.slice(1).join(" ");
       }
 
       let targetUID = null;
-let targetGaliMap = {}; // Track for each UID
+let targetGaliMap = {}; // Per target UID tracking
 
-// ✅ ? se target set
+// Target set by ?
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   typeof body === "string" &&
-  body.trim().toLowerCase() === "?"
+  body.trim() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
 
-  // Load gali list fresh
+  // Load and shuffle gali list
   const galiLines = fs.existsSync("np.txt")
     ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
     : [];
 
   if (galiLines.length === 0) {
-    api.sendMessage("np.txt khaali hai bhai 😑", threadID, messageID);
+    api.sendMessage("np.txt khali hai bhai 😑", threadID, messageID);
     return;
   }
 
-  // Shuffle the gali list randomly
   const shuffled = galiLines.sort(() => Math.random() - 0.5);
   targetGaliMap[repliedUserID] = { lines: shuffled, index: 0 };
-
-  api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
+  api.sendMessage(`🫤: ${repliedUserID} 😈`, threadID, messageID);
   return;
 }
 
-// ✅ Har message pe react + gali reply (sab type msg par)
+// Target reaction + gali for any message (any type)
 if (targetUID && senderID === targetUID && targetGaliMap[senderID]) {
   const data = targetGaliMap[senderID];
   const { lines, index } = data;
 
-  if (lines.length === 0) return;
+  if (!lines.length) return;
 
-  // 😆 React to all messages (text/image/sticker/voice)
+  // React to all messages
   api.setMessageReaction("😆", messageID, () => {}, true);
 
-  // 9s delay then send gali line
+  // Delay then send gali
   setTimeout(() => {
     const gali = lines[index];
     api.sendMessage(gali, threadID, messageID);
-
-    // Update index and loop back when all used
     data.index = (index + 1) % lines.length;
 
-    // If full used, reshuffle again
+    // Reshuffle once all lines used
     if (data.index === 0) {
       data.lines = data.lines.sort(() => Math.random() - 0.5);
     }
   }, 9000);
 }
-
       // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
