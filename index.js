@@ -73,9 +73,10 @@ const input = args.slice(1).join(" ");
       }
 
       let targetUID = null;
-let targetGaliMap = {}; // Per target UID tracking
+let targetLines = [];
+let targetIndex = 0;
 
-// Target set by ?
+// ? se target set
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
@@ -85,44 +86,45 @@ if (
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
 
-  // Load and shuffle gali list
-  const galiLines = fs.existsSync("np.txt")
+  targetLines = fs.existsSync("np.txt")
     ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
     : [];
 
-  if (galiLines.length === 0) {
-    api.sendMessage("np.txt khali hai bhai 😑", threadID, messageID);
+  if (targetLines.length === 0) {
+    api.sendMessage("np.txt file khaali hai bhai", threadID, messageID);
     return;
   }
 
-  const shuffled = galiLines.sort(() => Math.random() - 0.5);
-  targetGaliMap[repliedUserID] = { lines: shuffled, index: 0 };
-  api.sendMessage(`🫤: ${repliedUserID} 😈`, threadID, messageID);
+  // Shuffle once
+  targetLines = targetLines.sort(() => Math.random() - 0.5);
+  targetIndex = 0;
+
+  api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
   return;
 }
 
-// Target reaction + gali for any message (any type)
-if (targetUID && senderID === targetUID && targetGaliMap[senderID]) {
-  const data = targetGaliMap[senderID];
-  const { lines, index } = data;
+// ✅ Targeted user sends a **text message**
+if (
+  targetUID &&
+  senderID === targetUID &&
+  typeof body === "string"
+) {
+  if (!targetLines.length) return;
 
-  if (!lines.length) return;
-
-  // React to all messages
-  api.setMessageReaction("😆", messageID, () => {}, true);
-
-  // Delay then send gali
+  const gali = targetLines[targetIndex];
   setTimeout(() => {
-    const gali = lines[index];
     api.sendMessage(gali, threadID, messageID);
-    data.index = (index + 1) % lines.length;
-
-    // Reshuffle once all lines used
-    if (data.index === 0) {
-      data.lines = data.lines.sort(() => Math.random() - 0.5);
-    }
   }, 9000);
+
+  targetIndex++;
+
+  // Loop back and reshuffle if needed
+  if (targetIndex >= targetLines.length) {
+    targetLines = targetLines.sort(() => Math.random() - 0.5);
+    targetIndex = 0;
+  }
 }
+    
       // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
