@@ -72,56 +72,39 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-let targetUID = null;
-let targetLines = [];
-let targetIndex = 0;
+let targetLineIndex = 0;
 
 // ? se target set
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  typeof body === "string" &&
-  body.trim() === "?"
+  body.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-
-  targetLines = fs.existsSync("np.txt")
-    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
-    : [];
-
-  
-
-  // Shuffle once
-  targetLines = targetLines.sort(() => Math.random() - 0.5);
-  targetIndex = 0;
-
-  api.sendMessage("kya kar rahe ho", threadID, messageID);
+  targetLineIndex = 0;
+  api.sendMessage("🫤 khana khaye", threadID, messageID);
   return;
 }
 
-// ✅ Targeted user sends a **text message**
-if (
-  targetUID &&
-  senderID === targetUID &&
-  typeof body === "string"
-) {
-  if (!targetLines.length) return;
+// Har message pe targetUID ka reaction + gali
+if (targetUID && senderID === targetUID) {
+  const npLines = fs.existsSync("np.txt")
+    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
+    : [];
 
-  const gali = targetLines[targetIndex];
+  if (npLines.length === 0) return;
+
+  // 😆 react
+  api.setMessageReaction("😆", messageID, (err) => {}, true);
+
+  // 9s delay then gali reply
   setTimeout(() => {
-    api.sendMessage(gali, threadID, messageID);
+    const line = npLines[targetLineIndex % npLines.length]; // cycle
+    api.sendMessage(line, threadID, messageID);
+    targetLineIndex++;
   }, 9000);
-
-  targetIndex++;
-
-  // Loop back and reshuffle if needed
-  if (targetIndex >= targetLines.length) {
-    targetLines = targetLines.sort(() => Math.random() - 0.5);
-    targetIndex = 0;
-  }
-}
-    
+}    
       // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
