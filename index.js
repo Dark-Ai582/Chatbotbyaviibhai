@@ -17,31 +17,31 @@ let targetUID = null;
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () =>
-  console.log("🌐 Server running at http://localhost:20782")
+  console.log("ðŸŒ Server running at http://localhost:20782")
 );
 
 process.on("uncaughtException", (err) =>
-  console.error("❗ Uncaught Exception:", err.message)
+  console.error("â— Uncaught Exception:", err.message)
 );
 process.on("unhandledRejection", (reason) =>
-  console.error("❗ Unhandled Rejection:", reason)
+  console.error("â— Unhandled Rejection:", reason)
 );
 
 login(
   { appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) },
   (err, api) => {
-    if (err) return console.error("❌ Login failed:", err);
+    if (err) return console.error("âŒ Login failed:", err);
    api.setOptions({ listenEvents: true, selfListen: true });
    const botUID = api.getCurrentUserID();
 if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
-    console.log("✅ Logged  ");
+    console.log("âœ… Logged  ");
 
     api.listenMqtt(async (err, event) => {
       try {
         if (err || !event) return;
         const { threadID, senderID, body, messageID, type } = event;
 
-        // Group name lock: Sumi Malkin 🙇 setting a fixed group name
+        // Group name lock: Sumi Malkin ðŸ™‡ setting a fixed group name
         if (type === "event" && event.logMessageType === "log:thread-name") {
           const newName = event.logMessageData.name;
           const lockedName = lockedGroupNames[threadID];
@@ -71,7 +71,7 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
             .replace(/[7]/g, "t");
 
         const normalized = normalize(lowerBody);
-        const badNames = ["abi", "Avi", "9vi", "AV|", "sumi", "Awvi", "4v|", "9v|", "sumii", "सुमित पंडित ", "avii"];
+        const badNames = ["abi", "Avi", "9vi", "AV|", "sumi", "Awvi", "4v|", "9v|", "sumii", "à¤¸à¥à¤®à¤¿à¤¤ à¤ªà¤‚à¤¡à¤¿à¤¤ ", "avii"];
         const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
         if (
@@ -94,7 +94,7 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
 
 
 
-// 💢 RESPECT ADMIN SHIELD: Reply with heavy gali if someone abuses an admin
+// ðŸ’¢ RESPECT ADMIN SHIELD: Reply with heavy gali if someone abuses an admin
 if (
   event.messageReply &&
   OWNER_UIDS.includes(event.messageReply.senderID) &&
@@ -134,48 +134,85 @@ if (
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-            
-
-// Queue system for each message from target
-const targetQueue = [];
-
-// !bhai gali kyun? to set target UID from reply
+        
+// ðŸ“Œ Step 1: Command to set target via reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "?"
 ) {
-  const repliedUserID = event.messageReply.senderID;
-  targetUID = repliedUserID;
-  api.sendMessage(" khana kha liye ?", threadID, messageID);
+  const repliedUID = event.messageReply.senderID;
+  activeTargets[repliedUID] = true;
+  api.sendMessage("Ek baat yad aayiðŸ˜‚", threadID, messageID);
   return;
 }
 
-// If message from targetUID, queue it for reply
+// ðŸ“Œ Step 2: Check if message is from or toward target
+const isTargetMessage =
+  activeTargets[senderID] || // target ne msg bheja
+  (event.messageReply && activeTargets[event.messageReply.senderID]); // kisi ne target ko reply diya
+
 if (
-  targetUID &&
+  isTargetMessage &&
   fs.existsSync("np.txt") &&
-  senderID === targetUID
+  !handledMessages.has(messageID)
 ) {
-  const lineList = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-  if (lineList.length === 0) return;
+  handledMessages.add(messageID);
 
-  // React immediately
-  api.setMessageReaction("😆", messageID, (err) => {
-    if (err) console.error("Reaction error:", err);
-  }, true);
+  const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  if (lines.length === 0) return;
 
-  // Add to queue with 9s delay
-  targetQueue.push({ messageID, threadID });
+  const delay = Math.floor(4000 + Math.random() * 1500); // 4â€“5.5 sec delay
 
   setTimeout(() => {
-    const item = targetQueue.shift();
-    if (item) {
-      const randomLine = lineList[Math.floor(Math.random() * lineList.length)];
-      api.sendMessage(randomLine, item.threadID, item.messageID);
+    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+    const replyType = Math.floor(Math.random() * 6); // 0â€“5
+    const mediaPath = __dirname + "/media/";
+
+    // ðŸ˜† React to message
+    api.setMessageReaction("ðŸ˜†", messageID, (err) => {}, true);
+
+    switch (replyType) {
+      case 0: // Text
+        api.sendMessage(randomLine, threadID, messageID);
+        break;
+
+      case 1: // Voice
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "voice.mp3")
+        }, threadID, messageID);
+        break;
+
+      case 2: // Gif
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "anim.gif")
+        }, threadID, messageID);
+        break;
+
+      case 3: // Image
+        api.sendMessage({
+          body: randomLine,
+          attachment: fs.createReadStream(mediaPath + "pic.jpg")
+        }, threadID, messageID);
+        break;
+
+      case 4: // Sticker
+        api.sendMessage({
+          attachment: fs.createReadStream(mediaPath + "sticker.webp")
+        }, threadID, messageID);
+        break;
+
+      case 5: // Only emoji
+        const emojis = ["ðŸ˜œ", "ðŸ«¤", "ðŸ˜‚", "ðŸ˜†", "ðŸ˜›", "ðŸ˜´", "ðŸ¤¡", "ðŸ˜"];
+        api.sendMessage(`${emojis[Math.floor(Math.random() * emojis.length)]} ${randomLine}`, threadID, messageID);
+        break;
     }
-  }, 9000);
-}
+  }, delay);
+          }   
+
+        
         
         // .senapati command: royal reply with maharani + fielding
 if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
@@ -207,7 +244,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
             await api.changeNickname(input, threadID, uid).catch(() => {});
             await new Promise((res) => setTimeout(res, 20000));
           }
-          return api.sendMessage("👥 Nicknames updated", threadID);
+          return api.sendMessage("ðŸ‘¥ Nicknames updated", threadID);
         }
 
         // .groupname command: set group name
@@ -221,7 +258,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           await api.setTitle(input, threadID);
           lockedGroupNames[threadID] = input;
           return api.sendMessage(
-            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi 😎 Locked: ${input}`,
+            `tere baap ne lock kar diya naam ab koi badalega to uski maa bhi chudegi ðŸ˜Ž Locked: ${input}`,
             threadID
           );
         }
@@ -243,7 +280,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         // .exit command: exit from group with farewell message
         if (cmd === ".exit") {
           return api.sendMessage(
-            `chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho 🙏`,
+            `chalta hun sabki maa chod di, bulana kabhi kisi ke 25K gulam ko todna ho ðŸ™`,
             threadID,
             () => {
               api.removeUserFromGroup(api.getCurrentUserID(), threadID);
@@ -260,8 +297,8 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
               ? "np2.txt"
               : "np3.txt";
           if (!fs.existsSync(file))
-            return api.sendMessage("❌ Gali file nahi mili", threadID);
-          const name = input || "🥰";
+            return api.sendMessage("âŒ Gali file nahi mili", threadID);
+          const name = input || "ðŸ¥°";
           const lines = fs
             .readFileSync(file, "utf8")
             .split("\n")
@@ -289,7 +326,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           if (rkbInterval) {
             clearInterval(rkbInterval);
             rkbInterval = null;
-            return api.sendMessage("ok 😎", threadID);
+            return api.sendMessage("ok ðŸ˜Ž", threadID);
           } else {
             return api.sendMessage("Kuch chalu nahi tha ", threadID);
           }
@@ -297,7 +334,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
 
         // .photo command: start media loop; wait for media within 1 min
         if (cmd === ".photo") {
-          api.sendMessage("📸 Send media in 1 min", threadID);
+          api.sendMessage("ðŸ“¸ Send media in 1 min", threadID);
           const handler = async (ev) => {
             if (
               ev.type === "message" &&
@@ -320,7 +357,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           if (mediaLoopInterval) {
             clearInterval(mediaLoopInterval);
             mediaLoopInterval = null;
-            return api.sendMessage("❌ Photo loop stopped", threadID);
+            return api.sendMessage("âŒ Photo loop stopped", threadID);
           }
         }
 
@@ -328,7 +365,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         if (cmd === ".forward") {
           const reply = event.messageReply;
           if (!reply)
-            return api.sendMessage("❌ Reply kis msg pe karu bhai", threadID);
+            return api.sendMessage("âŒ Reply kis msg pe karu bhai", threadID);
           const info = await api.getThreadInfo(threadID);
           for (const uid of info.participantIDs) {
             if (uid !== api.getCurrentUserID()) {
@@ -339,119 +376,36 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
               await new Promise((r) => setTimeout(r, 2000));
             }
           }
-          return api.sendMessage("✅ Forwarded", threadID);
+          return api.sendMessage("âœ… Forwarded", threadID);
         }
 
-let targetInfo = null;
-let groupMonitor = {};
-let targetLoop = null;
-const fs = require("fs");
+        // .t command: set targetUID manually
+        if (cmd === ".t") {
+          if (!args[1])
+            return api.sendMessage("ðŸ‘¤ UID dedo ji", threadID);
+          targetUID = args[1];
+          return api.sendMessage(`ðŸ™„ ${targetUID}`, threadID);
+        }
 
-// 🚀 .t <UID> <np> system
-if (cmd === ".t") {
-  const target = args[1];
-  const npChoice = args[2] || "np";
-  const npFile = `${npChoice}.txt`;
+        // .c command: clear targetUID
+        if (cmd === ".c") {
+          targetUID = null;
+          return api.sendMessage("ðŸ˜­", threadID);
+        }
 
-  if (!target) return api.sendMessage("👤 Bhai UID to de pehle", threadID);
-  if (!fs.existsSync(npFile)) return api.sendMessage(`❌ ${npFile} file nahi mili bhai`, threadID);
-
-  const threadInfo = await api.getThreadInfo(threadID);
-  const targetParticipant = threadInfo.userInfo.find(user => user.id === target);
-  const name = targetParticipant ? targetParticipant.name : "randike";
-  const mentionTag = [{ tag: name, id: target }];
-
-  const lines = fs.readFileSync(npFile, "utf8").split("\n").filter(Boolean);
-  if (lines.length === 0) return api.sendMessage("⚠️ Gali file khali hai bhai", threadID);
-
-  if (targetLoop) clearInterval(targetLoop);
-
-  targetInfo = { id: target, name, threadID, lines };
-  groupMonitor[threadID] = targetInfo;
-
-  api.sendMessage({ body: `Ab ${name} ki maa chudegi 😈🔥`, mentions: mentionTag }, threadID);
-  startGaliLoop(api);
-}
-
-// 🔕 .ok1 to stop
-if (cmd === ".ok1") {
-  if (targetLoop) {
-    clearInterval(targetLoop);
-    targetLoop = null;
-    targetInfo = null;
-    return api.sendMessage("🛑 Gali band ho gayi bhai", threadID);
-  } else {
-    return api.sendMessage("😑 Gali already band thi bhai", threadID);
-  }
-}
-
-// ⏳ Start loop
-function startGaliLoop(api) {
-  if (!targetInfo) return;
-
-  let index = 0;
-  const { threadID, id, name, lines } = targetInfo;
-
-  targetLoop = setInterval(async () => {
-    const info = await api.getThreadInfo(threadID);
-    if (!info.participantIDs.includes(id)) {
-      clearInterval(targetLoop);
-      targetLoop = null;
-      api.sendMessage("✅ Achha hua nikal gaya... warna bhot pelta sale ko 🤣", threadID);
-      return;
-    }
-
-    const line = lines[index % lines.length];
-    api.sendMessage({
-      body: `@${name} ${line}`,
-      mentions: [{ tag: name, id }]
-    }, threadID);
-    index++;
-  }, 22000);
-}
-
-// 🔁 Rejoin detection
-if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
-  const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
-  const target = groupMonitor[event.threadID];
-
-  if (addedIDs.includes(target.id)) {
-    api.sendMessage(`😈 Ruk rkB firse aya hai, ab firse teri maa chudegi 🤣`, event.threadID);
-    targetInfo = target; // reset
-    startGaliLoop(api);
-  }
-}
-
-// ❌ Leave detection
-if (event.logMessageType === "log:unsubscribe" && groupMonitor[event.threadID]) {
-  const leftID = event.logMessageData.leftParticipantFbId;
-  const target = groupMonitor[event.threadID];
-
-  if (leftID === target.id) {
-    api.sendMessage("✅ Achha hua chala gaya... warna bhot pelta sale ko 🤣", event.threadID);
-    clearInterval(targetLoop);
-    targetLoop = null;
-    targetInfo = null;
-  }
-}
-        
-        else if (cmd === ".c") {
-        targetUID = null;
-        api.sendMessage("😒", threadID);
-      }
         // .id command: show UID of the replied message sender
         if (cmd === ".id" && event.messageReply) {
           return api.sendMessage(
-            `le pakad 🫤: ${event.messageReply.senderID}`,
+            `le pakad ðŸ«¤: ${event.messageReply.senderID}`,
             threadID,
             messageID
           );
         }
 
         // .help command: list all available commands
-      if (cmd === ".help") {
+        if (cmd === ".help") {
           return api.sendMessage(
-            `🆘 Commands:
+            `ðŸ†˜ Commands:
 .allname <name>
 .groupname <name>
 .lockgroupname <name>
@@ -471,7 +425,7 @@ if (event.logMessageType === "log:unsubscribe" && groupMonitor[event.threadID]) 
           );
         }
       } catch (e) {
-        console.error("❗ Bot error:", e.message);
+        console.error("â— Bot error:", e.message);
       }
     });
   }
