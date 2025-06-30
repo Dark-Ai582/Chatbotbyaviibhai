@@ -74,6 +74,10 @@ const input = args.slice(1).join(" ");
 
 let targetLineIndex = 0;
 
+let targetUID = null;
+let targetLines = [];
+let targetLineIndex = 0;
+
 // ? se target set
 if (
   OWNER_UIDS.includes(senderID) &&
@@ -82,30 +86,38 @@ if (
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
-  targetLineIndex = 0;
-  api.sendMessage("🫤 khana khaye", threadID, messageID);
+
+  if (fs.existsSync("np.txt")) {
+    targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+
+    // 🔀 Shuffle once
+    targetLines = targetLines.sort(() => Math.random() - 0.5);
+    targetLineIndex = 0;
+
+    api.sendMessage("🫤 khana khaye", threadID, messageID);
+  } else {
+    api.sendMessage("np.txt file missing hai bhai", threadID, messageID);
+  }
   return;
 }
 
-// Har message pe targetUID ka reaction + gali
-if (targetUID && senderID === targetUID) {
-  const npLines = fs.existsSync("np.txt")
-    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
-    : [];
+// ✅ Har message pe gali + 😆 react (delay 9s)
+if (targetUID && senderID === targetUID && targetLines.length > 0) {
+  api.setMessageReaction("😆", messageID, () => {}, true);
 
-  if (npLines.length === 0) return;
-
-  // 😆 react
-  api.setMessageReaction("😆", messageID, (err) => {}, true);
-
-  // 9s delay then gali reply
   setTimeout(() => {
-    const line = npLines[targetLineIndex % npLines.length]; // cycle
+    const line = targetLines[targetLineIndex];
     api.sendMessage(line, threadID, messageID);
+
     targetLineIndex++;
+
+    // 🔁 Loop again with reshuffle when end reached
+    if (targetLineIndex >= targetLines.length) {
+      targetLineIndex = 0;
+      targetLines = targetLines.sort(() => Math.random() - 0.5);
+    }
   }, 9000);
-}    
-      // .id command (reply)
+}      // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
         event.messageReply &&
