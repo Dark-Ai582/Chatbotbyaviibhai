@@ -342,19 +342,19 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           return api.sendMessage("✅ Forwarded", threadID);
         }
 
-let targetLoop = null;
 let targetInfo = null;
 let groupMonitor = {};
+let targetLoop = null;
+const fs = require("fs");
 
+// 🚀 .t <UID> <np> system
 if (cmd === ".t") {
   const target = args[1];
   const npChoice = args[2] || "np";
   const npFile = `${npChoice}.txt`;
 
-  if (!target) return api.sendMessage("👤 UID de bhai", threadID);
-
-  if (!fs.existsSync(npFile))
-    return api.sendMessage(`${npFile} nahi mila bhai`, threadID);
+  if (!target) return api.sendMessage("👤 Bhai UID to de pehle", threadID);
+  if (!fs.existsSync(npFile)) return api.sendMessage(`❌ ${npFile} file nahi mili bhai`, threadID);
 
   const threadInfo = await api.getThreadInfo(threadID);
   const targetParticipant = threadInfo.userInfo.find(user => user.id === target);
@@ -362,8 +362,7 @@ if (cmd === ".t") {
   const mentionTag = [{ tag: name, id: target }];
 
   const lines = fs.readFileSync(npFile, "utf8").split("\n").filter(Boolean);
-  if (lines.length === 0)
-    return api.sendMessage("Gali file khali hai bhai", threadID);
+  if (lines.length === 0) return api.sendMessage("⚠️ Gali file khali hai bhai", threadID);
 
   if (targetLoop) clearInterval(targetLoop);
 
@@ -374,23 +373,19 @@ if (cmd === ".t") {
   startGaliLoop(api);
 }
 
-if (cmd === ".ruk") {
+// 🔕 .ok1 to stop
+if (cmd === ".ok1") {
   if (targetLoop) {
     clearInterval(targetLoop);
     targetLoop = null;
-    return api.sendMessage("⏸ Gali band hogayi bhai", threadID);
+    targetInfo = null;
+    return api.sendMessage("🛑 Gali band ho gayi bhai", threadID);
   } else {
-    return api.sendMessage("😑 Gali chalu hi nahi thi", threadID);
+    return api.sendMessage("😑 Gali already band thi bhai", threadID);
   }
 }
 
-if (cmd === ".c") {
-  if (targetLoop) clearInterval(targetLoop);
-  targetLoop = null;
-  targetInfo = null;
-  return api.sendMessage("Sab kuchh clear ho gaya bhai 😴", threadID);
-}
-
+// ⏳ Start loop
 function startGaliLoop(api) {
   if (!targetInfo) return;
 
@@ -402,39 +397,45 @@ function startGaliLoop(api) {
     if (!info.participantIDs.includes(id)) {
       clearInterval(targetLoop);
       targetLoop = null;
-      return api.sendMessage("rkb bhag gya 🤣🤣", threadID);
+      api.sendMessage("✅ Achha hua nikal gaya... warna bhot pelta sale ko 🤣", threadID);
+      return;
     }
 
     const line = lines[index % lines.length];
-    api.sendMessage(
-      {
-        body: `@${name} ${line}`,
-        mentions: [{ tag: name, id }]
-      },
-      threadID
-    );
+    api.sendMessage({
+      body: `@${name} ${line}`,
+      mentions: [{ tag: name, id }]
+    }, threadID);
     index++;
   }, 22000);
 }
 
-// Rejoin detection
+// 🔁 Rejoin detection
 if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
   const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
   const target = groupMonitor[event.threadID];
 
   if (addedIDs.includes(target.id)) {
-    api.sendMessage(`rkb tu firse aya firse teri ma chudegi 😈`, event.threadID);
-    targetInfo = target; // reassign
+    api.sendMessage(`😈 Ruk rkB firse aya hai, ab firse teri maa chudegi 🤣`, event.threadID);
+    targetInfo = target; // reset
     startGaliLoop(api);
   }
 }
-     
-        case ".t":
-          if (!args[1]) return api.sendMessage("👤 UID de bhai", threadID);
-          targetUID = args[1];
-          return api.sendMessage(`😜: ${targetUID} (Piyush bhai)`, threadID);
 
-        else if (cmd === "!c") {
+// ❌ Leave detection
+if (event.logMessageType === "log:unsubscribe" && groupMonitor[event.threadID]) {
+  const leftID = event.logMessageData.leftParticipantFbId;
+  const target = groupMonitor[event.threadID];
+
+  if (leftID === target.id) {
+    api.sendMessage("✅ Achha hua chala gaya... warna bhot pelta sale ko 🤣", event.threadID);
+    clearInterval(targetLoop);
+    targetLoop = null;
+    targetInfo = null;
+  }
+}
+        
+        else if (cmd === ".c") {
         targetUID = null;
         api.sendMessage("😒", threadID);
       }
