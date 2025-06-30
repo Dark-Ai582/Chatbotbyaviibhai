@@ -73,10 +73,10 @@ const input = args.slice(1).join(" ");
       }
 
 let targetUID = null;
-let targetLines = [];
-let targetLineIndex = 0;
+let usedLines = [];
+let allLines = [];
 
-// ? se target set
+// Target set with ?
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
@@ -86,37 +86,45 @@ if (
   targetUID = repliedUserID;
 
   if (fs.existsSync("np.txt")) {
-    targetLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-
-    // 🔀 Shuffle once
-    targetLines = targetLines.sort(() => Math.random() - 0.5);
-    targetLineIndex = 0;
-
-    api.sendMessage("🫤 khana khaye", threadID, messageID);
+    allLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    usedLines = [];
+    api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
   } else {
-    api.sendMessage("np.txt file missing hai bhai", threadID, messageID);
+    api.sendMessage("np.txt file hi nahi mila bhai 🫠", threadID, messageID);
   }
   return;
 }
 
-// ✅ Har message pe gali + 😆 react (delay 9s)
-if (targetUID && senderID === targetUID && targetLines.length > 0) {
+// Jab targetUID wale ka msg aaye, reply + 😆 + unique gali
+if (targetUID && senderID === targetUID) {
+  if (allLines.length === 0) return;
+
+  // React karo 😆
   api.setMessageReaction("😆", messageID, () => {}, true);
 
+  // 9s delay ke baad reply me gali
   setTimeout(() => {
-    const line = targetLines[targetLineIndex];
-    api.sendMessage(line, threadID, messageID);
-
-    targetLineIndex++;
-
-    // 🔁 Loop again with reshuffle when end reached
-    if (targetLineIndex >= targetLines.length) {
-      targetLineIndex = 0;
-      targetLines = targetLines.sort(() => Math.random() - 0.5);
+    // Filter out unused lines
+    const unusedLines = allLines.filter(line => !usedLines.includes(line));
+    
+    // Reset used list agar sab ho gaya
+    if (unusedLines.length === 0) {
+      usedLines = [];
     }
+
+    // Phir se unusedLines update
+    const freshLines = allLines.filter(line => !usedLines.includes(line));
+    const line = freshLines[Math.floor(Math.random() * freshLines.length)];
+
+    // Send reply
+    api.sendMessage({ body: line, replyToMessage: messageID }, threadID);
+
+    // Mark this line as used
+    usedLines.push(line);
   }, 9000);
 }
-// ✅ Har message pe gali + 😆 react (delay 9s)
+      
+      // ✅ Har message pe gali + 😆 react (delay 9s)
 if (targetUID && senderID === targetUID && targetLines.length > 0) {
   api.setMessageReaction("😆", messageID, () => {}, true);
 
