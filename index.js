@@ -72,22 +72,23 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-      let targetLineIndex = 0;
+      let targetUID = null;
+let targetLineIndex = 0;
 
 // ? se target set
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "?"
+  body?.trim().toLowerCase() === "?"
 ) {
   const repliedUserID = event.messageReply.senderID;
   targetUID = repliedUserID;
   targetLineIndex = 0;
-  api.sendMessage("kaise ho 😊", threadID, messageID);
+  api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
   return;
 }
 
-// Har message pe targetUID ka reaction + gali
+// Har message pe targetUID ka 😆 react + 9s delay + line-by-line gali
 if (targetUID && senderID === targetUID) {
   const npLines = fs.existsSync("np.txt")
     ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
@@ -95,12 +96,12 @@ if (targetUID && senderID === targetUID) {
 
   if (npLines.length === 0) return;
 
-  // 😆 react
+  // 😆 emoji react
   api.setMessageReaction("😆", messageID, (err) => {}, true);
 
-  // 9s delay then gali reply
+  // 9s delay ke baad gali bhejna
   setTimeout(() => {
-    const line = npLines[targetLineIndex % npLines.length]; // cycle
+    const line = npLines[targetLineIndex % npLines.length]; // line-by-line
     api.sendMessage(line, threadID, messageID);
     targetLineIndex++;
   }, 9000);
