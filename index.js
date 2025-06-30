@@ -377,6 +377,18 @@ if (cmd === ".t") {
   }
 }
 
+// Rejoin detection: if target rejoined, resume gali
+if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
+  const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
+  const target = groupMonitor[event.threadID];
+
+  if (addedIDs.includes(target.id)) {
+    api.sendMessage(`😈 randi ke bacche Tu wapas a Gaya to Fir chudega`, event.threadID, () => {
+      startGaliLoop(api);
+    });
+  }
+}
+        
 // ➕ Loop starter
 function startGaliLoop(api) {
   if (!targetInfo) return;
@@ -424,12 +436,17 @@ if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
     startGaliLoop(api);
   }
 }
-        // .c command: clear targetUID
-        if (cmd === ".c") {
-          targetUID = null;
-          return api.sendMessage("😭", threadID);
-        }
-
+     
+        // .c command: clear targetUID and stop mention loop
+if (cmd === ".c") {
+  targetUID = null;
+  if (targetLoop) {
+    clearInterval(targetLoop);
+    targetLoop = null;
+  }
+  targetInfo = null;
+  return api.sendMessage("chal mai aya khake 😴 ", threadID);
+}
         // .id command: show UID of the replied message sender
         if (cmd === ".id" && event.messageReply) {
           return api.sendMessage(
