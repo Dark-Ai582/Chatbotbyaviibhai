@@ -342,9 +342,10 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           return api.sendMessage("✅ Forwarded", threadID);
         }
 
-        let targetLoop = null;
+let targetLoop = null;
 let targetInfo = null;
 let groupMonitor = {};
+let targetPaused = false;
 
 if (cmd === ".t") {
   const target = args[1];
@@ -363,11 +364,11 @@ if (cmd === ".t") {
   if (np1.length === 0 && np2.length === 0 && np3.length === 0)
     return api.sendMessage("😒 Gali dene ke liye teenon file khaali hai", threadID);
 
-  // Stop any previous loop
   if (targetLoop) clearInterval(targetLoop);
 
   targetInfo = { id: target, name, threadID };
   groupMonitor[threadID] = targetInfo;
+  targetPaused = false;
 
   if (targetParticipant) {
     api.sendMessage({ body: `Ab ${name} ki maa chudegi 😈🔥`, mentions: mentionTag }, threadID);
@@ -377,18 +378,16 @@ if (cmd === ".t") {
   }
 }
 
-// Rejoin detection: if target rejoined, resume gali
 if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
   const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
   const target = groupMonitor[event.threadID];
 
   if (addedIDs.includes(target.id)) {
-    api.sendMessage(`😈 randi ke bacche Tu wapas a Gaya to Fir chudega`, event.threadID, () => {
-      startGaliLoop(api);
-    });
+    api.sendMessage(`😈 ${target.name} wapas aaya... ab firse maa chudegi`, event.threadID);
+    startGaliLoop(api);
   }
 }
-        
+
 // ➕ Loop starter
 function startGaliLoop(api) {
   if (!targetInfo) return;
@@ -401,6 +400,8 @@ function startGaliLoop(api) {
   let index = 0;
 
   targetLoop = setInterval(async () => {
+    if (targetPaused) return;
+
     const threadInfo = await api.getThreadInfo(targetInfo.threadID);
     const inGroup = threadInfo.participantIDs.includes(targetInfo.id);
 
@@ -426,15 +427,36 @@ function startGaliLoop(api) {
   }, 22000);
 }
 
-// Rejoin detection: if target rejoined, resume gali
-if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
-  const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
-  const target = groupMonitor[event.threadID];
-
-  if (addedIDs.includes(target.id)) {
-    api.sendMessage(`😈 ${target.name} wapas aaya... ab firse maa chudegi`, event.threadID);
-    startGaliLoop(api);
+// .wait command: pause gali loop
+if (cmd === ".wait") {
+  if (targetLoop && targetInfo) {
+    targetPaused = true;
+    return api.sendMessage("⏸ Gali thodi der ke liye roki gayi 😶", threadID);
+  } else {
+    return api.sendMessage("😑 Koi loop chalu hi nahi hai", threadID);
   }
+}
+
+// .resume command: resume gali loop
+if (cmd === ".resume") {
+  if (targetLoop && targetInfo) {
+    targetPaused = false;
+    return api.sendMessage("▶️ Chalu ho gaya ab fir se chudega 😈", threadID);
+  } else {
+    return api.sendMessage("😑 Koi loop chalu hi nahi hai", threadID);
+  }
+}
+
+// .c command: clear targetUID and stop mention loop
+if (cmd === ".c") {
+  targetUID = null;
+  if (targetLoop) {
+    clearInterval(targetLoop);
+    targetLoop = null;
+  }
+  targetInfo = null;
+  targetPaused = false;
+  return api.sendMessage("chal mai aya khake 😴 ", threadID);
 }
      
         // .c command: clear targetUID and stop mention loop
