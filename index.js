@@ -14,6 +14,9 @@ let mediaLoopInterval = null,
   lastMedia = null;
 let targetUID = null;
 
+const activeTargets = {};
+const handledMessages = new Set();
+
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () =>
