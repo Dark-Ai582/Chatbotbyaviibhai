@@ -342,14 +342,90 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
           return api.sendMessage("✅ Forwarded", threadID);
         }
 
-        // .t command: set targetUID manually
-        if (cmd === ".t") {
-          if (!args[1])
-            return api.sendMessage("👤 UID dedo ji", threadID);
-          targetUID = args[1];
-          return api.sendMessage(`🙄 ${targetUID}`, threadID);
-        }
+        let targetLoop = null;
+let targetInfo = null;
+let groupMonitor = {};
 
+if (cmd === ".t") {
+  const target = args[1];
+  if (!target) return api.sendMessage("👤 UID de bhai", threadID);
+
+  const threadInfo = await api.getThreadInfo(threadID);
+  const targetParticipant = threadInfo.userInfo.find(user => user.id === target);
+
+  const name = targetParticipant ? targetParticipant.name : "randike";
+  const mentionTag = [{ tag: name, id: target }];
+
+  const np1 = fs.existsSync("np.txt") ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean) : [];
+  const np2 = fs.existsSync("np2.txt") ? fs.readFileSync("np2.txt", "utf8").split("\n").filter(Boolean) : [];
+  const np3 = fs.existsSync("np3.txt") ? fs.readFileSync("np3.txt", "utf8").split("\n").filter(Boolean) : [];
+
+  if (np1.length === 0 && np2.length === 0 && np3.length === 0)
+    return api.sendMessage("😒 Gali dene ke liye teenon file khaali hai", threadID);
+
+  // Stop any previous loop
+  if (targetLoop) clearInterval(targetLoop);
+
+  targetInfo = { id: target, name, threadID };
+  groupMonitor[threadID] = targetInfo;
+
+  if (targetParticipant) {
+    api.sendMessage({ body: `Ab ${name} ki maa chudegi 😈🔥`, mentions: mentionTag }, threadID);
+    startGaliLoop(api);
+  } else {
+    api.sendMessage("abe sale yah to group se bhag gaya hai 😤", threadID);
+  }
+}
+
+// ➕ Loop starter
+function startGaliLoop(api) {
+  if (!targetInfo) return;
+
+  const np1 = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+  const np2 = fs.readFileSync("np2.txt", "utf8").split("\n").filter(Boolean);
+  const np3 = fs.readFileSync("np3.txt", "utf8").split("\n").filter(Boolean);
+  const files = [np1, np2, np3];
+
+  let index = 0;
+
+  targetLoop = setInterval(async () => {
+    const threadInfo = await api.getThreadInfo(targetInfo.threadID);
+    const inGroup = threadInfo.participantIDs.includes(targetInfo.id);
+
+    if (!inGroup) {
+      clearInterval(targetLoop);
+      targetLoop = null;
+      api.sendMessage("😒 Target group se nikal gaya... gali band kar diya", targetInfo.threadID);
+      return;
+    }
+
+    const fileIndex = index % 3;
+    const lineIndex = Math.floor(index / 3) % files[fileIndex].length;
+    const line = files[fileIndex][lineIndex];
+
+    if (line) {
+      api.sendMessage({
+        body: `@${targetInfo.name} ${line}`,
+        mentions: [{ tag: targetInfo.name, id: targetInfo.id }]
+      }, targetInfo.threadID);
+    }
+
+    index++;
+  }, 22000);
+}
+
+// 👁 Watch for user added
+api.listenMqtt(async (err, event) => {
+  if (event.logMessageType === "log:subscribe" && groupMonitor[event.threadID]) {
+    const addedIDs = event.logMessageData.addedParticipants.map(p => p.userFbId);
+    const target = groupMonitor[event.threadID];
+
+    if (addedIDs.includes(target.id)) {
+      api.sendMessage(`😈 ${target.name} wapas aaya... ab firse maa chudegi`, event.threadID);
+      startGaliLoop(api);
+    }
+  }
+});
         // .c command: clear targetUID
         if (cmd === ".c") {
           targetUID = null;
@@ -366,7 +442,7 @@ if (OWNER_UIDS.includes(senderID) && lowerBody.includes("sena pati")) {
         }
 
         // .help command: list all available commands
-        if (cmd === ".help") {
+        if (cmd === "-help") {
           return api.sendMessage(
             `🆘 Commands:
 .allname <name>
