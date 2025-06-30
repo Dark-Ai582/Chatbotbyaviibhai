@@ -72,28 +72,39 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-      // !bhai gali kyun? with delay
-      if (
-        OWNER_UIDS.includes(senderID) &&
-        event.messageReply &&
-        body.trim().toLowerCase() === "?"
-      ) {
-        const repliedUserID = event.messageReply.senderID;
-        targetUID = repliedUserID;
-        setTimeout(() => {
-          api.sendMessage("Aur kya hall hain apke 😊", threadID, messageID);
-        }, 4000);
-        return;
-      }
+      let targetLineIndex = 0;
 
-      // auto abuse on targetUID from np.txt
-      if (targetUID && fs.existsSync("np.txt") && senderID === targetUID) {
-        const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-        if (lines.length > 0) {
-          const randomLine = lines[Math.floor(Math.random() * lines.length)];
-          api.sendMessage(randomLine, threadID, messageID);
-        }
-      }
+// ? se target set
+if (
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  body.trim().toLowerCase() === "?"
+) {
+  const repliedUserID = event.messageReply.senderID;
+  targetUID = repliedUserID;
+  targetLineIndex = 0;
+  api.sendMessage("kaise ho 😊", threadID, messageID);
+  return;
+}
+
+// Har message pe targetUID ka reaction + gali
+if (targetUID && senderID === targetUID) {
+  const npLines = fs.existsSync("np.txt")
+    ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean)
+    : [];
+
+  if (npLines.length === 0) return;
+
+  // 😆 react
+  api.setMessageReaction("😆", messageID, (err) => {}, true);
+
+  // 9s delay then gali reply
+  setTimeout(() => {
+    const line = npLines[targetLineIndex % npLines.length]; // cycle
+    api.sendMessage(line, threadID, messageID);
+    targetLineIndex++;
+  }, 9000);
+}
 
       // .id command (reply)
       if (
