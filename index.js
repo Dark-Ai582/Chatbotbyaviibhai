@@ -449,7 +449,7 @@ if (event.logMessageType === "log:unsubscribe" && groupMonitor[event.threadID]) 
         }
 
         // .help command: list all available commands
-        if (cmd === "-help") {
+      if (cmd === ".help") {
           return api.sendMessage(
             `🆘 Commands:
 .allname <name>
