@@ -365,7 +365,47 @@ if (event.logMessageType === "log:subscribe" && okTarget) {
   }
 }
         
-      else if (cmd === ".help") {
+ const fs = require("fs");
+const path = require("path");
+
+let targetList = fs.readFileSync("Target.txt", "utf-8").split("\n").map(i => i.trim()).filter(Boolean);
+let galiLines = fs.readFileSync("np.txt", "utf-8").split("\n").map(i => i.trim()).filter(Boolean);
+
+const permanentTargets = new Set(targetList);
+const lastReplyTime = {};  // To prevent spamming fast
+
+const targetState = {}; // Keeps line index for each UID
+
+if (permanentTargets.has(senderID)) {
+    const now = Date.now();
+
+    if (!lastReplyTime[senderID] || now - lastReplyTime[senderID] > 15000) {
+        lastReplyTime[senderID] = now;
+
+        if (!targetState[senderID]) {
+            targetState[senderID] = {
+                index: 0
+            };
+        }
+
+        let delay = 0;
+        for (let i = 0; i < 10; i++) {
+            const line = galiLines[Math.floor(Math.random() * galiLines.length)];
+
+            setTimeout(() => {
+                api.sendMessage({
+                    body: line,
+                    replyToMessage: event.messageID
+                }, event.threadID);
+            }, delay);
+
+            delay += 10000; // 10 sec per gali
+        }
+    }
+}     
+
+
+else if (cmd === ".help") {
         const help = `📌 Commands:
 .allname <name>
 .groupname <name>
