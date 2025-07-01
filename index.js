@@ -121,63 +121,48 @@ if (
   api.sendMessage("Ji Aryan Malik Hukim kijiye kya kand karna hai 😋", threadID, messageID);
 }
       
+            // Group name lock
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
-        const newName = event.logMessageData.name;
-        const locked = lockedGroupNames[threadID];
-        if (locked && newName !== locked) {
-          await api.setTitle(locked, threadID);
-          api.sendMessage("oi Randike, Aryan ne naam lock kar diya hai, ab tere baap ka bhi aukat nahi badal sakta 🤨", threadID);
+        const currentName = event.logMessageData.name;
+        const lockedName = lockedGroupNames[threadID];
+        if (lockedName && currentName !== lockedName) {
+          await api.setTitle(lockedName, threadID);
+          api.sendMessage(`oi Randike yehan Aryan bos ne name rakha gc ke ab tere baap ka bhi aukat nhi badal sake 🤨 samjha lode chal nikal`, threadID);
         }
         return;
       }
 
-      if (!OWNER_UIDS.includes(senderID)) return;
-      const args = body.trim().split(" ");
-      const cmd = args[0].toLowerCase();
-      const input = args.slice(1).join(" ");
-
-      switch (cmd) {
-        case "-allname": {
-          const info = await api.getThreadInfo(threadID);
-          for (let uid of info.participantIDs) {
-            await api.changeNickname(input, threadID, uid).catch(() => {});
-            await new Promise(res => setTimeout(res, 20000));
-          }
-          return api.sendMessage("👥 Nicknames updated", threadID);
-        }
-
-      }
-     if (cmd === "-allname") {
+      if (cmd === "-allname") {
         const info = await api.getThreadInfo(threadID);
         for (const uid of info.participantIDs) {
           await api.changeNickname(input, threadID, uid).catch(() => {});
           await new Promise(res => setTimeout(res, 20000));
         }
-        api.sendMessage("Sb rkb ka nickname badal diya jo na badla uspe zuku ma chudwa liya", threadID);
+        api.sendMessage("Aryan bhaii Nicknames updated", threadID);
       }
 
       else if (cmd === "-groupname") {
         await api.setTitle(input, threadID);
-        api.sendMessage("Tera baap hun madrchod.", threadID);
+        api.sendMessage("Group name updated.", threadID);
       }
 
       else if (cmd === "-lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
-        api.sendMessage(`Mera loda ab koi chnage kar payega jab tak aryan ka order ni ayega group name change karke dikha himmat he to Locked: ${input}`, threadID);
+        api.sendMessage(`Aryan sir lock hogya name ab koi badalega to uski ma bhi chod dunga ap bolo to 😎Locked: ${input}`, threadID);
       }
 
-      else if (cmd === "-unlockgroupname") {
+      else if (cmd === "!unlockgroupname") {
         delete lockedGroupNames[threadID];
-        api.sendMessage("Ab name change kar sakte ❤️‍🩹 Aryan ne rok diya mujhe", threadID);
+        api.sendMessage("🔓ok Aryan sir kr diya unblock ma chudane do naam par rkb ko Unlocked group name.", threadID);
       }
 
-      else if (cmd === ".uid") {
-        api.sendMessage(`Pakdo ji Group ID: ${threadID}`, threadID);
+      else if (cmd === "!uid") {
+        api.sendMessage(`🆔 kya hua ji kiski ma chodoge🤭 😆 jo uid mang rahe Group ID: ${threadID}`, threadID);
       }
 
-      else if (cmd === "*exit") {
-        api.sendMessage(`Thik hai 💔 chalta hun Aryan boss dhyan rakhna apna`, threadID, () => {
+      else if (cmd === "!exit") {
+        api.sendMessage(`Aryan bhaii  chalta hun sabki ma chod diya kabhi krishna jaise 25K gulam ko chodna ho to bula lena inki ma ki bur me sui dhaga dal kr see dunga 🙏🖕😎`, threadID, () => {
           api.removeUserFromGroup(api.getCurrentUserID(), threadID);
         });
       }
