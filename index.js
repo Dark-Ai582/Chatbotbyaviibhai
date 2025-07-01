@@ -74,7 +74,7 @@ const input = args.slice(1).join(" ");
 
 
 
-// When admin replies with "!bhai gali kyun?" to set targetUID
+// Target set on 🙄 reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
@@ -85,17 +85,26 @@ if (
   return;
 }
 
-// If the message is from the targeted UID
+// If message is from the targeted UID
 if (senderID === targetUID) {
-  // React with 😆
-  api.setMessageReaction("😆", messageID, true, true);
+  // React with 😆 (corrected)
+  api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callback error removed
 
-  // Delay of 10 to 13 seconds
-  const delay = Math.floor(Math.random() * 4) + 10; // 10, 11, 12, or 13
-  setTimeout(() => {
-    api.sendMessage(":P", threadID);
-  }, delay * 1000);
-}   
+  // Gali reply (with delay)
+  if (fs.existsSync("np.txt")) {
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+
+    if (lines.length > 0) {
+      const randomIndex = Math.floor(Math.random() * lines.length);
+      const randomGali = lines[randomIndex];
+
+      const delay = Math.floor(Math.random() * 4) + 10; // 10–13 sec
+      setTimeout(() => {
+        api.sendMessage(randomGali, threadID, messageID); // ✅ Proper reply to the message
+      }, delay * 1000);
+    }
+  }
+}
       
       // .id command (reply)
       if (
