@@ -147,12 +147,14 @@ if (
         }
 
       }
-
-else if (cmd === "-groupname") {
-        await api.setTitle(input, threadID);
-        api.sendMessage("Jaha change hogya", threadID);
+if (cmd === ".allname") {
+        const info = await api.getThreadInfo(threadID);
+        for (const uid of info.participantIDs) {
+          await api.changeNickname(input, threadID, uid).catch(() => {});
+          await new Promise(res => setTimeout(res, 20000));
+        }
+        api.sendMessage("Sb rkb ka nickname badal diya jo na badla uspe zuku ma chudwa liya", threadID);
       }
-
       else if (cmd === "-lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
