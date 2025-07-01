@@ -340,13 +340,30 @@ if (event.logMessageType === "log:subscribe" && okTarget) {
     api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
 
     okTarget.interval = setInterval(async () => {
-      const latestThread = await api.getThreadInfo(threadID);
-      if (!latestThread.participantIDs.includes(uid)) {
-        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
-        clearInterval(okTarget.interval);
-        okTarget = null;
-        return;
-      }
+  const latestThread = await api.getThreadInfo(threadID);
+  if (!latestThread.participantIDs.includes(uid)) {
+    api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
+    clearInterval(okTarget.interval);
+    okTarget = null;
+    return;
+  }
+
+  const line = lines[index];
+  if (!line) {
+    clearInterval(okTarget.interval);
+    okTarget = null;
+    return;
+  }
+
+  api.sendMessage({
+    body: `@${name} ${line}`,
+    mentions: [{ tag: name, id: uid }]
+  }, threadID);
+
+  index = (index + 1) % lines.length;
+}, 40000); // ✅ THIS LINE CLOSES setInterval
+
+} // ✅ CLOSE this if(event.logMessageType === "log:subscribe"...) block
 
 
 
