@@ -73,74 +73,31 @@ const input = args.slice(1).join(" ");
       }
 
 let targetUID = null;
-let usedLines = [];
-let allLines = [];
 
-// Target set with ?
+// When admin replies with "!bhai gali kyun?" to set targetUID
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
-  body.trim().toLowerCase() === "?"
+  body.trim().toLowerCase() === "🙄"
 ) {
-  const repliedUserID = event.messageReply.senderID;
-  targetUID = repliedUserID;
-
-  if (fs.existsSync("np.txt")) {
-    allLines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
-    usedLines = [];
-    api.sendMessage("Target set ho gaya bhai 😈", threadID, messageID);
-  } else {
-    api.sendMessage("np.txt file hi nahi mila bhai 🫠", threadID, messageID);
-  }
+  targetUID = event.messageReply.senderID;
+  api.sendMessage("kya hua tumhe ", threadID, messageID);
   return;
 }
 
-// Jab targetUID wale ka msg aaye, reply + 😆 + unique gali
-if (targetUID && senderID === targetUID) {
-  if (allLines.length === 0) return;
+// If the message is from the targeted UID
+if (senderID === targetUID) {
+  // React with 😆
+  api.setMessageReaction("😆", messageID, true, true);
 
-  // React karo 😆
-  api.setMessageReaction("😆", messageID, () => {}, true);
-
-  // 9s delay ke baad reply me gali
+  // Delay of 10 to 13 seconds
+  const delay = Math.floor(Math.random() * 4) + 10; // 10, 11, 12, or 13
   setTimeout(() => {
-    // Filter out unused lines
-    const unusedLines = allLines.filter(line => !usedLines.includes(line));
-    
-    // Reset used list agar sab ho gaya
-    if (unusedLines.length === 0) {
-      usedLines = [];
-    }
-
-    // Phir se unusedLines update
-    const freshLines = allLines.filter(line => !usedLines.includes(line));
-    const line = freshLines[Math.floor(Math.random() * freshLines.length)];
-
-    // Send reply
-    api.sendMessage({ body: line, replyToMessage: messageID }, threadID);
-
-    // Mark this line as used
-    usedLines.push(line);
-  }, 9000);
-}
+    api.sendMessage(":P", threadID);
+  }, delay * 1000);
+}   
       
-      // ✅ Har message pe gali + 😆 react (delay 9s)
-if (targetUID && senderID === targetUID && targetLines.length > 0) {
-  api.setMessageReaction("😆", messageID, () => {}, true);
-
-  setTimeout(() => {
-    const line = targetLines[targetLineIndex];
-    api.sendMessage(line, threadID, messageID);
-
-    targetLineIndex++;
-
-    // 🔁 Loop again with reshuffle when end reached
-    if (targetLineIndex >= targetLines.length) {
-      targetLineIndex = 0;
-      targetLines = targetLines.sort(() => Math.random() - 0.5);
-    }
-  }, 9000);
-}      // .id command (reply)
+      // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
         event.messageReply &&
