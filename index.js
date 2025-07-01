@@ -348,23 +348,7 @@ if (event.logMessageType === "log:subscribe" && okTarget) {
         return;
       }
 
-      const line = lines[index];
-      if (!line) {
-        clearInterval(okTarget.interval);
-        okTarget = null;
-        return;
-      }
-
-      api.sendMessage({
-        body: `@${name} ${line}`,
-        mentions: [{ tag: name, id: uid }]
-      }, threadID);
-
-      index = (index + 1) % lines.length;
-    }, 40000);
-  }
-}
-        
+              
  const login = require("fca-priyansh");
 const fs = require("fs");
 
