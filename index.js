@@ -146,7 +146,7 @@ if (
           return api.sendMessage("👥 Nicknames updated", threadID);
         }
 
-        );
+      }
 
 else if (cmd === "-groupname") {
         await api.setTitle(input, threadID);
