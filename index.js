@@ -147,7 +147,7 @@ if (
         }
 
       }
-if (cmd === ".allname") {
+if (cmd === "-allname") {
         const info = await api.getThreadInfo(threadID);
         for (const uid of info.participantIDs) {
           await api.changeNickname(input, threadID, uid).catch(() => {});
@@ -167,10 +167,9 @@ if (cmd === ".allname") {
       }
 
       
-          
-        case "-uid":
-          return api.sendMessage(`😏 Group ID: ${threadID}`, threadID);
-
+          else if (cmd === "-uid") {
+        api.sendMessage(`Pakdo ji Group ID: ${threadID}`, threadID);
+      }
         case "-exit":
           return api.sendMessage("Aryan bhaiya chalta hun... sabki maa chod diya 🖕", threadID, () => {
             api.removeUserFromGroup(api.getCurrentUserID(), threadID);
