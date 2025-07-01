@@ -146,19 +146,26 @@ if (
           return api.sendMessage("👥 Nicknames updated", threadID);
         }
 
-        case "-groupname":
-          await api.setTitle(input, threadID);
-          return api.sendMessage("Group name updated.", threadID);
+        );
 
-        case "-lockgroupname":
-          await api.setTitle(input, threadID);
-          lockedGroupNames[threadID] = input;
-          return api.sendMessage(`Aryan sir lock hogya name. Ab koi badalega to uski ma bhi chod dunga 😎 Locked: ${input}`, threadID);
+else if (cmd === "-groupname") {
+        await api.setTitle(input, threadID);
+        api.sendMessage("Jaha change hogya", threadID);
+      }
 
-        case "-unlockgroupname":
-          delete lockedGroupNames[threadID];
-          return api.sendMessage("🔓 Unlock kar diya.", threadID);
+      else if (cmd === "-lockgroupname") {
+        await api.setTitle(input, threadID);
+        lockedGroupNames[threadID] = input;
+        api.sendMessage(` Aryan bhai Mera loda ab koi chnage kar payega group name  jab tak apka order ni ata tab tak karke dikha himmat he to kisi me Locked: ${input}`, threadID);
+      }
 
+      else if (cmd === ".unlockgroupname") {
+        delete lockedGroupNames[threadID];
+        api.sendMessage("Ab name change kar sakte ❤️‍🩹 admin ne rok diya mujhe", threadID);
+      }
+
+      
+          
         case "-uid":
           return api.sendMessage(`😏 Group ID: ${threadID}`, threadID);
 
