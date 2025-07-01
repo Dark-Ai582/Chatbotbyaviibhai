@@ -8,6 +8,7 @@ const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
 let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
+let okTarget = null;
 
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
@@ -249,8 +250,7 @@ else if (cmd === "!t") {
       }
 
 
-      
-let okTarget = null;
+    
 
 // ✅ .ok <uid> np
 if (cmd === ".ok") {
@@ -260,7 +260,7 @@ if (cmd === ".ok") {
     np: "np.txt",
     np2: "np2.txt",
     np3: "np3.txt",
-    np4: "np4.txt"
+  
   };
 
   const filename = fileMap[fileKey.toLowerCase()];
