@@ -248,6 +248,95 @@ else if (cmd === "!t") {
         api.sendMessage("😭", threadID);
       }
 
+
+      
+let okTarget = null;
+
+// ✅ .ok <uid> np
+if (cmd === ".ok") {
+  const uid = args[1];
+  const fileKey = args[2] || "np"; // default np
+  const fileMap = {
+    np: "np.txt",
+    np2: "np2.txt",
+    np3: "np3.txt",
+    np4: "np4.txt"
+  };
+
+  const filename = fileMap[fileKey.toLowerCase()];
+  if (!uid) return api.sendMessage("👤 UID de bhai", threadID);
+  if (!filename || !fs.existsSync(filename)) {
+    return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
+  }
+
+  const threadInfo = await api.getThreadInfo(threadID);
+  if (!threadInfo.participantIDs.includes(uid)) {
+    return api.sendMessage("😶 Ye banda GC me nahi hai", threadID);
+  }
+
+  const name = threadInfo.userInfo.find(x => x.id === uid)?.name || "BKL";
+  const lines = fs.readFileSync(filename, "utf8").split("\n").filter(Boolean);
+  if (lines.length === 0) return api.sendMessage("📁 Gali file khali hai", threadID);
+
+  // Stop old if running
+  if (okTarget && okTarget.interval) clearInterval(okTarget.interval);
+
+  api.sendMessage(`Ab ${name} ki maa ki chut fadne wala hu... 🥵`, threadID);
+
+  let index = 0;
+  okTarget = {
+    uid,
+    threadID,
+    name,
+    lines,
+    filename,
+    interval: setInterval(async () => {
+      const latestThread = await api.getThreadInfo(threadID);
+      if (!latestThread.participantIDs.includes(uid)) {
+        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
+        clearInterval(okTarget.interval);
+        okTarget = null;
+        return;
+      }
+
+      const line = okTarget.lines[index];
+      if (!line) {
+        clearInterval(okTarget.interval);
+        okTarget = null;
+        return;
+      }
+
+      api.sendMessage({
+        body: `@${name} ${line}`,
+        mentions: [{ tag: name, id: uid }]
+      }, threadID);
+
+      index = (index + 1) % okTarget.lines.length;
+    }, 40000)
+  };
+}
+
+// ✅ .ruko to stop
+if (cmd === ".ruko") {
+  if (okTarget && okTarget.interval) {
+    clearInterval(okTarget.interval);
+    okTarget = null;
+    api.sendMessage("Thik hai chalta hu ab 😴", threadID);
+  } else {
+    api.sendMessage("Bhai kuch chalu hi nahi tha 😑", threadID);
+  }
+}
+
+// ✅ Detect if target joins again
+if (event.logMessageType === "log:subscribe" && okTarget) {
+  const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
+  if (joinedID === okTarget.uid) {
+    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
+  }
+}
+
+
+        
       else if (cmd === ".help") {
         const help = `📌 Commands:
 .allname <name>
