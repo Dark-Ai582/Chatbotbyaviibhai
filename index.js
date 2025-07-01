@@ -147,7 +147,7 @@ if (
         }
 
       }
-if (cmd === "-allname") {
+     if (cmd === "-allname") {
         const info = await api.getThreadInfo(threadID);
         for (const uid of info.participantIDs) {
           await api.changeNickname(input, threadID, uid).catch(() => {});
@@ -155,25 +155,32 @@ if (cmd === "-allname") {
         }
         api.sendMessage("Sb rkb ka nickname badal diya jo na badla uspe zuku ma chudwa liya", threadID);
       }
+
+      else if (cmd === "-groupname") {
+        await api.setTitle(input, threadID);
+        api.sendMessage("Tera baap hun madrchod.", threadID);
+      }
+
       else if (cmd === "-lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
-        api.sendMessage(` Aryan bhai Mera loda ab koi chnage kar payega group name  jab tak apka order ni ata tab tak karke dikha himmat he to kisi me Locked: ${input}`, threadID);
+        api.sendMessage(`Mera loda ab koi chnage kar payega jab tak aryan ka order ni ayega group name change karke dikha himmat he to Locked: ${input}`, threadID);
       }
 
-      else if (cmd === ".unlockgroupname") {
+      else if (cmd === "-unlockgroupname") {
         delete lockedGroupNames[threadID];
-        api.sendMessage("Ab name change kar sakte ❤️‍🩹 admin ne rok diya mujhe", threadID);
+        api.sendMessage("Ab name change kar sakte ❤️‍🩹 Aryan ne rok diya mujhe", threadID);
       }
 
-      
-          else if (cmd === "-uid") {
+      else if (cmd === ".uid") {
         api.sendMessage(`Pakdo ji Group ID: ${threadID}`, threadID);
       }
-        case "-exit":
-          return api.sendMessage("Aryan bhaiya chalta hun... sabki maa chod diya 🖕", threadID, () => {
-            api.removeUserFromGroup(api.getCurrentUserID(), threadID);
-          });
+
+      else if (cmd === "*exit") {
+        api.sendMessage(`Thik hai 💔 chalta hun Aryan boss dhyan rakhna apna`, threadID, () => {
+          api.removeUserFromGroup(api.getCurrentUserID(), threadID);
+        });
+      }
 
         case "-rkb":
         case "-rkb2":
