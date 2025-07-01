@@ -365,44 +365,83 @@ if (event.logMessageType === "log:subscribe" && okTarget) {
   }
 }
         
- const fs = require("fs");
-const path = require("path");
+ const login = require("fca-priyansh");
+const fs = require("fs");
 
-let targetList = fs.readFileSync("Target.txt", "utf-8").split("\n").map(i => i.trim()).filter(Boolean);
-let galiLines = fs.readFileSync("np.txt", "utf-8").split("\n").map(i => i.trim()).filter(Boolean);
+// Load Target.txt and np.txt
+let permanentTargets = new Set();
+let galiLines = [];
 
-const permanentTargets = new Set(targetList);
-const lastReplyTime = {};  // To prevent spamming fast
-
-const targetState = {}; // Keeps line index for each UID
-
-if (permanentTargets.has(senderID)) {
-    const now = Date.now();
-
-    if (!lastReplyTime[senderID] || now - lastReplyTime[senderID] > 15000) {
-        lastReplyTime[senderID] = now;
-
-        if (!targetState[senderID]) {
-            targetState[senderID] = {
-                index: 0
-            };
-        }
-
-        let delay = 0;
-        for (let i = 0; i < 10; i++) {
-            const line = galiLines[Math.floor(Math.random() * galiLines.length)];
-
-            setTimeout(() => {
-                api.sendMessage({
-                    body: line,
-                    replyToMessage: event.messageID
-                }, event.threadID);
-            }, delay);
-
-            delay += 10000; // 10 sec per gali
-        }
+function loadTargetData() {
+    try {
+        permanentTargets = new Set(
+            fs.readFileSync("Target.txt", "utf-8")
+                .split("\n")
+                .map(x => x.trim())
+                .filter(Boolean)
+        );
+        galiLines = fs.readFileSync("np.txt", "utf-8")
+            .split("\n")
+            .map(x => x.trim())
+            .filter(Boolean);
+    } catch (err) {
+        console.error("Error loading Target.txt or np.txt:", err);
     }
-}     
+}
+loadTargetData();
+setInterval(loadTargetData, 60000); // Reload files every 1 min
+
+const lastGaliTime = {}; // track per user
+
+login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf-8")) }, (err, api) => {
+    if (err) return console.error(err);
+
+    api.setOptions({
+        listenEvents: true,
+        forceLogin: true,
+        logLevel: "silent"
+    });
+
+    api.listenMqtt(async (err, event) => {
+        if (err || !event || !event.senderID || !event.threadID) return;
+
+        const senderID = event.senderID;
+        const messageID = event.messageID;
+        const threadID = event.threadID;
+
+        if (permanentTargets.has(senderID)) {
+            const now = Date.now();
+
+            if (!lastGaliTime[senderID] || now - lastGaliTime[senderID] > 15000) {
+                lastGaliTime[senderID] = now;
+
+                const usedIndexes = new Set();
+                let delay = 0;
+
+                for (let i = 0; i < 10; i++) {
+                    // Unique random gali
+                    let gali;
+                    let tries = 0;
+                    do {
+                        const index = Math.floor(Math.random() * galiLines.length);
+                        gali = galiLines[index];
+                        tries++;
+                    } while (usedIndexes.has(gali) && tries < 50);
+                    usedIndexes.add(gali);
+
+                    setTimeout(() => {
+                        api.sendMessage({
+                            body: gali,
+                            replyToMessage: messageID
+                        }, threadID);
+                    }, delay);
+
+                    delay += 13000; // 13 second gap
+                }
+            }
+        }
+    });
+});
 
 
 else if (cmd === ".help") {
