@@ -339,7 +339,9 @@ if (event.logMessageType === "log:subscribe" && okTarget) {
 
     api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, thread);
 
-    okTarget.interval = setInterval(async () => {
+    if (okTarget.interval) clearInterval(okTarget.interval);
+
+okTarget.interval = setInterval(async () => {
       const latestThread = await api.getThreadInfo(thread);
       if (!latestThread.participantIDs.includes(uid)) {
         api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, thread);
