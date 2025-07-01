@@ -72,7 +72,7 @@ const input = args.slice(1).join(" ");
         return;
       }
 
-let targetUID = null;
+
 
 // When admin replies with "!bhai gali kyun?" to set targetUID
 if (
