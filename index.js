@@ -329,22 +329,20 @@ if (cmd === ".ruko") {
 
 // ✅ Detect if target joins again
 if (event.logMessageType === "log:subscribe" && okTarget) {
-  const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
-  if (joinedID === okTarget.uid) {
-    const name = okTarget.name;
-    const uid = okTarget.uid;
-    const thread = okTarget.threadID;
-    const lines = okTarget.lines;
+  const addedIDs = event.logMessageData.addedParticipants?.map(p => p.userFbId);
+  if (addedIDs && addedIDs.includes(okTarget.uid)) {
+    const { name, uid, threadID, lines } = okTarget;
     let index = 0;
 
-    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, thread);
-
+    // ✅ Clear old interval first
     if (okTarget.interval) clearInterval(okTarget.interval);
 
-okTarget.interval = setInterval(async () => {
-      const latestThread = await api.getThreadInfo(thread);
+    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
+
+    okTarget.interval = setInterval(async () => {
+      const latestThread = await api.getThreadInfo(threadID);
       if (!latestThread.participantIDs.includes(uid)) {
-        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, thread);
+        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
         clearInterval(okTarget.interval);
         okTarget = null;
         return;
@@ -360,14 +358,12 @@ okTarget.interval = setInterval(async () => {
       api.sendMessage({
         body: `@${name} ${line}`,
         mentions: [{ tag: name, id: uid }]
-      }, thread);
+      }, threadID);
 
       index = (index + 1) % lines.length;
     }, 40000);
   }
 }
-
-
         
       else if (cmd === ".help") {
         const help = `📌 Commands:
