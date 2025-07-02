@@ -433,12 +433,11 @@ if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarg
 });
 
 
-// ====== STICKER SYSTEM START ======
-
-else if (cmd.startsWith("/sticker")) {
+// ✅ Independent /sticker<seconds> Command
+if (body?.startsWith("/sticker")) {
   if (!fs.existsSync("Sticker.txt")) return api.sendMessage("❌ Sticker.txt not found", threadID);
 
-  const delay = parseInt(cmd.replace("/sticker", ""));
+  const delay = parseInt(body.replace("/sticker", "").trim());
   if (isNaN(delay) || delay < 5) return api.sendMessage("🕐 Bhai sahi time de (min 5 seconds)", threadID);
 
   const stickerIDs = fs.readFileSync("Sticker.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
@@ -463,7 +462,8 @@ else if (cmd.startsWith("/sticker")) {
   }, delay * 1000);
 }
 
-else if (cmd === "/stopsticker") {
+// ✅ Independent /stopsticker Command
+if (body?.trim() === "/stopsticker") {
   if (stickerInterval) {
     clearInterval(stickerInterval);
     stickerInterval = null;
@@ -473,5 +473,3 @@ else if (cmd === "/stopsticker") {
     api.sendMessage("😒 Bhai kuch bhej bhi rha tha kya?", threadID);
   }
 }
-
-// ====== STICKER SYSTEM END ======
