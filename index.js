@@ -124,13 +124,16 @@ if (cmd === "/stickeruidoff") {
 
 
 
-// Target set on 🙄 reply
 if (
   OWNER_UIDS.includes(senderID) &&
   event.messageReply &&
   body.trim().toLowerCase() === "🙄"
 ) {
-  targetUID = event.messageReply.senderID;
+  const repliedUID = event.messageReply.senderID;
+  if (friendUIDs.includes(repliedUID)) {
+    return api.sendMessage("❌ Ye banda Avii Don ka dost hai, isko target nahi kar sakte", threadID, messageID);
+  }
+  targetUID = repliedUID;
   api.sendMessage("kya hua tumhe ", threadID, messageID);
   return;
 }
@@ -311,6 +314,9 @@ if (cmd === ".ok" && OWNER_UIDS.includes(senderID)) {
   };
 
   const filename = fileMap[fileKey.toLowerCase()];
+  if (friendUIDs.includes(uid)) {
+  return api.sendMessage("❌ Isko target nahi kar sakte — Avii Don ne mana kiya hai", threadID, messageID);
+  }
   if (!uid) return api.sendMessage("👤 UID de bhai", threadID);
   if (!filename || !fs.existsSync(filename)) {
     return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
@@ -374,6 +380,35 @@ if (cmd === ".ruko" && OWNER_UIDS.includes(senderID)) {
   }
 }
 
+else if (cmd === "/sticker") {
+  if (!fs.existsSync("Sticker.txt")) return api.sendMessage("❌ Sticker.txt not found", threadID);
+
+  const delay = parseInt(args[1]);
+  if (isNaN(delay) || delay < 5) return api.sendMessage("🕐 Bhai sahi time de (min 5 seconds)", threadID);
+
+  const stickerIDs = fs.readFileSync("Sticker.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
+  if (!stickerIDs.length) return api.sendMessage("⚠️ Sticker.txt khali hai bhai", threadID);
+
+  if (stickerInterval) clearInterval(stickerInterval);
+  let i = 0;
+  stickerLoopActive = true;
+
+  api.sendMessage(`📦 Sticker bhejna start mittar 😜: har ${delay} sec`, threadID);
+
+  stickerInterval = setInterval(() => {
+    if (!stickerLoopActive || i >= stickerIDs.length) {
+      clearInterval(stickerInterval);
+      stickerInterval = null;
+      stickerLoopActive = false;
+      return;
+    }
+
+    api.sendMessage({ sticker: stickerIDs[i] }, threadID);
+    i++;
+  }, delay * 1000);
+}
+
+      
 // ✅ Resume if target rejoins
 if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarget) {
   const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
