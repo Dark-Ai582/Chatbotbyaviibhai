@@ -24,7 +24,13 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
   console.log("✅ Bot logged in and running...");
 
-  api.listenMqtt(async (err, event) => {
+if (event.logMessageType === "log:subscribe" && okTarget) {
+  const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
+  if (joinedID === okTarget.uid) {
+    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
+    // Gali resume nahi kar raha yahan, tu bole to firse auto chalu bhi karwa dunga
+  }
+}
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
@@ -249,25 +255,18 @@ else if (cmd === "!t") {
         api.sendMessage("😭", threadID);
       }
 
-
-    
-
-// ✅ .ok <uid> np
 if (cmd === ".ok") {
   const uid = args[1];
-  const fileKey = args[2] || "np"; // default np
+  const fileKey = args[2] || "np";
   const fileMap = {
     np: "np.txt",
     np2: "np2.txt",
     np3: "np3.txt",
-  
+    np4: "np4.txt"
   };
-
   const filename = fileMap[fileKey.toLowerCase()];
   if (!uid) return api.sendMessage("👤 UID de bhai", threadID);
-  if (!filename || !fs.existsSync(filename)) {
-    return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
-  }
+  if (!filename || !fs.existsSync(filename)) return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
 
   const threadInfo = await api.getThreadInfo(threadID);
   if (!threadInfo.participantIDs.includes(uid)) {
@@ -278,7 +277,7 @@ if (cmd === ".ok") {
   const lines = fs.readFileSync(filename, "utf8").split("\n").filter(Boolean);
   if (lines.length === 0) return api.sendMessage("📁 Gali file khali hai", threadID);
 
-  // Stop old if running
+  // Clear previous
   if (okTarget && okTarget.interval) clearInterval(okTarget.interval);
 
   api.sendMessage(`Ab ${name} ki maa ki chut fadne wala hu... 🥵`, threadID);
@@ -292,13 +291,17 @@ if (cmd === ".ok") {
     filename,
     interval: setInterval(async () => {
       const latestThread = await api.getThreadInfo(threadID);
+
+      // If user is no longer in group
       if (!latestThread.participantIDs.includes(uid)) {
-        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa  ki chut fadta mai puri zindagi 😌`, threadID);
+        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
         clearInterval(okTarget.interval);
         okTarget = null;
         return;
       }
 
+      // If user came back after being gone
+      if (!okTarget.lines || okTarget.lines.length === 0) return;
       const line = okTarget.lines[index];
       if (!line) {
         clearInterval(okTarget.interval);
@@ -316,8 +319,8 @@ if (cmd === ".ok") {
   };
 }
 
-// ✅ .ruko to stop
-if (cmd === ".ruko") {
+
+  if (cmd === ".ruko") {
   if (okTarget && okTarget.interval) {
     clearInterval(okTarget.interval);
     okTarget = null;
@@ -325,50 +328,9 @@ if (cmd === ".ruko") {
   } else {
     api.sendMessage("Bhai kuch chalu hi nahi tha 😑", threadID);
   }
-}
-
-// ✅ Detect if target joins again
-if (event.logMessageType === "log:subscribe" && okTarget) {
-  const addedIDs = event.logMessageData.addedParticipants?.map(p => p.userFbId);
-  if (addedIDs && addedIDs.includes(okTarget.uid)) {
-    const { name, uid, threadID, lines } = okTarget;
-    let index = 0;
-
-    // ✅ Clear old interval first
-    if (okTarget.interval) clearInterval(okTarget.interval);
-
-    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
-
-    okTarget.interval = setInterval(async () => {
-  const latestThread = await api.getThreadInfo(threadID);
-  if (!latestThread.participantIDs.includes(uid)) {
-    api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
-    clearInterval(okTarget.interval);
-    okTarget = null;
-    return;
   }
-
-  const line = lines[index];
-  if (!line) {
-    clearInterval(okTarget.interval);
-    okTarget = null;
-    return;
-  }
-
-  api.sendMessage({
-    body: `@${name} ${line}`,
-    mentions: [{ tag: name, id: uid }]
-  }, threadID);
-
-  index = (index + 1) % lines.length;
-}, 40000); // ✅ THIS LINE CLOSES setInterval
-
-} // ✅ CLOSE this if(event.logMessageType === "log:subscribe"...) block
-
-
-
-
-else if (cmd === ".help") {
+        
+      else if (cmd === ".help") {
         const help = `📌 Commands:
 .allname <name>
 .groupname <name>
