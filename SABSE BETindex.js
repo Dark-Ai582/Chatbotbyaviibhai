@@ -9,6 +9,9 @@ let rkbInterval = null, stopRequested = false;
 let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
 let okTarget = null;
+let stickerInterval = null;
+let stickerLoopActive = false;
+let detectStickerUID = false;
 // Top of the file:
 const targetListUIDs = fs.existsSync("Target.txt")
   ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean)
@@ -33,6 +36,16 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
+      if (
+  detectStickerUID &&
+  event.type === "message" &&
+  event.attachments &&
+  event.attachments[0]?.type === "sticker"
+) {
+  const stickerID = event.attachments[0].ID;
+  console.log("🧷 Sticker ID:", stickerID);
+  api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
+      }
       // 🔥 Auto abuse for UIDs in Target.txt
 if (targetListUIDs.includes(senderID)) {
   if (fs.existsSync("np.txt")) {
@@ -66,6 +79,15 @@ const input = args.slice(1).join(" ");
       // ❌ Block commands (. or !) from non-owners
 if ((cmd.startsWith(".") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
   return; // Ignore commands from non-owners
+}
+      if (cmd === "/stickeruidon") {
+  detectStickerUID = true;
+  return api.sendMessage("✅ Sticker UID detection ON hai ab", threadID);
+}
+
+if (cmd === "/stickeruidoff") {
+  detectStickerUID = false;
+  return api.sendMessage("❌ Sticker UID detection OFF kar diya gaya", threadID);
 }
 
       const normalize = (text) =>
