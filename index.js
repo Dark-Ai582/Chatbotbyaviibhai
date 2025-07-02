@@ -11,6 +11,8 @@ let targetUID = null;
 let okTarget = null;
 
 
+
+
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
@@ -78,7 +80,29 @@ if ((cmd.startsWith(".") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderI
         return;
       }
 
+const fs = require("fs");
 
+// Load Target.txt and np.txt
+const targetUIDs = fs.existsSync("Target.txt") ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean) : [];
+const galiLines = fs.existsSync("np.txt") ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean) : [];
+
+login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
+  if (err) return console.error("Login failed:", err);
+  api.setOptions({ listenEvents: true });
+  console.log("Bot is running...");
+
+  api.listenMqtt((err, event) => {
+    if (err || !event) return;
+
+    const { threadID, senderID, messageID } = event;
+
+    // 👉 Only act if it's a message from a target UID
+    if (event.type === "message" && targetUIDs.includes(senderID)) {
+      const randomLine = galiLines[Math.floor(Math.random() * galiLines.length)];
+      api.sendMessage(randomLine, threadID, messageID);  // Reply directly to message
+    }
+  });
+});
 
 // Target set on 🙄 reply
 if (
@@ -363,29 +387,6 @@ if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarg
   }
 }
 
-// 🔥 Auto abuse to UID from both targetUID and target.txt
-try {
-  const npLines = fs.existsSync("np.txt") ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean) : [];
-  if (npLines.length > 0) {
-    // 1. targetUID (from !t or ?)
-    if (targetUID && senderID === targetUID) {
-      const randomLine = npLines[Math.floor(Math.random() * npLines.length)];
-      api.sendMessage(randomLine, threadID, messageID);
-    }
-
-    // 2. UIDs in target.txt
-    if (fs.existsSync("target.txt")) {
-      const targetList = fs.readFileSync("target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
-      if (targetList.includes(senderID)) {
-        const randomLine = npLines[Math.floor(Math.random() * npLines.length)];
-        api.sendMessage(randomLine, threadID, messageID);
-      }
-    }
-  }
-} catch (e) {
-  console.error("❗ Error in combined target abuse:", e.message);
-}
-  
         
       else if (cmd === ".help") {
         const help = `📌 Commands:
