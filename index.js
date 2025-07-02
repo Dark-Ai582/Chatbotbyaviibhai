@@ -374,10 +374,10 @@ if (cmd === ".ruko" && OWNER_UIDS.includes(senderID)) {
   }
 }
 
-if (cmd.startsWith("/sticker")) {
+else if (cmd === "/sticker") {
   if (!fs.existsSync("Sticker.txt")) return api.sendMessage("❌ Sticker.txt not found", threadID);
 
-  const delay = parseInt(cmd.replace("/sticker", "").trim());
+  const delay = parseInt(args[1]);
   if (isNaN(delay) || delay < 5) return api.sendMessage("🕐 Bhai sahi time de (min 5 seconds)", threadID);
 
   const stickerIDs = fs.readFileSync("Sticker.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
@@ -400,17 +400,6 @@ if (cmd.startsWith("/sticker")) {
     api.sendMessage({ sticker: stickerIDs[i] }, threadID);
     i++;
   }, delay * 1000);
-}
-
-else if (cmd === "/stopsticker") {
-  if (stickerInterval) {
-    clearInterval(stickerInterval);
-    stickerInterval = null;
-    stickerLoopActive = false;
-    api.sendMessage("🛑 Sticker bhejna band kr diya mittar 😎", threadID);
-  } else {
-    api.sendMessage("😒 Bhai kuch bhej bhi rha tha kya?", threadID);
-  }
 }
 
       
