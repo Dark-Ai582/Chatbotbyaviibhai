@@ -179,40 +179,34 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-// 💢 RESPECT ADMIN SHIELD (with Friend.txt check)
+// 💢 RESPECT ADMIN SHIELD (with Friend.txt logic)
 if (
   event.messageReply &&
-  OWNER_UIDS.includes(event.messageReply.senderID) && // replied message is from admin
-  !OWNER_UIDS.includes(senderID) // sender is not admin
+  OWNER_UIDS.includes(event.messageReply.senderID) &&
+  !OWNER_UIDS.includes(senderID)
 ) {
-  const repliedUID = event.messageReply.senderID; // jisko reply kiya gaya
-  const normalize = (text) =>
-    text
-      .toLowerCase()
-      .replace(/[4@]/g, "a")
-      .replace(/[1|!]/g, "i")
-      .replace(/[0]/g, "o")
-      .replace(/[3]/g, "e")
-      .replace(/[5$]/g, "s")
-      .replace(/[7]/g, "t");
+  const normalizedBody = body.toLowerCase()
+    .replace(/[4@]/g, "a")
+    .replace(/[1|!]/g, "i")
+    .replace(/[0]/g, "o")
+    .replace(/[3]/g, "e")
+    .replace(/[5$]/g, "s")
+    .replace(/[7]/g, "t");
 
-  const galiWords = [
+  const abuseWords = [
     "randi", "chut", "gand", "gandu", "chutiya", "madarchod", "bhosda", "behnchod",
     "mc", "bc", "lowda", "lund", "ma chudane", "maa ka", "teri maa"
   ];
 
-  const normalized = normalize(body);
-  const isAbusive = galiWords.some((word) => normalized.includes(word));
+  const isAbusive = abuseWords.some(word => normalizedBody.includes(word));
 
   if (isAbusive) {
-    // ✅ Check if the replied UID is in Friend.txt
-    if (friendUIDs.includes(event.messageReply.senderID)) {
-      return api.sendMessage("😇 Ye banda Avii bhaiya ka dost hai, isko reply me gali mat de", threadID, messageID);
+    if (friendUIDs.includes(senderID)) {
+      return api.sendMessage("shit ap to avi ke dost ho gali ni de skta par admin ke reply me bad word use krke baat ni kro pls❤️", threadID, messageID);
+    } else {
+      const gali = "🔥 Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri maa ki chut me land deke fad kr darzi se silwa dunga... next time dhyan rakhna warna target hojyega ❤️";
+      return api.sendMessage(gali, threadID, messageID);
     }
-
-    // ❌ Not a friend — gali allowed
-    const gali = "🩸 Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri maa ki chut me land deke darzi se silwa dunga... ok next time dhyan rakhna warna target hojyega ♥️";
-    return api.sendMessage(gali, threadID, messageID);
   }
 }
 
