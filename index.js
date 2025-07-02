@@ -10,6 +10,7 @@ let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
 let okTarget = null;
 
+
 const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
@@ -24,13 +25,7 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
   console.log("✅ Bot logged in and running...");
 
-if (event.logMessageType === "log:subscribe" && okTarget) {
-  const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
-  if (joinedID === okTarget.uid) {
-    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
-    // Gali resume nahi kar raha yahan, tu bole to firse auto chalu bhi karwa dunga
-  }
-}
+  api.listenMqtt(async (err, event) => {
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
@@ -255,18 +250,23 @@ else if (cmd === "!t") {
         api.sendMessage("😭", threadID);
       }
 
+
+
+// ✅ .ok <uid> [np/np2/np3]
 if (cmd === ".ok") {
   const uid = args[1];
-  const fileKey = args[2] || "np";
+  const fileKey = args[2] || "np"; // default is np
   const fileMap = {
     np: "np.txt",
     np2: "np2.txt",
-    np3: "np3.txt",
-    np4: "np4.txt"
+    np3: "np3.txt"
   };
+
   const filename = fileMap[fileKey.toLowerCase()];
   if (!uid) return api.sendMessage("👤 UID de bhai", threadID);
-  if (!filename || !fs.existsSync(filename)) return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
+  if (!filename || !fs.existsSync(filename)) {
+    return api.sendMessage(`❌ '${fileKey}' file nahi mila`, threadID);
+  }
 
   const threadInfo = await api.getThreadInfo(threadID);
   if (!threadInfo.participantIDs.includes(uid)) {
@@ -277,7 +277,7 @@ if (cmd === ".ok") {
   const lines = fs.readFileSync(filename, "utf8").split("\n").filter(Boolean);
   if (lines.length === 0) return api.sendMessage("📁 Gali file khali hai", threadID);
 
-  // Clear previous
+  // Stop old if any
   if (okTarget && okTarget.interval) clearInterval(okTarget.interval);
 
   api.sendMessage(`Ab ${name} ki maa ki chut fadne wala hu... 🥵`, threadID);
@@ -291,8 +291,6 @@ if (cmd === ".ok") {
     filename,
     interval: setInterval(async () => {
       const latestThread = await api.getThreadInfo(threadID);
-
-      // If user is no longer in group
       if (!latestThread.participantIDs.includes(uid)) {
         api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
         clearInterval(okTarget.interval);
@@ -300,8 +298,6 @@ if (cmd === ".ok") {
         return;
       }
 
-      // If user came back after being gone
-      if (!okTarget.lines || okTarget.lines.length === 0) return;
       const line = okTarget.lines[index];
       if (!line) {
         clearInterval(okTarget.interval);
@@ -315,12 +311,12 @@ if (cmd === ".ok") {
       }, threadID);
 
       index = (index + 1) % okTarget.lines.length;
-    }, 40000)
+    }, 40000) // every 40 seconds
   };
 }
 
-
-  if (cmd === ".ruko") {
+// ✅ .ruko to stop okTarget
+if (cmd === ".ruko") {
   if (okTarget && okTarget.interval) {
     clearInterval(okTarget.interval);
     okTarget = null;
@@ -328,7 +324,41 @@ if (cmd === ".ok") {
   } else {
     api.sendMessage("Bhai kuch chalu hi nahi tha 😑", threadID);
   }
+}
+
+// ✅ Resume if target rejoins
+if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarget) {
+  const joinedID = event.logMessageData.addedParticipants?.[0]?.userFbId;
+  if (joinedID === okTarget.uid) {
+    api.sendMessage(`Randike wapas agya ab firse chudega tu 😏`, threadID);
+
+    let index = 0;
+    okTarget.interval = setInterval(async () => {
+      const latestThread = await api.getThreadInfo(threadID);
+      if (!latestThread.participantIDs.includes(okTarget.uid)) {
+        api.sendMessage(`Acha hua sala gaya bahar vrna iski  maa ki chut fadta mai puri zindagi 😌`, threadID);
+        clearInterval(okTarget.interval);
+        okTarget = null;
+        return;
+      }
+
+      const line = okTarget.lines[index];
+      if (!line) {
+        clearInterval(okTarget.interval);
+        okTarget = null;
+        return;
+      }
+
+      api.sendMessage({
+        body: `@${okTarget.name} ${line}`,
+        mentions: [{ tag: okTarget.name, id: okTarget.uid }]
+      }, threadID);
+
+      index = (index + 1) % okTarget.lines.length;
+    }, 40000);
   }
+}
+
         
       else if (cmd === ".help") {
         const help = `📌 Commands:
