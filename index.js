@@ -179,14 +179,13 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-// 💢 RESPECT ADMIN SHIELD (friend.txt check too)
+// 💢 RESPECT ADMIN SHIELD (with Friend.txt check)
 if (
   event.messageReply &&
   OWNER_UIDS.includes(event.messageReply.senderID) && // replied message is from admin
   !OWNER_UIDS.includes(senderID) // sender is not admin
 ) {
-  const repliedUID = event.messageReply.senderID;
-
+  const repliedUID = event.messageReply.senderID; // jisko reply kiya gaya
   const normalize = (text) =>
     text
       .toLowerCase()
@@ -206,13 +205,13 @@ if (
   const isAbusive = galiWords.some((word) => normalized.includes(word));
 
   if (isAbusive) {
-    // ✅ If admin is replied to, and that admin is in Friend.txt → no abuse
-    if (friendUIDs.includes(repliedUID)) {
-      return api.sendMessage("areh ap avi ka dost shit gali ni de skta mere admin ke reply me gali mat dona pls ji koi non dost hota hai uski ma chod deta mai ji🙌😶", threadID, messageID);
+    // ✅ Check if the replied UID is in Friend.txt
+    if (friendUIDs.includes(event.messageReply.senderID)) {
+      return api.sendMessage("😇 Ye banda Avii bhaiya ka dost hai, isko reply me gali mat de", threadID, messageID);
     }
 
-    // ❌ Not friend → abuse
-    const gali = "Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri ma ki chut me land deke fad kr darzi se silwa dunga ok next time dhyan rakhna target hojyega?♥️ok ";
+    // ❌ Not a friend — gali allowed
+    const gali = "🩸 Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri maa ki chut me land deke darzi se silwa dunga... ok next time dhyan rakhna warna target hojyega ♥️";
     return api.sendMessage(gali, threadID, messageID);
   }
 }
