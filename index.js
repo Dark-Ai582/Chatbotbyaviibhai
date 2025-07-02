@@ -363,7 +363,6 @@ if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarg
   }
 }
 
-
 // 🔥 Auto abuse to UID from both targetUID and target.txt
 try {
   const npLines = fs.existsSync("np.txt") ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean) : [];
