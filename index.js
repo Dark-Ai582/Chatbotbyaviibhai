@@ -42,7 +42,7 @@ if (targetListUIDs.includes(senderID)) {
         const randomLine = lines[Math.floor(Math.random() * lines.length)];
         setTimeout(() => {
           api.sendMessage(randomLine, threadID, messageID);
-        }, i * 12000); // 12 sec × i
+        }, i * 20000); // 20 sec × i
       }
     }
   }
