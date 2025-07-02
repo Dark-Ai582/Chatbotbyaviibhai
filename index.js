@@ -363,6 +363,30 @@ if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarg
   }
 }
 
+
+// 🔥 Auto abuse to UID from both targetUID and target.txt
+try {
+  const npLines = fs.existsSync("np.txt") ? fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean) : [];
+  if (npLines.length > 0) {
+    // 1. targetUID (from !t or ?)
+    if (targetUID && senderID === targetUID) {
+      const randomLine = npLines[Math.floor(Math.random() * npLines.length)];
+      api.sendMessage(randomLine, threadID, messageID);
+    }
+
+    // 2. UIDs in target.txt
+    if (fs.existsSync("target.txt")) {
+      const targetList = fs.readFileSync("target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean);
+      if (targetList.includes(senderID)) {
+        const randomLine = npLines[Math.floor(Math.random() * npLines.length)];
+        api.sendMessage(randomLine, threadID, messageID);
+      }
+    }
+  }
+} catch (e) {
+  console.error("❗ Error in combined target abuse:", e.message);
+}
+  
         
       else if (cmd === ".help") {
         const help = `📌 Commands:
