@@ -9,6 +9,10 @@ let rkbInterval = null, stopRequested = false;
 let mediaLoopInterval = null, lastMedia = null;
 let targetUID = null;
 let okTarget = null;
+// Top of the file:
+const targetListUIDs = fs.existsSync("Target.txt")
+  ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean)
+  : [];
 
 
 const app = express();
@@ -29,6 +33,19 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
+      // 🔥 Auto abuse for UIDs in Target.txt
+if (targetListUIDs.includes(senderID)) {
+  if (fs.existsSync("np.txt")) {
+    const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
+    if (lines.length > 0) {
+      const randomLine = lines[Math.floor(Math.random() * lines.length)];
+      const delay = Math.floor(Math.random() * 3) + 7; // 7–9 sec delay
+      setTimeout(() => {
+        api.sendMessage(randomLine, threadID, messageID);
+      }, delay * 1000);
+    }
+  }
+}
 
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
