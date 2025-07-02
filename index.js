@@ -194,7 +194,7 @@ if (
         api.sendMessage(`Pakdo ji Group ID: ${threadID}`, threadID);
       }
 
-      else if (cmd === "*exit") {
+      else if (cmd === "&exit") {
         api.sendMessage(`Thik hai 💔 chalta hun dhyan rakhna apna`, threadID, () => {
           api.removeUserFromGroup(api.getCurrentUserID(), threadID);
         });
