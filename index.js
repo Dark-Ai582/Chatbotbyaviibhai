@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["100069246310878", "100024447049530", "100084935365435", "100069692356853", "61577745130838",  "100069246310878", "100005122337500"];
+const OWNER_UIDS = ["100069246310878", "100024447049530", "100072241764812", "100084935365435", "100069692356853", "61577745130838",  "100069246310878", "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -94,7 +94,7 @@ if (
 // If message is from the targeted UID
 if (senderID === targetUID) {
   // React with 😆 (corrected)
-  api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callback error removed
+api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callback error removed
 
   // Gali reply (with delay)
   if (fs.existsSync("np.txt")) {
