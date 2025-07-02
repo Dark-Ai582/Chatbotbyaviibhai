@@ -35,6 +35,15 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
+      if (
+  event.type === "message" &&
+  event.attachments &&
+  event.attachments[0]?.type === "sticker"
+) {
+  const stickerID = event.attachments[0].ID;
+  console.log("🧷 Sticker ID:", stickerID);
+  api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
+      }
 
       const enqueueMessage = (uid, threadID, messageID, api) => {
         if (!messageQueues[uid]) messageQueues[uid] = [];
@@ -345,12 +354,3 @@ login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, 
 });
 
 
-if (
-  event.type === "message" &&
-  event.attachments &&
-  event.attachments[0]?.type === "sticker"
-) {
-  const stickerID = event.attachments[0].ID;
-  console.log("🧷 Sticker ID:", stickerID);
-  api.sendMessage(`🆔 Sticker ID: ${stickerID}`, event.threadID, event.messageID);
-}
