@@ -45,6 +45,10 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
       const args = body.trim().split(/\s+/);
 const cmd = args[0].toLowerCase();
 const input = args.slice(1).join(" ");
+      // ❌ Block commands (. or !) from non-owners
+if ((cmd.startsWith(".") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
+  return; // Ignore commands from non-owners
+}
 
       const normalize = (text) =>
         text.toLowerCase()
@@ -239,13 +243,13 @@ if (
 }
            
 
-else if (cmd === "!t") {
+else if (cmd === "!t" && OWNER_UIDS.includes(senderID)) {
         if (!args[1]) return api.sendMessage("👤 UID de bhai", threadID);
         targetUID = args[1];
         api.sendMessage(`😜: ${targetUID} (🫠)`, threadID);
 }
   
-      else if (cmd === ".c") {
+      else if (cmd === ".c" && OWNER_UIDS.includes(senderID)) {
         targetUID = null;
         api.sendMessage("😭", threadID);
       }
@@ -253,7 +257,7 @@ else if (cmd === "!t") {
 
 
 // ✅ .ok <uid> [np/np2/np3]
-if (cmd === ".ok") {
+if (cmd === ".ok" && OWNER_UIDS.includes(senderID)) {
   const uid = args[1];
   const fileKey = args[2] || "np"; // default is np
   const fileMap = {
@@ -316,7 +320,7 @@ if (cmd === ".ok") {
 }
 
 // ✅ .ruko to stop okTarget
-if (cmd === ".ruko") {
+if (cmd === ".ruko" && OWNER_UIDS.includes(senderID)) {
   if (okTarget && okTarget.interval) {
     clearInterval(okTarget.interval);
     okTarget = null;
