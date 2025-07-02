@@ -179,18 +179,13 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-// 💢 RESPECT ADMIN SHIELD (But skip if replied person is in Friend.txt)
+// 💢 RESPECT ADMIN SHIELD (friend.txt check too)
 if (
   event.messageReply &&
-  OWNER_UIDS.includes(event.messageReply.senderID) &&
-  !OWNER_UIDS.includes(senderID)
+  OWNER_UIDS.includes(event.messageReply.senderID) && // replied message is from admin
+  !OWNER_UIDS.includes(senderID) // sender is not admin
 ) {
   const repliedUID = event.messageReply.senderID;
-
-  // ✅ Check if replied person is Friend.txt
-  if (friendUIDs.includes(repliedUID)) {
-    return api.sendMessage("areh cutiie apko avii ne dost me dala mere admin ka reply me gali ni dona pls 🥹 koi aur deta to uski ma hi chod deta hun mai 🤒🙌", threadID, messageID);
-  }
 
   const normalize = (text) =>
     text
@@ -211,6 +206,12 @@ if (
   const isAbusive = galiWords.some((word) => normalized.includes(word));
 
   if (isAbusive) {
+    // ✅ If admin is replied to, and that admin is in Friend.txt → no abuse
+    if (friendUIDs.includes(repliedUID)) {
+      return api.sendMessage("areh ap avi ka dost shit gali ni de skta mere admin ke reply me gali mat dona pls ji koi non dost hota hai uski ma chod deta mai ji🙌😶", threadID, messageID);
+    }
+
+    // ❌ Not friend → abuse
     const gali = "Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri ma ki chut me land deke fad kr darzi se silwa dunga ok next time dhyan rakhna target hojyega?♥️ok ";
     return api.sendMessage(gali, threadID, messageID);
   }
