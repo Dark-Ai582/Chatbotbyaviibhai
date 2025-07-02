@@ -179,12 +179,19 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
           return api.unsendMessage(event.messageReply.messageID);
         }
 
-// 💢 RESPECT ADMIN SHIELD: Reply with heavy gali if someone abuses an admin
+// 💢 RESPECT ADMIN SHIELD (But skip if replied person is in Friend.txt)
 if (
   event.messageReply &&
   OWNER_UIDS.includes(event.messageReply.senderID) &&
   !OWNER_UIDS.includes(senderID)
 ) {
+  const repliedUID = event.messageReply.senderID;
+
+  // ✅ Check if replied person is Friend.txt
+  if (friendUIDs.includes(repliedUID)) {
+    return api.sendMessage("areh cutiie apko avii ne dost me dala mere admin ka reply me gali ni dona pls 🥹 koi aur deta to uski ma hi chod deta hun mai 🤒🙌", threadID, messageID);
+  }
+
   const normalize = (text) =>
     text
       .toLowerCase()
@@ -204,13 +211,10 @@ if (
   const isAbusive = galiWords.some((word) => normalized.includes(word));
 
   if (isAbusive) {
-    const gali =
-      "Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri ma ki chut me land deke fad kr darzi se silwa dunga ok next time dhyan rakhna target hojyega?♥️ok ";
-
+    const gali = "Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri ma ki chut me land deke fad kr darzi se silwa dunga ok next time dhyan rakhna target hojyega?♥️ok ";
     return api.sendMessage(gali, threadID, messageID);
   }
-}        
-
+}
 
       if (cmd === ".allname") {
         const info = await api.getThreadInfo(threadID);
