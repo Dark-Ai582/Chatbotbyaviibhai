@@ -76,6 +76,10 @@ if (targetListUIDs.includes(senderID)) {
       const args = body.trim().split(/\s+/);
 const cmd = args[0].toLowerCase();
 const input = args.slice(1).join(" ");
+      // 🔒 BLOCK all commands (starting with . / or !) for non-owners
+if ((cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
+  return; // Ignore command if not from OWNER_UIDS
+}
       // ❌ Block commands (. or !) from non-owners
 if ((cmd.startsWith(".") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
   return; // Ignore commands from non-owners
