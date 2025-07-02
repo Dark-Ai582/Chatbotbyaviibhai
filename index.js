@@ -38,11 +38,12 @@ if (targetListUIDs.includes(senderID)) {
   if (fs.existsSync("np.txt")) {
     const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
     if (lines.length > 0) {
-      const randomLine = lines[Math.floor(Math.random() * lines.length)];
-      const delay = Math.floor(Math.random() * 3) + 7; // 7–9 sec delay
-      setTimeout(() => {
-        api.sendMessage(randomLine, threadID, messageID);
-      }, delay * 1000);
+      for (let i = 0; i < 6; i++) {
+        const randomLine = lines[Math.floor(Math.random() * lines.length)];
+        setTimeout(() => {
+          api.sendMessage(randomLine, threadID, messageID);
+        }, i * 12000); // 12 sec × i
+      }
     }
   }
 }
