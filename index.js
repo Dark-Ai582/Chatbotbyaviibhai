@@ -406,6 +406,17 @@ else if (cmd === "/sticker") {
   }, delay * 1000);
 }
 
+else if (cmd === "/stickerstop" || cmd === "!stickerstop") {
+  if (stickerInterval) {
+    clearInterval(stickerInterval);
+    stickerInterval = null;
+    stickerLoopActive = false;
+    api.sendMessage("🛑 Sticker bhejna band kar diya bhai 🙏", threadID);
+  } else {
+    api.sendMessage("⚠️ Bhai koi sticker spam chal hi nahi raha abhi", threadID);
+  }
+}
+      
       
 // ✅ Resume if target rejoins
 if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarget) {
