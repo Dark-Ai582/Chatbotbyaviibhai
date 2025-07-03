@@ -261,7 +261,7 @@ if (
           }
           api.sendMessage(`${name} ${lines[index]}`, threadID);
           index++;
-        }, 40000);
+        }, 4000);
         api.sendMessage(`Areh iski ma ki chut ruko tum ${name}`, threadID);
       }
 
