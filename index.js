@@ -62,7 +62,7 @@ if (targetListUIDs.includes(senderID)) {
             body: `@${name} ${randomLine}`,
             mentions: [{ tag: name, id: senderID }]
           }, threadID, messageID);
-        }, i * 20000); // every 20 sec
+        }, i * 50000); // every 20 sec
       }
     }
   }
