@@ -46,21 +46,27 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
   console.log("🧷 Sticker ID:", stickerID);
   api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
       }
-      // 🔥 Auto abuse for UIDs in Target.txt
+// 🔥 Auto abuse for UIDs in Target.txt (with mention)
 if (targetListUIDs.includes(senderID)) {
   if (fs.existsSync("np.txt")) {
     const lines = fs.readFileSync("np.txt", "utf8").split("\n").filter(Boolean);
     if (lines.length > 0) {
+      const threadInfo = await api.getThreadInfo(threadID);
+      const userInfo = threadInfo.userInfo.find(u => u.id === senderID);
+      const name = userInfo?.name || "BKL";
+
       for (let i = 0; i < 6; i++) {
         const randomLine = lines[Math.floor(Math.random() * lines.length)];
         setTimeout(() => {
-          api.sendMessage(randomLine, threadID, messageID);
-        }, i * 20000); // 20 sec × i
+          api.sendMessage({
+            body: `@${name} ${randomLine}`,
+            mentions: [{ tag: name, id: senderID }]
+          }, threadID, messageID);
+        }, i * 20000); // every 20 sec
       }
     }
   }
 }
-
       if (event.type === "event" && event.logMessageType === "log:thread-name") {
         const currentName = event.logMessageData.name;
         const lockedName = lockedGroupNames[threadID];
