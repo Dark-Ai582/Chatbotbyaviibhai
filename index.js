@@ -2,7 +2,7 @@ import login from "fca-priyansh";
 import fs from "fs";
 import express from "express";
 
-const OWNER_UIDS = ["61577465263125",  "100005122337500"];
+const OWNER_UIDS = ["61574944646625",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -110,7 +110,7 @@ if (cmd === "/stickeruidoff") {
           .replace(/[7]/g, "t");
 
       const normalized = normalize(lowerBody);
-      const badNames = ["Sumi", "avii", "saina", "sumi3:)", "s4ina", "sumii"];
+      const badNames = ["Ritesh", "", "r1t3sh", "ritesh", "ritesh", "Ritesh"];
       const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
       if (
