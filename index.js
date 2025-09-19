@@ -164,7 +164,56 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
     }
   }
 }
-      
+
+
+      // 🔒 DP Lock System
+const lockedGroupDPs = {}; // threadID -> { image, isRemoved }
+
+// Lock DP
+else if (cmd === ".lockdp" && OWNER_UIDS.includes(senderID)) {
+  const threadInfo = await api.getThreadInfo(threadID);
+  const dpUrl = threadInfo.imageSrc || null;
+
+  if (dpUrl) {
+    // Save current DP
+    lockedGroupDPs[threadID] = { image: dpUrl, isRemoved: false };
+    api.sendMessage("✅ Group DP lock ho gaya, ab koi badlega to mai turant wapas laga dunga 😎", threadID);
+  } else {
+    // Save as removed
+    lockedGroupDPs[threadID] = { image: null, isRemoved: true };
+    api.sendMessage("✅ Abhi DP nahi hai, DP remove state lock ho gayi hai 🔒", threadID);
+  }
+}
+
+// Unlock DP
+else if (cmd === ".unlockdp" && OWNER_UIDS.includes(senderID)) {
+  delete lockedGroupDPs[threadID];
+  api.sendMessage("❌ DP lock hata diya, ab koi bhi change kar sakta hai 🙂", threadID);
+}
+
+// Detect DP change (event)
+if (event.type === "event" && event.logMessageType === "log:thread-image") {
+  const lockedDP = lockedGroupDPs[threadID];
+  if (lockedDP) {
+    if (lockedDP.isRemoved) {
+      // DP remove state tha
+      await api.changeGroupImage(null, threadID); // remove again
+      api.sendMessage("🚫 Abey DP lock hai, DP remove hi rahegi 😏", threadID);
+    } else if (lockedDP.image) {
+      // Restore old DP
+      try {
+        const request = await fetch(lockedDP.image);
+        const buffer = await request.arrayBuffer();
+        const stream = Buffer.from(buffer);
+
+        await api.changeGroupImage(stream, threadID);
+        api.sendMessage("🚫 Abey majdur, DP lock hai... wahi rehne de 😎", threadID);
+      } catch (err) {
+        console.error("❗ DP restore failed:", err.message);
+      }
+    }
+  }
+}
       // .id command (reply)
       if (
         OWNER_UIDS.includes(senderID) &&
