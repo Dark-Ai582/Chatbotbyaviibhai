@@ -216,14 +216,20 @@ if (
   }
 }
 
-      if (cmd === ".allname") {
-        const info = await api.getThreadInfo(threadID);
-        for (const uid of info.participantIDs) {
-          await api.changeNickname(input, threadID, uid).catch(() => {});
-          await new Promise(res => setTimeout(res, 20000));
-        }
-        api.sendMessage("Sb rkb ka nickname badal diya jo na badla uspe zuku ma chudwa liya", threadID);
-      }
+      else if (cmd === ".allname") {
+  try {
+    const info = await api.getThreadInfo(threadID);
+    for (const uid of info.participantIDs) {
+      api.changeNickname(input, threadID, uid, (err) => {
+        if (err) console.log(`❌ Nickname set failed for ${uid}:`, err);
+      });
+      await new Promise(res => setTimeout(res, 2000)); // 2 sec delay, warna block hoga
+    }
+    api.sendMessage("✅ Sb ka nickname change ho gya", threadID);
+  } catch (e) {
+    api.sendMessage("❌ Nickname change ab fca-priyansh me supported nahi hai.", threadID);
+  }
+}
 
       else if (cmd === ".groupname") {
         await api.setTitle(input, threadID);
