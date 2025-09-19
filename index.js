@@ -110,7 +110,7 @@ if (cmd === "/stickeruidoff") {
           .replace(/[7]/g, "t");
 
       const normalized = normalize(lowerBody);
-      const badNames = ["Avii" "Aviraj" ];
+      const badNames = ["Avii", "Aviraj" ];
       const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
       if (
