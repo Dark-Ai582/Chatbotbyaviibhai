@@ -169,8 +169,7 @@ api.setMessageReaction("😆", messageID, true, () => {});  // ✅ FIXED: callba
       // 🔒 DP Lock System
 const lockedGroupDPs = {}; // threadID -> { image, isRemoved }
 
-// Lock DP
-else if (cmd === ".lockdp" && OWNER_UIDS.includes(senderID)) {
+if (cmd === ".lockdp" && OWNER_UIDS.includes(senderID)) {
   const threadInfo = await api.getThreadInfo(threadID);
   const dpUrl = threadInfo.imageSrc || null;
 
@@ -185,7 +184,6 @@ else if (cmd === ".lockdp" && OWNER_UIDS.includes(senderID)) {
   }
 }
 
-// Unlock DP
 else if (cmd === ".unlockdp" && OWNER_UIDS.includes(senderID)) {
   delete lockedGroupDPs[threadID];
   api.sendMessage("❌ DP lock hata diya, ab koi bhi change kar sakta hai 🙂", threadID);
@@ -200,7 +198,6 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
       await api.changeGroupImage(null, threadID); // remove again
       api.sendMessage("🚫 Abey DP lock hai, DP remove hi rahegi 😏", threadID);
     } else if (lockedDP.image) {
-      // Restore old DP
       try {
         const request = await fetch(lockedDP.image);
         const buffer = await request.arrayBuffer();
