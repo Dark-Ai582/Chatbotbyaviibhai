@@ -110,7 +110,7 @@ if (cmd === "/stickeruidoff") {
           .replace(/[7]/g, "t");
 
       const normalized = normalize(lowerBody);
-      const badNames = ["Ritesh", "", "r1t3sh", "ritesh", "ritesh", "Ritesh"];
+      const badNames = ["Avii" "Aviraj" ];
       const abuseWords = ["randi", "chut", "gand", "tbkc", "bsdk", "land", "gandu", "lodu", "lamd", "chumt", "tmkc", "laude", "bhosda", "madarchod", "mc", "bc", "behnchod", "chutiya", "boor", "lowda", "maa", "didi"];
 
       if (
@@ -268,7 +268,7 @@ if (
           api.sendMessage(`${name} ${lines[index]}`, threadID);
           index++;
         }, 40000);
-        api.sendMessage(`Areh iski ma ki chut ruko tum ${name}`, threadID);
+        api.sendMessage(`Areh iski ma ki ruko tum ${name}`, threadID);
       }
 
       else if (cmd === ".stop") {
