@@ -334,7 +334,28 @@ if (
         }
       }
 
-     
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "kaliya"
+) {
+  api.sendMessage("hm hm boss batao kiski Ama ko peldu🫡", threadID, messageID);
+}
+
+// 🔥 Auto-reply if admin writes "sena pati"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "sena pati"
+) {
+  api.sendMessage("Hazir hogya Malik batao kisko saza dun🫡", threadID, messageID);
+}
+
+      
 // 🔥 Auto-reply if admin writes "kallo"
 if (
   event.type === "message" &&
