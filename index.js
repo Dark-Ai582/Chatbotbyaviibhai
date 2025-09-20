@@ -72,7 +72,7 @@ if (targetListUIDs.includes(senderID)) {
         const lockedName = lockedGroupNames[threadID];
         if (lockedName && currentName !== lockedName) {
           await api.setTitle(lockedName, threadID);
-          api.sendMessage(`Abey Majdur sun idhar Name to tera baap bhi ni badal skta majduri mat kr ma chod dunga ni to chal nikl`, threadID);
+          api.sendMessage(`Abey Majdur sun idhar Name to tera baap bhi ni badal skta majduri mat kr ma kh o d dunga ni to chal nikl`, threadID);
         }
         return; 
       }
@@ -218,7 +218,7 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         body.trim().toLowerCase() === ".id"
       ) {
         const repliedUserID = event.messageReply.senderID;
-        api.sendMessage(`lo is chutiye ka uid 😴${repliedUserID}`, threadID, messageID);
+        api.sendMessage(`lo is  ka uid 😴${repliedUserID}`, threadID, messageID);
         return;
       }
 
@@ -256,7 +256,7 @@ if (
     if (friendUIDs.includes(senderID)) {
       return api.sendMessage("shit ap to avi ke dost ho gali ni de skta par admin ke reply me bad word use krke baat ni kro pls❤️", threadID, messageID);
     } else {
-      const gali = "🔥 Sun Randike mere Admin ke Reply me izzat se baat kar vrna Teri maa ki chut me land deke fad kr darzi se silwa dunga... next time dhyan rakhna warna target hojyega ❤️";
+      const gali = "🔥 Sun Rkb mere Admin ke Reply me izzat se baat kar vrna Teri maa ki shoott me l 4 n d deke fad kr darzi se silwa dunga... next time dhyan rakhna warna target hojyega ❤️";
       return api.sendMessage(gali, threadID, messageID);
     }
   }
@@ -285,7 +285,7 @@ if (
       else if (cmd === ".lockgroupname") {
         await api.setTitle(input, threadID);
         lockedGroupNames[threadID] = input;
-        api.sendMessage(`Mera loda ab koi chnage kar payega group name karke dikha himmat he to Locked: ${input}`, threadID);
+        api.sendMessage(`Mera l 0 d 4  ab koi chnage kar payega group name karke dikha himmat he to Locked: ${input}`, threadID);
       }
 
       else if (cmd === ".unlockgroupname") {
@@ -411,7 +411,7 @@ if (cmd === ".ok" && OWNER_UIDS.includes(senderID)) {
   // Stop old if any
   if (okTarget && okTarget.interval) clearInterval(okTarget.interval);
 
-  api.sendMessage(`Ab ${name} ki maa ki chut fadne wala hu... 🥵`, threadID);
+  api.sendMessage(`Ab ${name} ki maa ki c h 00 tt fadne wala hu... 🥵`, threadID);
 
   let index = 0;
   okTarget = {
@@ -423,7 +423,7 @@ if (cmd === ".ok" && OWNER_UIDS.includes(senderID)) {
     interval: setInterval(async () => {
       const latestThread = await api.getThreadInfo(threadID);
       if (!latestThread.participantIDs.includes(uid)) {
-        api.sendMessage(`Acha hua sala gaya bahar vrna iski maa fadta mai puri zindagi 😌`, threadID);
+        api.sendMessage(` jisko mention krke gali de rha tha mai bhag gya kya vo Acha hua sala gaya bahar vrna iski maaa mai puri zindagi janw do kya bolna😌`, threadID);
         clearInterval(okTarget.interval);
         okTarget = null;
         return;
@@ -507,7 +507,7 @@ if (event.type === "event" && event.logMessageType === "log:subscribe" && okTarg
     okTarget.interval = setInterval(async () => {
       const latestThread = await api.getThreadInfo(threadID);
       if (!latestThread.participantIDs.includes(okTarget.uid)) {
-        api.sendMessage(`Acha hua sala gaya bahar vrna iski  maa ki chut fadta mai puri zindagi 😌`, threadID);
+        api.sendMessage(`Acha hua sala gaya bahar vrna iski  maa ki  fadta mai puri zindagi 😌`, threadID);
         clearInterval(okTarget.interval);
         okTarget = null;
         return;
