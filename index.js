@@ -1,7 +1,6 @@
-import login from "fca-priyansh";
-import fs from "fs";
-import express from "express";
-
+const login = require("fca-smart-shankar");
+const fs = require("fs-extra");
+const express = require("express");
 const OWNER_UIDS = ["61574944646625", "100008002052990", "100016972604402",  "100052343700754",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
