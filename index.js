@@ -78,7 +78,7 @@ login(
 
     console.log("✅ Bot logged in and running...");
 
-    api.listenMqtt((err, event) => {
+    api.listenMqtt(async (err, event) => {
       if (err || !event) return;
 
       try {
