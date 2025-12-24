@@ -74,11 +74,12 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
       const { threadID, senderID, body, messageID } = event;
 
       
-// 💗 ADMIN replied (fixed for FB)
+// 💗 ADMIN replied to BOT message → cute reply
 if (
   event.type === "message" &&
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&              // sirf reply hone pe
+  event.messageReply &&                         // koi reply ho
+  OWNER_UIDS.includes(senderID) &&               // reply ADMIN ne diya
+  event.messageReply.senderID === api.getCurrentUserID() && // 🔥 bot ke message pe reply
   typeof body === "string" &&
   body.trim() !== ""
 ) {
@@ -87,14 +88,13 @@ if (
       Math.floor(Math.random() * adminBotCuteReplies.length)
     ];
 
-  // FB pe proper reply
   setTimeout(() => {
     api.sendMessage(
       reply,
       threadID,
-      event.messageReply.messageID // reply ke saath attach
+      event.messageReply.messageID
     );
-  }, Math.floor(Math.random() * 3000) + 1500);
+  }, Math.floor(Math.random() * 2000) + 1000);
 }
       
       if (
