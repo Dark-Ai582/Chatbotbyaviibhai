@@ -74,20 +74,26 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
       const { threadID, senderID, body, messageID } = event;
 
       
-// 💗 ADMIN replied (kallo-style reliable fix)
+// 💗 ADMIN replied (fixed for FB)
 if (
   event.type === "message" &&
   OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&              // bas reply hona chahiye
-  typeof body === "string"
+  event.messageReply &&              // sirf reply hone pe
+  typeof body === "string" &&
+  body.trim() !== ""
 ) {
   const reply =
     adminBotCuteReplies[
       Math.floor(Math.random() * adminBotCuteReplies.length)
     ];
 
+  // FB pe proper reply
   setTimeout(() => {
-    api.sendMessage(reply, threadID, messageID);
+    api.sendMessage(
+      reply,
+      threadID,
+      event.messageReply.messageID // reply ke saath attach
+    );
   }, Math.floor(Math.random() * 3000) + 1500);
 }
       
