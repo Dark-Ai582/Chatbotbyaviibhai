@@ -71,12 +71,12 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
 
-// 💗 ONLY when ADMIN replies to BOT message
+// 💗 ADMIN replied (kallo-style reliable fix)
 if (
   event.type === "message" &&
   OWNER_UIDS.includes(senderID) &&
-  event.messageReply &&
-  event.messageReply.senderID === api.getCurrentUserID()
+  event.messageReply &&              // bas reply hona chahiye
+  typeof body === "string"
 ) {
   const reply =
     adminBotCuteReplies[
@@ -84,10 +84,9 @@ if (
     ];
 
   setTimeout(() => {
-    api.sendMessage(reply, threadID);
-  }, Math.floor(Math.random() * 3000) + 2000);
+    api.sendMessage(reply, threadID, messageID);
+  }, Math.floor(Math.random() * 3000) + 1500);
 }
-
       
       if (
   detectStickerUID &&
