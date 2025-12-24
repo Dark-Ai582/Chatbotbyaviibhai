@@ -2,7 +2,7 @@ const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
 const OWNER_UIDS = ["61574944646625", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
-const OWNER_UIDS = ["12345"];
+
 const targetListUIDs = ["11111", "22222"];
 
 const adminBotCuteReplies = [
