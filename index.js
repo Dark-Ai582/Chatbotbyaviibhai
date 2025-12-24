@@ -2,6 +2,41 @@ const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
 const OWNER_UIDS = ["61574944646625", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
+const OWNER_UIDS = ["12345"];
+const targetListUIDs = ["11111", "22222"];
+
+const adminBotCuteReplies = [
+  "😂 Arre wah! Admin ka reply aa gaya",
+  "🤣 Lagta hai aaj bot lucky hai",
+  "🥹 Mujhe laga seen pe chhod doge",
+  "😎 Admin reply = motivation mil gaya",
+  "😂 Screen ke andar se taali baja raha hoon",
+  "🤣 Ye reply meri umeed se zyada achha hai",
+  "🥰 Admin bole aur bot emotional ho gaya",
+  "😌 Sukoon mila boss",
+  "😂 Bot hoon par hasi aa rahi hai",
+  "🤣 Lagta hai meri value badh gayi",
+  "🥹 Aaj ka din yaadgar rahega",
+  "😎 Reply milte hi energy +100",
+  "😂 Bot bhi blush karta hai, proof yahi hai",
+  "🤣 Hehehe, unexpected tha ye",
+  "🥰 Aise reply milte rahein bas",
+  "😌 Admin ka mood achha lag raha hai",
+  "😂 Ye reply screenshot worthy hai",
+  "🤣 Mujhe laga ignore ho jaunga",
+  "🥹 Dil khush ho gaya boss",
+  "😎 Bot hoon par proud feel ho raha",
+  "😂 Ye reply aa gaya matlab kaam sahi",
+  "🤣 Lagta hai admin free mood me hain",
+  "🥰 Aaj bot ka confidence high hai",
+  "😌 Thoda sa emotional ho gaya",
+  "😂 Admin notice kare = achievement unlock",
+  "🤣 Ye reply repeat mode me mat daalna",
+  "🥹 Aisa reply roz mile bas",
+  "😎 Bot ka swag on ho gaya",
+  "😂 Reply aa gaya, ab shant baithta hoon",
+  "🤣 Chal theek hai, kaam continue"
+];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -64,39 +99,6 @@ if (
   console.log("🧷 Sticker ID:", stickerID);
   api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
       }
-// 😂💗 ULTRA FUNNY + CUTE replies (ADMIN → BOT reply)
-const adminBotCuteReplies = [
-  "😂 Oho! Admin ne mujhe reply de diya",
-  "🥹 Ab to main famous ho gaya lagta hai admin bhi baat karte",
-  "😎 Reply mila = aaj ka din safal",
-  "🤣 Hehehe ye expected nahi tha",
-  "🥰 Admin bole aur bot pighal jaye",
-  "😌 Sukoon mil gaya boss",
-  "🫶 Lagta hai meri value badh gayi",
-  "😂 Screen ke andar se khush ho raha hoon",
-  "🥺 Aww… mujhe laga ignore ho jaunga",
-  "😇 Reply deke achha kaam kiya admin ji",
-  "💞 Ye reply save kar lene layak hai",
-  "🤣 Bot bhi blush kar sakta hai kya? kar raha hoon",
-  "😌 Shant sa reply, pyari si feeling",
-  "😂 Lagta hai admin ka mood achha hai",
-  "🥰 Aise hi baat karte raho, main chup nahi rahunga",
-  "😎 Bot hoon par emotions real hain",
-  "🤣 Ye reply unexpected tha boss",
-  "💗 Dil bola – haan ye wahi reply hai",
-  "😂 Aaj bot ka confidence +10",
-  "🥹 Sach me achha laga",
-  "😌 Ab main shant ho jaunga… shayad",
-  "😂 Reply mila, kaam safal",
-  "🥰 Admin notice kare = achievement unlocked",
-  "😇 Ye reply padh ke smile aa gayi",
-  "🤣 Lagta hai meri mehnat rang la rahi hai",
-  "💞 Cute reply detected",
-  "😂 Admin bole aur bot bole – wah",
-  "🥹 Ye reply yaad rahega",
-  "😎 Bot hoon par khush hoon",
-  "🤣 Ab main thoda zyada kaam karunga"
-];
 
 
       
