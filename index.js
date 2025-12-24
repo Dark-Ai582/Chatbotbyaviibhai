@@ -79,63 +79,27 @@ login(
     console.log("✅ Bot logged in and running...");
 
     api.listenMqtt(async (err, event) => {
-      if (err || !event) return;
+      if (!event || !event.type) return;
 
-      try {
-        const { threadID, senderID, body } = event;
+const { threadID, senderID, body } = event;
 
-        // 💗 ADMIN replies to BOT message → cute reply
-        if (
-          event.type === "message" &&
-          event.messageReply &&
-          OWNER_UIDS.includes(senderID) &&
-          event.messageReply.senderID === BOT_UID &&
-          typeof body === "string" &&
-          body.trim() !== ""
-        ) {
-          const reply =
-            adminBotCuteReplies[
-              Math.floor(Math.random() * adminBotCuteReplies.length)
-            ];
-
-          api.sendMessage(
-            reply,
-            threadID,
-            event.messageReply.messageID
-          );
-        }
-
-      } catch (e) {
-        console.error("❗ Listen error:", e.message);
-      }
-    });
-  }
-);
-      
-// 💗 ADMIN replied to BOT message → cute reply
 if (
   event.type === "message" &&
-  event.messageReply &&                         // koi reply ho
-  OWNER_UIDS.includes(senderID) &&               // reply ADMIN ne diya
-  event.messageReply.senderID === api.getCurrentUserID() && // 🔥 bot ke message pe reply
-  typeof body === "string" &&
-  body.trim() !== ""
+  event.messageReply &&
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply.senderID === BOT_UID
 ) {
   const reply =
     adminBotCuteReplies[
       Math.floor(Math.random() * adminBotCuteReplies.length)
     ];
 
-  setTimeout(() => {
-    api.sendMessage(
-      reply,
-      threadID,
-      event.messageReply.messageID
-    );
-  }, Math.floor(Math.random() * 2000) + 1000);
-}
-      
-      if (
+  return api.sendMessage(
+    reply,
+    threadID,
+    event.messageReply.messageID
+  );
+}      if (
   detectStickerUID &&
   event.type === "message" &&
   event.attachments &&
