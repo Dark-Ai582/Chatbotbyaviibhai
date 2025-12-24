@@ -2,7 +2,7 @@ const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
 const OWNER_UIDS = ["61574944646625", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
-
+let BOT_UID = null;
 
 
 const adminBotCuteReplies = [
@@ -56,23 +56,61 @@ const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 
-process.on("uncaughtException", err => console.error("❗ Uncaught Exception:", err.message));
-process.on("unhandledRejection", reason => console.error("❗ Unhandled Rejection:", reason));
+process.on("uncaughtException", err =>
+  console.error("❗ Uncaught Exception:", err.message)
+);
+process.on("unhandledRejection", reason =>
+  console.error("❗ Unhandled Rejection:", reason)
+);
 
-login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
-  if (err) return console.error("❌ Login failed:", err);
-  api.setOptions({ listenEvents: true, selfListen: true });
-  const botUID = api.getCurrentUserID();
-if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
-  console.log("✅ Bot logged in and running...");
+login(
+  { appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) },
+  (err, api) => {
+    if (err) return console.error("❌ Login failed:", err);
 
-  api.listenMqtt(async (err, event) => {
-    try {
+    api.setOptions({
+      listenEvents: true,
+      selfListen: true
+    });
 
-      
-  if (err || !event) return;
-      const { threadID, senderID, body, messageID } = event;
+    // ✅ BOT UID sirf yahan store hoga (ADMIN list me nahi)
+    BOT_UID = api.getCurrentUserID();
 
+    console.log("✅ Bot logged in and running...");
+
+    api.listenMqtt((err, event) => {
+      if (err || !event) return;
+
+      try {
+        const { threadID, senderID, body } = event;
+
+        // 💗 ADMIN replies to BOT message → cute reply
+        if (
+          event.type === "message" &&
+          event.messageReply &&
+          OWNER_UIDS.includes(senderID) &&
+          event.messageReply.senderID === BOT_UID &&
+          typeof body === "string" &&
+          body.trim() !== ""
+        ) {
+          const reply =
+            adminBotCuteReplies[
+              Math.floor(Math.random() * adminBotCuteReplies.length)
+            ];
+
+          api.sendMessage(
+            reply,
+            threadID,
+            event.messageReply.messageID
+          );
+        }
+
+      } catch (e) {
+        console.error("❗ Listen error:", e.message);
+      }
+    });
+  }
+);
       
 // 💗 ADMIN replied to BOT message → cute reply
 if (
