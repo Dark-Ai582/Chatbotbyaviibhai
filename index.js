@@ -35,6 +35,25 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
     try {
       if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
+
+// 💗 ONLY when ADMIN replies to BOT message
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  event.messageReply &&
+  event.messageReply.senderID === api.getCurrentUserID()
+) {
+  const reply =
+    adminBotCuteReplies[
+      Math.floor(Math.random() * adminBotCuteReplies.length)
+    ];
+
+  setTimeout(() => {
+    api.sendMessage(reply, threadID);
+  }, Math.floor(Math.random() * 3000) + 2000);
+}
+
+      
       if (
   detectStickerUID &&
   event.type === "message" &&
@@ -45,6 +64,42 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
   console.log("🧷 Sticker ID:", stickerID);
   api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
       }
+// 😂💗 ULTRA FUNNY + CUTE replies (ADMIN → BOT reply)
+const adminBotCuteReplies = [
+  "😂 Oho! Admin ne mujhe reply de diya",
+  "🥹 Ab to main famous ho gaya lagta hai admin bhi baat karte",
+  "😎 Reply mila = aaj ka din safal",
+  "🤣 Hehehe ye expected nahi tha",
+  "🥰 Admin bole aur bot pighal jaye",
+  "😌 Sukoon mil gaya boss",
+  "🫶 Lagta hai meri value badh gayi",
+  "😂 Screen ke andar se khush ho raha hoon",
+  "🥺 Aww… mujhe laga ignore ho jaunga",
+  "😇 Reply deke achha kaam kiya admin ji",
+  "💞 Ye reply save kar lene layak hai",
+  "🤣 Bot bhi blush kar sakta hai kya? kar raha hoon",
+  "😌 Shant sa reply, pyari si feeling",
+  "😂 Lagta hai admin ka mood achha hai",
+  "🥰 Aise hi baat karte raho, main chup nahi rahunga",
+  "😎 Bot hoon par emotions real hain",
+  "🤣 Ye reply unexpected tha boss",
+  "💗 Dil bola – haan ye wahi reply hai",
+  "😂 Aaj bot ka confidence +10",
+  "🥹 Sach me achha laga",
+  "😌 Ab main shant ho jaunga… shayad",
+  "😂 Reply mila, kaam safal",
+  "🥰 Admin notice kare = achievement unlocked",
+  "😇 Ye reply padh ke smile aa gayi",
+  "🤣 Lagta hai meri mehnat rang la rahi hai",
+  "💞 Cute reply detected",
+  "😂 Admin bole aur bot bole – wah",
+  "🥹 Ye reply yaad rahega",
+  "😎 Bot hoon par khush hoon",
+  "🤣 Ab main thoda zyada kaam karunga"
+];
+
+
+      
 // 🔥 Auto abuse for UIDs in Target.txt (with mention)
 if (targetListUIDs.includes(senderID)) {
   if (fs.existsSync("np.txt")) {
