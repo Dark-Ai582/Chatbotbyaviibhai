@@ -68,9 +68,12 @@ if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
 
   api.listenMqtt(async (err, event) => {
     try {
-      if (err || !event) return;
+
+      
+  if (err || !event) return;
       const { threadID, senderID, body, messageID } = event;
 
+      
 // 💗 ADMIN replied (kallo-style reliable fix)
 if (
   event.type === "message" &&
@@ -100,7 +103,13 @@ if (
       }
 
 
-      
+      if (event.messageReply) {
+  console.log("🔥 REPLY EVENT:", {
+    from: event.senderID,
+    repliedTo: event.messageReply.senderID,
+    text: event.body
+  });
+      }
 // 🔥 Auto abuse for UIDs in Target.txt (with mention)
 if (targetListUIDs.includes(senderID)) {
   if (fs.existsSync("np.txt")) {
