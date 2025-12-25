@@ -2,41 +2,6 @@ const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
 const OWNER_UIDS = ["61574944646625", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
-let BOT_UID = null;
-
-
-const adminBotCuteReplies = [
-  "😂 Arre wah! Admin ka reply aa gaya",
-  "🤣 Lagta hai aaj bot lucky hai",
-  "🥹 Mujhe laga seen pe chhod doge",
-  "😎 Admin reply = motivation mil gaya",
-  "😂 Screen ke andar se taali baja raha hoon",
-  "🤣 Ye reply meri umeed se zyada achha hai",
-  "🥰 Admin bole aur bot emotional ho gaya",
-  "😌 Sukoon mila boss",
-  "😂 Bot hoon par hasi aa rahi hai",
-  "🤣 Lagta hai meri value badh gayi",
-  "🥹 Aaj ka din yaadgar rahega",
-  "😎 Reply milte hi energy +100",
-  "😂 Bot bhi blush karta hai, proof yahi hai",
-  "🤣 Hehehe, unexpected tha ye",
-  "🥰 Aise reply milte rahein bas",
-  "😌 Admin ka mood achha lag raha hai",
-  "😂 Ye reply screenshot worthy hai",
-  "🤣 Mujhe laga ignore ho jaunga",
-  "🥹 Dil khush ho gaya boss",
-  "😎 Bot hoon par proud feel ho raha",
-  "😂 Ye reply aa gaya matlab kaam sahi",
-  "🤣 Lagta hai admin free mood me hain",
-  "🥰 Aaj bot ka confidence high hai",
-  "😌 Thoda sa emotional ho gaya",
-  "😂 Admin notice kare = achievement unlock",
-  "🤣 Ye reply repeat mode me mat daalna",
-  "🥹 Aisa reply roz mile bas",
-  "😎 Bot ka swag on ho gaya",
-  "😂 Reply aa gaya, ab shant baithta hoon",
-  "🤣 Chal theek hai, kaam continue"
-];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -56,50 +21,21 @@ const app = express();
 app.get("/", (_, res) => res.send("<h2>Messenger Bot Running</h2>"));
 app.listen(20782, () => console.log("🌐 Log server: http://localhost:20782"));
 
-process.on("uncaughtException", err =>
-  console.error("❗ Uncaught Exception:", err.message)
-);
-process.on("unhandledRejection", reason =>
-  console.error("❗ Unhandled Rejection:", reason)
-);
+process.on("uncaughtException", err => console.error("❗ Uncaught Exception:", err.message));
+process.on("unhandledRejection", reason => console.error("❗ Unhandled Rejection:", reason));
 
-login(
-  { appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) },
-  (err, api) => {
-    if (err) return console.error("❌ Login failed:", err);
+login({ appState: JSON.parse(fs.readFileSync("appstate.json", "utf8")) }, (err, api) => {
+  if (err) return console.error("❌ Login failed:", err);
+  api.setOptions({ listenEvents: true, selfListen: true });
+  const botUID = api.getCurrentUserID();
+if (!OWNER_UIDS.includes(botUID)) OWNER_UIDS.push(botUID);
+  console.log("✅ Bot logged in and running...");
 
-    api.setOptions({
-      listenEvents: true,
-      selfListen: true
-    });
-
-    // ✅ BOT UID sirf yahan store hoga (ADMIN list me nahi)
-    BOT_UID = api.getCurrentUserID();
-
-    console.log("✅ Bot logged in and running...");
-
-    api.listenMqtt(async (err, event) => {
-      if (!event || !event.type) return;
-
-const { threadID, senderID, body } = event;
-
-if (
-  event.type === "message" &&
-  event.messageReply &&
-  OWNER_UIDS.includes(senderID) &&
-  event.messageReply.senderID === BOT_UID
-) {
-  const reply =
-    adminBotCuteReplies[
-      Math.floor(Math.random() * adminBotCuteReplies.length)
-    ];
-
-  return api.sendMessage(
-    reply,
-    threadID,
-    event.messageReply.messageID
-  );
-}      if (
+  api.listenMqtt(async (err, event) => {
+    try {
+      if (err || !event) return;
+      const { threadID, senderID, body, messageID } = event;
+      if (
   detectStickerUID &&
   event.type === "message" &&
   event.attachments &&
@@ -108,15 +44,6 @@ if (
   const stickerID = event.attachments[0].ID;
   console.log("🧷 Sticker ID:", stickerID);
   api.sendMessage(`🆔 Sticker ID: ${stickerID}`, threadID, messageID);
-      }
-
-
-      if (event.messageReply) {
-  console.log("🔥 REPLY EVENT:", {
-    from: event.senderID,
-    repliedTo: event.messageReply.senderID,
-    text: event.body
-  });
       }
 // 🔥 Auto abuse for UIDs in Target.txt (with mention)
 if (targetListUIDs.includes(senderID)) {
