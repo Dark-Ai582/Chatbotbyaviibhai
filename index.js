@@ -221,6 +221,43 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         return;
       }
 
+
+      // 🔥 Admin-only Single Emoji Funny Replies
+
+const EMOJI_FUNNY = {
+  "😆": ["Aaj zyada hi khush lag raha", "Kya mil gaya aisa"],
+  "😭": ["Bas bas, itna bhi dukh nahi", "Drama full chal raha"],
+  "😂": ["Ho gaya bhai, samajh gaye", "Stand-up chalu hai kya"],
+  "😉": ["Plan chal raha lagta hai", "Seedha bol de"],
+  "🙂": ["Theek lag raha aaj", "Mood stable hai lagta"],
+  "💔": ["Aaj scene off hai", "Koi na, hota rehta"],
+  "❤️‍🩹": ["Healing mode on", "Thoda time lagega"],
+  "🙄": ["Phir wahi look", "Samajh gaye"],
+  "🥱": ["Topic thaka hua hai", "Break le le"],
+  "🥵": ["Pressure high lag raha", "Thoda slow kar"],
+  "😷": ["Health first bhai", "Rest kar le"],
+  "🤡": ["Aaj alag hi mode me hai", "Bas rehne de"],
+  "💩": ["Ye idea thoda weak tha", "Skip kar dete hain"],
+  "😈": ["Aaj shaitani mood hai", "Kuch planning chal rahi"],
+  "☠️": ["Over ho gaya lagta", "Dimag thak gaya"],
+  "👻": ["Aaya bhi, gaya bhi", "Silent mode"],
+  "🌚": ["Kuch chhupa hua lag raha", "Samajh rahe hain"],
+  "🌝": ["Aaj full chamak", "Positive vibe"],
+  "👀": ["Sab notice ho raha", "Dekha ja raha hai"],
+  "🦴": ["Energy low lag rahi", "Thoda rest chahiye"]
+};
+
+if (
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().length <= 4 &&
+  EMOJI_FUNNY[body.trim()]
+) {
+  const list = EMOJI_FUNNY[body.trim()];
+  const reply = list[Math.floor(Math.random() * list.length)];
+  api.sendMessage(reply, threadID);
+}
+      
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
