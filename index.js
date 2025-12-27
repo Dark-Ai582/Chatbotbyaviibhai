@@ -221,24 +221,23 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         return;
       }
 
+// ------------------- SAD MODE SYSTEM -------------------
 const fs = require("fs");
 
-// 🟢 Thread-wise sad mode ON/OFF
-let sadOnMap = {}; // threadID -> boolean
-let indexMap = {};  // threadID -> current line index
+// ✅ Sad lines load karo
+let sadLines = fs.readFileSync("sad.txt", "utf8").split("\n").filter(Boolean);
 
-// 📄 Load sad.txt lines
-const sadLines = fs.readFileSync("sad.txt", "utf8")
-  .split("\n")
-  .filter(Boolean);
+// ✅ Thread-wise ON/OFF aur index tracking
+let sadOnMap = {};   // threadID -> boolean
+let indexMap = {};   // threadID -> current line index
 
-module.exports.run = function ({ api, event, OWNER_UIDS }) {
+module.exports.run = async function ({ api, event, OWNER_UIDS }) {
   const { senderID, threadID, messageID, body, messageReply } = event;
   if (!body || typeof body !== "string") return;
 
   const text = body.trim().toLowerCase();
 
-  // 🔹 Admin commands → thread-wise ON/OFF
+  // 🔹 Commands sirf ADMIN ke liye
   if (OWNER_UIDS.includes(senderID)) {
     if (text === ".sad") {
       sadOnMap[threadID] = true;
@@ -251,23 +250,23 @@ module.exports.run = function ({ api, event, OWNER_UIDS }) {
     }
   }
 
-  // 🔹 Sad mode OFF → ignore
+  // 🔹 Sad mode off → ignore
   if (!sadOnMap[threadID]) return;
 
-  // 🔹 Sirf admin ke REPLY pe trigger
-  if (!messageReply) return; // reply required
-  if (!OWNER_UIDS.includes(messageReply.senderID)) return; // reply ka sender admin hona chahiye
+  // 🔹 Sirf admin ke reply pe trigger
+  if (!messageReply) return;                // reply required
+  if (!OWNER_UIDS.includes(messageReply.senderID)) return;  // reply ka sender admin hona chahiye
 
-  // 🔹 Thread-wise line index
+  // 🔹 Thread-wise index
   const i = indexMap[threadID] ?? 0;
-  if (!sadLines[i]) return; // lines khatam → stop
+  if (!sadLines[i]) return; // agar lines khatam ho gayi → stop
 
   // 🔹 Send sad.txt line as reply
   api.sendMessage(sadLines[i], threadID, messageID);
 
-  // 🔹 Increment thread-wise index
+  // 🔹 Increment index for next message
   indexMap[threadID] = i + 1;
-};      
+};
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
