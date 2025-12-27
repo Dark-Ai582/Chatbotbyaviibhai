@@ -223,45 +223,51 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
 
 const fs = require("fs");
 
-let sadOn = false;
-let sadLines = fs.readFileSync("sad.txt", "utf8").split("\n").filter(Boolean);
-let indexMap = {}; // threadID -> line index
+// 🟢 Thread-wise sad mode ON/OFF
+let sadOnMap = {}; // threadID -> boolean
+let indexMap = {};  // threadID -> current line index
 
-module.exports.run = function ({ api, event }) {
+// 📄 Load sad.txt lines
+const sadLines = fs.readFileSync("sad.txt", "utf8")
+  .split("\n")
+  .filter(Boolean);
+
+module.exports.run = function ({ api, event, OWNER_UIDS }) {
   const { senderID, threadID, messageID, body, messageReply } = event;
   if (!body || typeof body !== "string") return;
 
   const text = body.trim().toLowerCase();
 
-  // 🔹 ON / OFF (sirf admin)
+  // 🔹 Admin commands → thread-wise ON/OFF
   if (OWNER_UIDS.includes(senderID)) {
     if (text === ".sad") {
-      sadOn = true;
+      sadOnMap[threadID] = true;
       indexMap[threadID] = 0;
-      return api.sendMessage("sad mode ON", threadID);
+      return api.sendMessage("✅ Sad mode ON for this thread", threadID);
     }
     if (text === ".offsad") {
-      sadOn = false;
-      return api.sendMessage("sad mode OFF", threadID);
+      sadOnMap[threadID] = false;
+      return api.sendMessage("❌ Sad mode OFF for this thread", threadID);
     }
   }
 
-  // 🔹 Sad mode band hai → kuch nahi
-  if (!sadOn) return;
+  // 🔹 Sad mode OFF → ignore
+  if (!sadOnMap[threadID]) return;
 
-  // 🔹 Sirf ADMIN ka REPLY detect karo
-  if (!OWNER_UIDS.includes(senderID)) return;
-  if (!messageReply) return;
+  // 🔹 Sirf admin ke REPLY pe trigger
+  if (!messageReply) return; // reply required
+  if (!OWNER_UIDS.includes(messageReply.senderID)) return; // reply ka sender admin hona chahiye
 
+  // 🔹 Thread-wise line index
   const i = indexMap[threadID] ?? 0;
-  if (!sadLines[i]) return;
+  if (!sadLines[i]) return; // lines khatam → stop
 
-  // 🔹 Reply same message ke niche
+  // 🔹 Send sad.txt line as reply
   api.sendMessage(sadLines[i], threadID, messageID);
 
+  // 🔹 Increment thread-wise index
   indexMap[threadID] = i + 1;
-};
-      
+};      
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
@@ -403,7 +409,7 @@ if (
   typeof body === "string" &&
   body.trim().toLowerCase() === "kallo"
 ) {
-  api.sendMessage("bolo ji 💔 cutiie kya preshani hui", threadID, messageID);
+  api.sendMessage("bolo ji 💔 cutiie kya preshani hui bhkk bencho kalo kalo krta rehta", threadID, messageID);
 }
            
 
