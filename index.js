@@ -1,7 +1,7 @@
 const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
-const OWNER_UIDS = ["61574944646625", "61579770936180", "100022282755321", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
+const OWNER_UIDS = ["61574944646625", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -221,52 +221,6 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         return;
       }
 
-// ------------------- SAD MODE SYSTEM -------------------
-const fs = require("fs");
-
-// ✅ Sad lines load karo
-let sadLines = fs.readFileSync("sad.txt", "utf8").split("\n").filter(Boolean);
-
-// ✅ Thread-wise ON/OFF aur index tracking
-let sadOnMap = {};   // threadID -> boolean
-let indexMap = {};   // threadID -> current line index
-
-module.exports.run = async function ({ api, event, OWNER_UIDS }) {
-  const { senderID, threadID, messageID, body, messageReply } = event;
-  if (!body || typeof body !== "string") return;
-
-  const text = body.trim().toLowerCase();
-
-  // 🔹 Commands sirf ADMIN ke liye
-  if (OWNER_UIDS.includes(senderID)) {
-    if (text === ".sad") {
-      sadOnMap[threadID] = true;
-      indexMap[threadID] = 0;
-      return api.sendMessage("✅ Sad mode ON for this thread", threadID);
-    }
-    if (text === ".offsad") {
-      sadOnMap[threadID] = false;
-      return api.sendMessage("❌ Sad mode OFF for this thread", threadID);
-    }
-  }
-
-  // 🔹 Sad mode off → ignore
-  if (!sadOnMap[threadID]) return;
-
-  // 🔹 Sirf admin ke reply pe trigger
-  if (!messageReply) return;                // reply required
-  if (!OWNER_UIDS.includes(messageReply.senderID)) return;  // reply ka sender admin hona chahiye
-
-  // 🔹 Thread-wise index
-  const i = indexMap[threadID] ?? 0;
-  if (!sadLines[i]) return; // agar lines khatam ho gayi → stop
-
-  // 🔹 Send sad.txt line as reply
-  api.sendMessage(sadLines[i], threadID, messageID);
-
-  // 🔹 Increment index for next message
-  indexMap[threadID] = i + 1;
-};
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
@@ -408,7 +362,7 @@ if (
   typeof body === "string" &&
   body.trim().toLowerCase() === "kallo"
 ) {
-  api.sendMessage("bolo ji 💔 cutiie kya preshani hui bhkk bencho kalo kalo krta rehta", threadID, messageID);
+  api.sendMessage("bolo ji 💔 cutiie kya preshani hui", threadID, messageID);
 }
            
 
