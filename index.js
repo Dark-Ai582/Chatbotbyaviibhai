@@ -222,7 +222,7 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
       }
 
 
-      // 🔥 Admin-only Single Emoji Funny Replies
+      // 🔥 Admin-only Single Emoji → WhatsApp-style QUOTED Funny Reply
 
 const EMOJI_FUNNY = {
   "😆": ["Aaj zyada hi khush lag raha", "Kya mil gaya aisa"],
@@ -248,14 +248,22 @@ const EMOJI_FUNNY = {
 };
 
 if (
-  OWNER_UIDS.includes(senderID) &&
+  OWNER_UIDS.includes(senderID) &&          // ✅ admin only
+  event.type === "message" &&
   typeof body === "string" &&
-  body.trim().length <= 4 &&
+  body.trim().length <= 4 &&                // ✅ single emoji only
   EMOJI_FUNNY[body.trim()]
 ) {
-  const list = EMOJI_FUNNY[body.trim()];
-  const reply = list[Math.floor(Math.random() * list.length)];
-  api.sendMessage(reply, threadID);
+  const replies = EMOJI_FUNNY[body.trim()];
+  const text = replies[Math.floor(Math.random() * replies.length)];
+
+  api.sendMessage(
+    {
+      body: text,
+      replyToMessageID: messageID            // 🔑 THIS creates WhatsApp-style quoted reply
+    },
+    threadID
+  );
 }
       
     // .unsent command: unsend the replied message
