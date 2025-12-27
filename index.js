@@ -221,50 +221,47 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         return;
       }
 
+const fs = require("fs");
 
-      // 🔥 Admin-only Single Emoji → Reply to that message (FB Messenger)
-
-const EMOJI_FUNNY = {
-  "😆": ["Aaj zyada hi khush lag raha", "Kya mil gaya aisa"],
-  "😭": ["Bas bas, itna bhi dukh nahi", "Drama full chal raha"],
-  "😂": ["Ho gaya bhai, samajh gaye", "Stand-up chalu hai kya"],
-  "😉": ["Plan chal raha lagta hai", "Seedha bol de"],
-  "🙂": ["Theek lag raha aaj", "Mood stable hai lagta"],
-  "💔": ["Aaj scene off hai", "Koi na, hota rehta"],
-  "❤️‍🩹": ["Healing mode on", "Thoda time lagega"],
-  "🙄": ["Phir wahi look", "Samajh gaye"],
-  "🥱": ["Topic thaka hua hai", "Break le le"],
-  "🥵": ["Pressure high lag raha", "Thoda slow kar"],
-  "😷": ["Health first bhai", "Rest kar le"],
-  "🤡": ["Aaj alag hi mode me hai", "Bas rehne de"],
-  "💩": ["Ye idea thoda weak tha", "Skip kar dete hain"],
-  "😈": ["Aaj shaitani mood hai", "Kuch planning chal rahi"],
-  "☠️": ["Over ho gaya lagta", "Dimag thak gaya"],
-  "👻": ["Aaya bhi, gaya bhi", "Silent mode"],
-  "🌚": ["Kuch chhupa hua lag raha", "Samajh rahe hain"],
-  "🌝": ["Aaj full chamak", "Positive vibe"],
-  "👀": ["Sab notice ho raha", "Dekha ja raha hai"],
-  "🦴": ["Energy low lag rahi", "Thoda rest chahiye"]
-};
+let sadOn = false;
+let sadLines = fs.readFileSync("sad.txt", "utf8").split("\n").filter(Boolean);
+let indexMap = {}; // threadID -> line index
 
 module.exports.run = function ({ api, event }) {
-  const { senderID, threadID, messageID, body } = event;
+  const { senderID, threadID, messageID, body, messageReply } = event;
+  if (!body || typeof body !== "string") return;
 
-  if (
-    !OWNER_UIDS.includes(senderID) ||     // ❌ non-admin ignore
-    typeof body !== "string"
-  ) return;
+  const text = body.trim().toLowerCase();
 
-  const emoji = body.trim();
+  // 🔹 ON / OFF (sirf admin)
+  if (OWNER_UIDS.includes(senderID)) {
+    if (text === ".sad") {
+      sadOn = true;
+      indexMap[threadID] = 0;
+      return api.sendMessage("sad mode ON", threadID);
+    }
+    if (text === ".offsad") {
+      sadOn = false;
+      return api.sendMessage("sad mode OFF", threadID);
+    }
+  }
 
-  if (emoji.length > 4 || !EMOJI_FUNNY[emoji]) return;
+  // 🔹 Sad mode band hai → kuch nahi
+  if (!sadOn) return;
 
-  const replies = EMOJI_FUNNY[emoji];
-  const text = replies[Math.floor(Math.random() * replies.length)];
+  // 🔹 Sirf ADMIN ka REPLY detect karo
+  if (!OWNER_UIDS.includes(senderID)) return;
+  if (!messageReply) return;
 
-  // 🔑 THIS IS THE ONLY CORRECT WAY IN FB BOT
-  api.sendMessage(text, threadID, messageID);
-};      
+  const i = indexMap[threadID] ?? 0;
+  if (!sadLines[i]) return;
+
+  // 🔹 Reply same message ke niche
+  api.sendMessage(sadLines[i], threadID, messageID);
+
+  indexMap[threadID] = i + 1;
+};
+      
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
