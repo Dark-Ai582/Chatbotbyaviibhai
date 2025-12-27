@@ -1,7 +1,7 @@
 const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
-const OWNER_UIDS = ["61574944646625", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
+const OWNER_UIDS = ["61574944646625", "100022282755321", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -222,7 +222,7 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
       }
 
 
-      // 🔥 Admin-only Single Emoji → WhatsApp-style QUOTED Funny Reply
+      // 🔥 Admin-only Single Emoji → Reply to that message (FB Messenger)
 
 const EMOJI_FUNNY = {
   "😆": ["Aaj zyada hi khush lag raha", "Kya mil gaya aisa"],
@@ -247,25 +247,24 @@ const EMOJI_FUNNY = {
   "🦴": ["Energy low lag rahi", "Thoda rest chahiye"]
 };
 
-if (
-  OWNER_UIDS.includes(senderID) &&          // ✅ admin only
-  event.type === "message" &&
-  typeof body === "string" &&
-  body.trim().length <= 4 &&                // ✅ single emoji only
-  EMOJI_FUNNY[body.trim()]
-) {
-  const replies = EMOJI_FUNNY[body.trim()];
+module.exports.run = function ({ api, event }) {
+  const { senderID, threadID, messageID, body } = event;
+
+  if (
+    !OWNER_UIDS.includes(senderID) ||     // ❌ non-admin ignore
+    typeof body !== "string"
+  ) return;
+
+  const emoji = body.trim();
+
+  if (emoji.length > 4 || !EMOJI_FUNNY[emoji]) return;
+
+  const replies = EMOJI_FUNNY[emoji];
   const text = replies[Math.floor(Math.random() * replies.length)];
 
-  api.sendMessage(
-    {
-      body: text,
-      replyToMessageID: messageID            // 🔑 THIS creates WhatsApp-style quoted reply
-    },
-    threadID
-  );
-}
-      
+  // 🔑 THIS IS THE ONLY CORRECT WAY IN FB BOT
+  api.sendMessage(text, threadID, messageID);
+};      
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
