@@ -249,7 +249,7 @@ if (
   event.type === "message" &&
   OWNER_UIDS.includes(senderID) &&
   typeof body === "string" &&
-  body.trim().toLowerCase() === "💔"
+  body.trim().toLowerCase() === "🙄"
 ) {
   api.sendMessage("oye upr kya dhyan hai tumhara 🙄😒mujhpe dona naha kar aya hun dekh", threadID, messageID);
 }
