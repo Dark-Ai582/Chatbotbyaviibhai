@@ -15,6 +15,7 @@ let detectStickerUID = false;
 let sadMode = false;
 let sadLines = [];
 let sadIndex = 0;
+let sadOwnerUID = null; // jis admin ne sad mode ON kiya
 // Top of the file:
 const targetListUIDs = fs.existsSync("Target.txt")
   ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean)
@@ -101,16 +102,29 @@ if (cmd === ".sad" && OWNER_UIDS.includes(senderID)) {
   }
 
   sadMode = true;
-  sadIndex = 0;
-  return api.sendMessage("🥀 Sad mode ON", threadID, messageID);
-}
+sadOwnerUID = senderID; // controller admin
+sadIndex = 0;
+
+return api.sendMessage(
+  "🥀 Sad mode ON\n👤 Controller set",
+  threadID,
+  messageID
+);
 
 // ⏹️ SAD MODE OFF
-if (cmd === ".sadoff" && OWNER_UIDS.includes(senderID)) {
-  sadMode = false;
-  sadIndex = 0;
-  return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
+if (senderID !== sadOwnerUID) {
+  return api.sendMessage(
+    "❌ Tu sad mode controller nahi hai",
+    threadID,
+    messageID
+  );
 }
+
+sadMode = false;
+sadOwnerUID = null;
+sadIndex = 0;
+
+return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
       // 🔒 BLOCK all commands (starting with . / or !) for non-owners
 if ((cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
   return; // Ignore command if not from OWNER_UIDS
@@ -319,14 +333,18 @@ if (
 if (
   sadMode &&
   event.messageReply &&
-  OWNER_UIDS.includes(senderID)
+  senderID === sadOwnerUID
 ) {
   const line = sadLines[sadIndex];
   if (!line) return;
 
+  const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
+
+setTimeout(() => {
   api.sendMessage(line, threadID, messageID);
-  sadIndex = (sadIndex + 1) % sadLines.length;
-}
+}, delay * 1000);
+
+sadIndex = (sadIndex + 1) % sadLines.length;
       
     // .unsent command: unsend the replied message
         if (
