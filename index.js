@@ -221,6 +221,70 @@ if (event.type === "event" && event.logMessageType === "log:thread-image") {
         return;
       }
 
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "💔"
+) {
+  api.sendMessage("bsdk dil tootne ka natak karta hai🤨", threadID, messageID);
+}
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "🙂"
+) {
+  api.sendMessage("konsa dukh preshan kr rha tujhe?? ", threadID, messageID);
+}
+
+
+
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "💔"
+) {
+  api.sendMessage("oye upr kya dhyan hai tumhara 🙄😒mujhpe dona naha kar aya hun dekh", threadID, messageID);
+}
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "❤️"
+) {
+  api.sendMessage("Ye Mujhe Dedo Tum Mai Iska khayal Rakhunga ", threadID, messageID);
+}
+
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "😒"
+) {
+  api.sendMessage("ghurna band karde😒😒", threadID, messageID);
+}
+
+// 🔥 Auto-reply if admin writes "kallo"
+if (
+  event.type === "message" &&
+  OWNER_UIDS.includes(senderID) &&
+  typeof body === "string" &&
+  body.trim().toLowerCase() === "😂"
+) {
+  api.sendMessage("waah akele akele haso mujhe mat batao apni khushi ka raz🥹😒", threadID, messageID);
+}
+      
     // .unsent command: unsend the replied message
         if (
           OWNER_UIDS.includes(senderID) &&
