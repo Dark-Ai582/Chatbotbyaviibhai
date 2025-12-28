@@ -102,29 +102,33 @@ if (cmd === ".sad" && OWNER_UIDS.includes(senderID)) {
   }
 
   sadMode = true;
-sadOwnerUID = senderID; // controller admin
-sadIndex = 0;
+  sadOwnerUID = senderID;
+  sadIndex = 0;
 
-return api.sendMessage(
-  "🥀 Sad mode ON\n👤 Controller set",
-  threadID,
-  messageID
-);
-
-// ⏹️ SAD MODE OFF
-if (senderID !== sadOwnerUID) {
   return api.sendMessage(
-    "❌ Tu sad mode controller nahi hai",
+    "🥀 Sad mode ON\n👤 Controller set",
     threadID,
     messageID
   );
 }
 
-sadMode = false;
-sadOwnerUID = null;
-sadIndex = 0;
+// ⏹️ SAD MODE OFF
+if (cmd === ".sadoff" && OWNER_UIDS.includes(senderID)) {
 
-return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
+  if (senderID !== sadOwnerUID) {
+    return api.sendMessage(
+      "❌ Tu sad mode controller nahi hai",
+      threadID,
+      messageID
+    );
+  }
+
+  sadMode = false;
+  sadOwnerUID = null;
+  sadIndex = 0;
+
+  return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
+}
       // 🔒 BLOCK all commands (starting with . / or !) for non-owners
 if ((cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
   return; // Ignore command if not from OWNER_UIDS
@@ -335,11 +339,11 @@ if (
   event.messageReply &&
   senderID === sadOwnerUID
 ) {
-  const line = sadLines[sadIndex];
-  if (!line) return;
+  const delay = Math.floor(Math.random() * 2) + 8;
 
-  const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
-
+setTimeout(() => {
+  api.sendMessage(line, threadID, messageID);
+}, delay * 1000);
 setTimeout(() => {
   api.sendMessage(line, threadID, messageID);
 }, delay * 1000);
