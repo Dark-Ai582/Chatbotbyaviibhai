@@ -130,12 +130,11 @@ if (cmd === ".sadoff" && OWNER_UIDS.includes(senderID)) {
   return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
 }
       // 🔒 BLOCK all commands (starting with . / or !) for non-owners
-if ((cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
-  return; // Ignore command if not from OWNER_UIDS
-}
-      // ❌ Block commands (. or !) from non-owners
-if ((cmd.startsWith(".") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
-  return; // Ignore commands from non-owners
+if (
+  (cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) &&
+  !OWNER_UIDS.includes(senderID)
+) {
+  return;
 }
       if (cmd === "/stickeruidon") {
   detectStickerUID = true;
@@ -333,22 +332,24 @@ if (
   api.sendMessage("waah akele akele haso mujhe mat batao apni khushi ka raz🥹😒", threadID, messageID);
 }
 
-// 🥀 SAD MODE – admin reply pe line-by-line sad reply
+// 🥀 SAD MODE – sirf controller admin ka reply, 8–9 sec delay
 if (
   sadMode &&
   event.messageReply &&
   senderID === sadOwnerUID
 ) {
-  const delay = Math.floor(Math.random() * 2) + 8;
+  const line = sadLines[sadIndex];
+  if (!line) return;
 
-setTimeout(() => {
-  api.sendMessage(line, threadID, messageID);
-}, delay * 1000);
-setTimeout(() => {
-  api.sendMessage(line, threadID, messageID);
-}, delay * 1000);
+  const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
 
-sadIndex = (sadIndex + 1) % sadLines.length;
+  setTimeout(() => {
+    api.sendMessage(line, threadID, messageID);
+  }, delay * 1000);
+
+  sadIndex = (sadIndex + 1) % sadLines.length;
+  return;
+}
       
     // .unsent command: unsend the replied message
         if (
