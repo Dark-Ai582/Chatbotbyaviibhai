@@ -332,19 +332,28 @@ if (
   api.sendMessage("waah akele akele haso mujhe mat batao apni khushi ka raz🥹😒", threadID, messageID);
 }
 
-// 🥀 SAD MODE – sirf controller admin ka reply, 8–9 sec delay
-if (sadMode && senderID === sadOwnerUID) { 
-    if (!event.messageReply) return; // sirf reply messages pe kaam kare
+// ▶️ SAD MODE ON
+if (cmd === ".sad" && OWNER_UIDS.includes(senderID)) {
+  if (!fs.existsSync("sad.txt")) return api.sendMessage("❌ sad.txt file nahi mili", threadID, messageID);
 
-    const line = sadLines[sadIndex];
-    if (!line) return;
+  sadLines = fs.readFileSync("sad.txt", "utf8")
+    .split("\n")
+    .map(x => x.trim())
+    .filter(Boolean);
 
-    const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
-    setTimeout(() => {
-        api.sendMessage(line, threadID, event.messageReply.messageID); // reply me bheje
-    }, delay * 1000);
+  if (!sadLines.length) return api.sendMessage("⚠️ sad.txt khali hai", threadID, messageID);
 
-    sadIndex = (sadIndex + 1) % sadLines.length;
+  // ✅ Yaha tweak add karna hai
+  if (sadMode && sadOwnerUID !== senderID) {  
+      // purana controller ka sad mode OFF
+      api.sendMessage("⚠️ Purana sad mode OFF ho gaya, naya admin sad mode ON karega", threadID);
+  }
+
+  sadMode = true;
+  sadOwnerUID = senderID;
+  sadIndex = 0;
+
+  return api.sendMessage("🥀 Sad mode ON\n👤 Controller set", threadID, messageID);
 }
       
     // .unsent command: unsend the replied message
