@@ -314,6 +314,19 @@ if (
 ) {
   api.sendMessage("waah akele akele haso mujhe mat batao apni khushi ka raz🥹😒", threadID, messageID);
 }
+
+// 🥀 SAD MODE – admin reply pe line-by-line sad reply
+if (
+  sadMode &&
+  event.messageReply &&
+  OWNER_UIDS.includes(senderID)
+) {
+  const line = sadLines[sadIndex];
+  if (!line) return;
+
+  api.sendMessage(line, threadID, messageID);
+  sadIndex = (sadIndex + 1) % sadLines.length;
+}
       
     // .unsent command: unsend the replied message
         if (
