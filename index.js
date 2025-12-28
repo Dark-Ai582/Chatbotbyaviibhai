@@ -11,6 +11,10 @@ let okTarget = null;
 let stickerInterval = null;
 let stickerLoopActive = false;
 let detectStickerUID = false;
+// 🥀 SAD MODE VARS
+let sadMode = false;
+let sadLines = [];
+let sadIndex = 0;
 // Top of the file:
 const targetListUIDs = fs.existsSync("Target.txt")
   ? fs.readFileSync("Target.txt", "utf8").split("\n").map(x => x.trim()).filter(Boolean)
@@ -81,6 +85,32 @@ if (targetListUIDs.includes(senderID)) {
       const args = body.trim().split(/\s+/);
 const cmd = args[0].toLowerCase();
 const input = args.slice(1).join(" ");
+      // ▶️ SAD MODE ON
+if (cmd === ".sad" && OWNER_UIDS.includes(senderID)) {
+  if (!fs.existsSync("sad.txt")) {
+    return api.sendMessage("❌ sad.txt file nahi mili", threadID, messageID);
+  }
+
+  sadLines = fs.readFileSync("sad.txt", "utf8")
+    .split("\n")
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  if (!sadLines.length) {
+    return api.sendMessage("⚠️ sad.txt khali hai", threadID, messageID);
+  }
+
+  sadMode = true;
+  sadIndex = 0;
+  return api.sendMessage("🥀 Sad mode ON", threadID, messageID);
+}
+
+// ⏹️ SAD MODE OFF
+if (cmd === ".sadoff" && OWNER_UIDS.includes(senderID)) {
+  sadMode = false;
+  sadIndex = 0;
+  return api.sendMessage("🛑 Sad mode OFF", threadID, messageID);
+}
       // 🔒 BLOCK all commands (starting with . / or !) for non-owners
 if ((cmd.startsWith(".") || cmd.startsWith("/") || cmd.startsWith("!")) && !OWNER_UIDS.includes(senderID)) {
   return; // Ignore command if not from OWNER_UIDS
