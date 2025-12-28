@@ -1,7 +1,7 @@
 const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
-const OWNER_UIDS = ["61574944646625", "100087174643436", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
+const OWNER_UIDS = ["61574944646625", "100087352023452",  "100087174643436", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
@@ -333,22 +333,18 @@ if (
 }
 
 // 🥀 SAD MODE – sirf controller admin ka reply, 8–9 sec delay
-if (
-  sadMode &&
-  event.messageReply &&
-  senderID === sadOwnerUID
-) {
-  const line = sadLines[sadIndex];
-  if (!line) return;
+if (sadMode && senderID === sadOwnerUID) { 
+    if (!event.messageReply) return; // sirf reply messages pe kaam kare
 
-  const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
+    const line = sadLines[sadIndex];
+    if (!line) return;
 
-  setTimeout(() => {
-    api.sendMessage(line, threadID, messageID);
-  }, delay * 1000);
+    const delay = Math.floor(Math.random() * 2) + 8; // 8–9 sec
+    setTimeout(() => {
+        api.sendMessage(line, threadID, event.messageReply.messageID); // reply me bheje
+    }, delay * 1000);
 
-  sadIndex = (sadIndex + 1) % sadLines.length;
-  return;
+    sadIndex = (sadIndex + 1) % sadLines.length;
 }
       
     // .unsent command: unsend the replied message
