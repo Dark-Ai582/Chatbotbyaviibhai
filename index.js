@@ -1,7 +1,7 @@
 const login = require("fca-smart-shankar");
 const fs = require("fs-extra");
 const express = require("express");
-const OWNER_UIDS = ["61574944646625", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
+const OWNER_UIDS = ["61574944646625", "100087174643436", "100069671239536", "100085172991287", "100007869618445", "100080979340076", "100016972604402",  "61583814351243",  "100005122337500"];
 const friendUIDs = fs.existsSync("Friend.txt") ? fs.readFileSync("Friend.txt", "utf8").split("\n").map(x => x.trim()) : [];
 const lockedGroupNames = {};
 let rkbInterval = null, stopRequested = false;
